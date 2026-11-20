@@ -1,0 +1,59 @@
+DOCUMENT TYPE: ROAR GUIDER (.DOC)
+GUIDER ID: ROAR-GUIDER-01
+TITLE: Perfect Triangle Lite: 3D Model of Alexander — Unity Engine YAML / .bin / C# / JS DevOps Pipeline
+PRIMARY DIRECTIVE: BE GOOD
+FOLDER: /ROARdocs/
+
+================================================================================
+1. ECOLOGICAL SYSTEMS PERSONIFICATION, BIT-BY-BIT DESIGN & PASSABLE SHARD DEVOPS
+================================================================================
+Treat the 3D digital twin of Alexander as a living, personified ecological system where every mesh vertex, skeletal joint, and shader node acts as a self-regulating organism inside a wider runtime biosphere. By building the asset pipeline bit-by-bit—starting from low-poly "Perfect Triangle Lite" topological primitives and scaling upward through deterministic binary .bin buffers, Unity-style .meta/.prefab YAML descriptors, high-throughput C# burst jobs, and lightweight JavaScript/WebGL bridge viewers—each layer remains atomic and fault-tolerant. Even when downstream full-earth simulations degrade into high-load, "shit-tier" compute bottlenecks, this architecture ensures clean, passable shards (Reed-Solomon-verified .bin geometry chunks paired with human-readable YAML manifests) are continuously checkpointed and left behind, enabling complete ROAR (Recursive Orchestration & Autonomous Reconstruction) recovery under the primary directive "be good."
+
+================================================================================
+2. "PERFECT TRIANGLE LITE" TOPOLOGICAL & GEOMETRIC SPECIFICATION (LOD0 - LOD3)
+================================================================================
+- LOD0 (Hero Close-Up): 14,800 Triangles | 32 bytes stride (Pos, Norm, Tan, UV0) | Dialogue close-ups, FACS micro-expressions | All-quad source retopologized to strictly manifold triangles; zero N-gons or poles >5 edges on deformation zones.
+- LOD1 (Standard Tactical): 6,400 Triangles | 24 bytes stride (Pos, Norm, UV0) | Third-person / multi-agent scenes | Preserves jawline, brow ridge, shoulder deltoid loops, and hand articulation.
+- LOD2 (Crowd / Swarm): 2,200 Triangles | 16 bytes stride (Quantized Half-Float) | Full-earth sim / multi-node telemetry | Single-atlas PBR material; simplified 22-bone humanoid rig.
+- LOD3 (Passable Shard): 512 Triangles | 12 bytes stride (Octahedral Normals) | Degraded / "shit-tier" fallback survival | Ultra-lightweight convex hull + core silhouette proxy; <8 KB compressed .bin shard.
+
+Geometric & UV Invariants:
+- Winding Order & Coordinate Space: Left-handed Y-up (+X Right, +Y Up, +Z Forward) matching Unity native world space; 1.0 unit = 1.0 meter.
+- Equilateral Aspect Ratio Target: Minimum interior triangle angle theta_min >= 22 deg across all dynamic skinning zones (elbows, knees, neck, eyelids).
+- Texture Atlas Packing: Single 2048x2048 ORM (Occlusion, Roughness, Metallic) + Albedo + Normal atlas with 8px mipmap gutter padding.
+
+================================================================================
+3. HYBRID STORAGE & RUNTIME ARCHITECTURE: YAML + .BIN + C# + JS
+================================================================================
+3.1 Unity-Style YAML Prefab & Rig Manifest (Alexander_Lite.prefab.yaml)
+- GameObject: Alexander_PerfectTriangleLite (Tag: PlayerAvatar, Layer: 8)
+- MonoBehaviour: Assembly-CSharp::Alexander.Runtime.AlexanderShardController
+- binGeometryPath: "StreamingAssets/Shards/alexander_lod0_3.bin"
+- shardMagicHeader: "ALX3D_BIN_V1"
+- primaryDirective: "BE_GOOD"
+- passableShardThresholdMs: 16.67
+- lodFallbackChain:
+  * LOD0: byteOffset 64, byteLength 473600, crc32 0x8F4A21C9
+  * LOD1: byteOffset 473664, byteLength 153600, crc32 0x3D91E04B
+  * LOD2: byteOffset 627264, byteLength 35200, crc32 0x71C2B88A
+  * LOD3: byteOffset 662464, byteLength 6144, crc32 0x19E4F502
+
+3.2 64-Byte Aligned Binary Geometry Shard (alexander_lod0_3.bin)
+- 64-BYTE HEADER: Magic("ALX3D_BIN_V1") | Version | LOD Count | Flags
+- SHARD TABLE: [LOD0 Offset/CRC] [LOD1 Offset/CRC] [LOD2] [LOD3 Proxy]
+- VERTEX & INDEX PAYLOADS (64B SIMD-Aligned, Little-Endian)
+- REED-SOLOMON (16,12) AUTO-HEALING PARITY & MERKLE SHA-256 FOOTER
+
+3.3 Unity C# Burst / NativeArray Shard Loader (AlexanderShardController.cs)
+- Uses Mesh.AllocateWritableMeshData(1) and NativeArray<VertexAttributeDescriptor> for zero-GC-allocation mesh uploads, stepping down LOD0->LOD3 if frame time exceeds 16.67ms.
+
+3.4 JavaScript / WebGL Zero-Copy Shard Bridge (alexander-shard-bridge.js)
+- AlexanderShardBridge validates "ALX3D_BIN_V1" 12-byte magic header and maps 32-byte stride (8 x Float32) directly into Float32Array views.
+
+================================================================================
+4. BIT-BY-BIT DEVOPS & ROAR RECONSTRUCTION PIPELINE
+================================================================================
+- Stage 1 (CI Gate 1): Topological & Triangle Audit (theta_min >= 22 deg, sum w_i = 1.000).
+- Stage 2 (CI Gate 2): Deterministic .bin Packing & YAML Emission with Reed-Solomon (16,12) parity.
+- Stage 3 (CI Gate 3): Dual-Runtime Parity Verification (Unity C# EditMode + Node.js AlexanderShardBridge).
+- Stage 4 (ROAR Gate 4): Full-Earth Sim Stress & Passable Shard Survival (>50ms spike fallback to LOD3 512-triangle shard under "be good").

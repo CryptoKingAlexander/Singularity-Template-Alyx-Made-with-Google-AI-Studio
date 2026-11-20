@@ -1,0 +1,1714 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ROAR Protocol · Master Operational Action Items</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Roboto & Roboto Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;0,900;1,400&family=Roboto+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Roboto', 'sans-serif'],
+            mono: ['"Roboto Mono"', 'monospace'],
+          },
+          colors: {
+            // Depth Headings: Light Blue (Depth 1) to Navy Blue (Depth 4+)
+            heading: {
+              l1: '#bae6fd', // Depth 1: Light sky blue
+              l2: '#60a5fa', // Depth 2: Bright medium blue
+              l3: '#2563eb', // Depth 3: Deep cobalt blue
+              l4: '#1e3a8a', // Depth 4: Dark navy blue
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #070b12;
+      color: #e2e8f0;
+    }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0b1120; }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #334155; }
+
+    /* Phone View Model Space Locking: ensures cell contents wrap neatly within mobile bounds */
+    .cell-phone-space {
+      max-width: 290px;
+      min-width: 240px;
+      word-wrap: break-word;
+      white-space: normal;
+    }
+
+    .cell-phone-compact {
+      max-width: 200px;
+      min-width: 170px;
+      word-wrap: break-word;
+      white-space: normal;
+    }
+
+    /* Score badges (1 to 7 scale with 4 as average) */
+    .score-badge-1 { background-color: rgba(59, 130, 246, 0.16); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.35); }
+    .score-badge-2 { background-color: rgba(14, 165, 233, 0.16); color: #7dd3fc; border: 1px solid rgba(14, 165, 233, 0.35); }
+    .score-badge-3 { background-color: rgba(20, 184, 166, 0.16); color: #5eead4; border: 1px solid rgba(20, 184, 166, 0.35); }
+    .score-badge-4 { background-color: rgba(148, 163, 184, 0.20); color: #e2e8f0; border: 1px solid rgba(148, 163, 184, 0.40); }
+    .score-badge-5 { background-color: rgba(245, 158, 11, 0.20); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.40); }
+    .score-badge-6 { background-color: rgba(249, 115, 22, 0.22); color: #fdba74; border: 1px solid rgba(249, 115, 22, 0.45); }
+    .score-badge-7 { background-color: rgba(239, 68, 68, 0.25); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.50); }
+
+    .tier-critical { background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.6); color: #f87171; }
+    .tier-high     { background: rgba(245, 158, 11, 0.2); border: 1px solid rgba(245, 158, 11, 0.6); color: #fbbf24; }
+    .tier-medium   { background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.6); color: #34d399; }
+    .tier-standard { background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.6); color: #60a5fa; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-[#070b12] text-slate-200">
+
+  <!-- Top Application Bar -->
+  <header class="border-b border-slate-800/90 bg-[#0b1120]/95 backdrop-blur sticky top-0 z-30 px-4 py-2.5">
+    <div class="max-w-[1720px] mx-auto flex items-center justify-between gap-3">
+      
+      <!-- Depth 1 Heading: Light Sky Blue -->
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg bg-blue-600/20 border border-blue-500/40 flex items-center justify-center text-blue-400">
+          <i class="fa-solid fa-table-cells"></i>
+        </div>
+        <div>
+          <h1 class="text-sm font-black tracking-wide text-heading-l1">
+            ROAR Protocol · Master Action Items Table
+          </h1>
+          <p class="text-[11px] text-slate-400">
+            Requisites · Objectives · Action Items · Requirements
+          </p>
+        </div>
+      </div>
+
+      <!-- Quick Action Controls & SideNav Drawer Toggle -->
+      <div class="flex items-center gap-2">
+        <button 
+          onclick="toggleSideNav()" 
+          id="sideNavToggleBtn"
+          class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-md transition"
+        >
+          <i class="fa-solid fa-bars-staggered"></i>
+          <span>Action Item Panel</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Operational Formula & Metrics Ribbon -->
+  <section class="bg-[#090e18] border-b border-slate-800/80 px-4 py-2">
+    <div class="max-w-[1720px] mx-auto flex flex-wrap items-center justify-between gap-3 text-xs">
+      
+      <!-- Depth 2 Heading: Mid-Light Blue -->
+      <div class="flex items-center gap-2 font-mono">
+        <h2 class="text-xs font-bold text-heading-l2 flex items-center gap-1.5">
+          <i class="fa-solid fa-calculator text-[10px]"></i> Priority Metric:
+        </h2>
+        <span class="bg-black/60 px-2 py-0.5 rounded border border-slate-800 text-sky-200 font-bold text-[11px]">
+          (P)riority = [ (U)rgency + (I)mportance + (A)cceleration ] / 3
+        </span>
+        <span class="text-slate-500 text-[10px] hidden sm:inline">· Integer Scale 1 to 7 (4 = Avg)</span>
+      </div>
+
+      <!-- Quick Counts -->
+      <div class="flex items-center gap-3 font-mono text-[11px]">
+        <span>Total: <strong id="kpiTotal" class="text-white">0</strong></span>
+        <span class="text-red-400">Critical: <strong id="kpiCritical">0</strong></span>
+        <span class="text-amber-400">High: <strong id="kpiHigh">0</strong></span>
+        <span class="text-emerald-400">Medium: <strong id="kpiMedium">0</strong></span>
+        <span class="text-blue-400">Standard: <strong id="kpiStandard">0</strong></span>
+      </div>
+    </div>
+  </section>
+
+  <main class="flex-1 max-w-[1720px] w-full mx-auto p-4 space-y-4">
+
+    <!-- Filter & Dropdown Toolbar -->
+    <div class="bg-[#0e1626] border border-slate-800 p-3 rounded-xl flex flex-wrap items-center justify-between gap-3">
+      
+      <!-- Text Search Box -->
+      <div class="relative flex-1 min-w-[240px]">
+        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+        <input 
+          type="text" 
+          id="filterSearchInput" 
+          oninput="renderMasterTable()" 
+          placeholder="Filter across item names, tag soup, summaries, or terms..."
+          class="w-full pl-8 pr-3 py-1.5 bg-[#090e18] border border-slate-700/80 rounded-lg text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500"
+        >
+      </div>
+
+      <!-- Dropdown Selector for Domain Filtering -->
+      <div class="flex items-center gap-2">
+        <label for="filterDomainSelect" class="text-xs text-slate-400 whitespace-nowrap">Domain:</label>
+        <select 
+          id="filterDomainSelect" 
+          onchange="renderMasterTable()" 
+          class="bg-[#090e18] border border-slate-700/80 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+        >
+          <option value="ALL">All Action Domains (28 Items)</option>
+          <option value="SYSTEMS">Core Systems & Autonomous Infra (18 Items)</option>
+          <option value="VIBE">Prompt Engineering & Vibe Coding (10 Items)</option>
+        </select>
+      </div>
+
+      <!-- Dropdown Selector for Tier Filtering -->
+      <div class="flex items-center gap-2">
+        <label for="filterTierSelect" class="text-xs text-slate-400 whitespace-nowrap">Priority Tier:</label>
+        <select 
+          id="filterTierSelect" 
+          onchange="renderMasterTable()" 
+          class="bg-[#090e18] border border-slate-700/80 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+        >
+          <option value="ALL">All Priority Tiers</option>
+          <option value="CRITICAL">Critical (6.50 - 7.00)</option>
+          <option value="HIGH">High (5.50 - 6.49)</option>
+          <option value="MEDIUM">Medium (4.75 - 5.49)</option>
+          <option value="STANDARD">Standard (&lt; 4.75)</option>
+        </select>
+      </div>
+
+      <!-- Dropdown Selector for Sorting -->
+      <div class="flex items-center gap-2">
+        <label for="sortBySelect" class="text-xs text-slate-400 whitespace-nowrap">Sort By:</label>
+        <select 
+          id="sortBySelect" 
+          onchange="renderMasterTable()" 
+          class="bg-[#090e18] border border-slate-700/80 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+        >
+          <option value="p-desc">Priority Weight (High to Low)</option>
+          <option value="p-asc">Priority Weight (Low to High)</option>
+          <option value="u-desc">Urgency (U) (Highest)</option>
+          <option value="i-desc">Importance (I) (Highest)</option>
+          <option value="a-desc">Acceleration (A) (Highest)</option>
+          <option value="id-asc">Item ID (Ascending)</option>
+          <option value="name-asc">Action Item Name (A-Z)</option>
+        </select>
+      </div>
+
+      <!-- Direct Export Dropdown -->
+      <div class="flex items-center gap-2">
+        <button 
+          onclick="downloadCSVFile()" 
+          class="px-2.5 py-1.5 bg-[#090e18] hover:bg-slate-800 border border-slate-700 text-xs text-emerald-400 rounded-lg flex items-center gap-1.5 transition"
+        >
+          <i class="fa-solid fa-file-csv"></i> CSV
+        </button>
+      </div>
+
+    </div>
+
+    <!-- MASTER SCROLLABLE DATA TABLE (Read-Only Paradigm, Phone Model View Space) -->
+    <div class="bg-[#0b1120] rounded-xl border border-slate-800 shadow-2xl overflow-hidden">
+      <div class="overflow-x-auto overflow-y-auto max-h-[66vh] border-b border-slate-800">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead class="bg-[#070b14] text-slate-400 text-[11px] uppercase tracking-wider sticky top-0 z-20 border-b border-slate-800 select-none">
+            <tr>
+              <!-- Column 1: Item Name & ID -->
+              <th class="p-3 bg-[#070b14] min-w-[210px] max-w-[240px]">
+                <div class="flex items-center gap-1.5 text-heading-l2">
+                  <i class="fa-solid fa-hashtag text-[10px]"></i>
+                  <span>Action Item Name</span>
+                </div>
+              </th>
+
+              <!-- Column 2: Description (Phone View Model Space) -->
+              <th class="p-3 bg-[#070b14] cell-phone-space">
+                <div class="flex items-center gap-1.5 text-heading-l2">
+                  <i class="fa-solid fa-align-left text-[10px]"></i>
+                  <span>Description</span>
+                </div>
+              </th>
+
+              <!-- Column 3: Tag Soup (Phone View Model Space) -->
+              <th class="p-3 bg-[#070b14] cell-phone-compact">
+                <div class="flex items-center gap-1.5 text-heading-l2">
+                  <i class="fa-solid fa-tags text-[10px]"></i>
+                  <span>Tag Soup</span>
+                </div>
+              </th>
+
+              <!-- Column 4: AI Summary (Phone View Model Space) -->
+              <th class="p-3 bg-[#070b14] cell-phone-space">
+                <div class="flex items-center gap-1.5 text-heading-l2">
+                  <i class="fa-solid fa-robot text-[10px]"></i>
+                  <span>AI Summary</span>
+                </div>
+              </th>
+
+              <!-- Column 5: Key Terminology for Gaining Global Advantage -->
+              <th class="p-3 bg-[#070b14] cell-phone-space">
+                <div class="flex items-center gap-1.5 text-heading-l2">
+                  <i class="fa-solid fa-globe text-[10px]"></i>
+                  <span>Global Advantage Terms</span>
+                </div>
+              </th>
+
+              <!-- Column 6: AI Insights on Key Understandings of Root/Base ROAR (Colon-Titled Paragraphs) -->
+              <th class="p-3 bg-[#070b14] cell-phone-space">
+                <div class="flex items-center gap-1.5 text-heading-l2">
+                  <i class="fa-solid fa-brain text-[10px]"></i>
+                  <span>Root/Base ROAR Insights</span>
+                </div>
+              </th>
+
+              <!-- Column 7: (U)rgency -->
+              <th class="p-3 bg-[#070b14] text-center whitespace-nowrap min-w-[70px]">
+                <span class="text-red-400 font-bold">(U)</span>rg
+              </th>
+
+              <!-- Column 8: (I)mportance -->
+              <th class="p-3 bg-[#070b14] text-center whitespace-nowrap min-w-[70px]">
+                <span class="text-amber-400 font-bold">(I)</span>mp
+              </th>
+
+              <!-- Column 9: (A)cceleration -->
+              <th class="p-3 bg-[#070b14] text-center whitespace-nowrap min-w-[70px]">
+                <span class="text-emerald-400 font-bold">(A)</span>cc
+              </th>
+
+              <!-- Column 10: (P)riority Weight Calculated -->
+              <th class="p-3 bg-[#070b14] text-center whitespace-nowrap min-w-[110px] border-l border-slate-800">
+                <span class="text-sky-300 font-bold">(P)riority</span>
+              </th>
+
+              <!-- Quick Edit Target -->
+              <th class="p-3 bg-[#070b14] text-center min-w-[90px]">
+                <span>Manage</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody id="masterTableBody" class="divide-y divide-slate-800/80 font-normal">
+            <!-- Dynamically populated rows -->
+          </tbody>
+        </table>
+      </div>
+      <div class="px-4 py-2 bg-[#090e18] flex items-center justify-between text-[11px] text-slate-400">
+        <span id="tableResultsCount">Showing 28 action items</span>
+        <span class="font-mono">Read-Only Table Paradigm · Phone Space Formatted</span>
+      </div>
+    </div>
+
+    <!-- COLLAPSIBLE SIDE NAVIGATION / DRAWER (Selection via Standard Drop-Down) -->
+    <div id="sideNavDrawer" class="fixed inset-y-0 right-0 w-full sm:w-[480px] bg-[#0b1120] border-l border-slate-800 shadow-2xl z-50 transform translate-x-full transition-transform duration-300 flex flex-col">
+      
+      <!-- Drawer Header with Depth 1 & 2 Headings -->
+      <div class="p-4 border-b border-slate-800 bg-[#070b14] flex items-center justify-between">
+        <div>
+          <h2 class="text-sm font-bold text-heading-l1 flex items-center gap-2">
+            <i class="fa-solid fa-sliders text-blue-400"></i>
+            <span>Action Item Management</span>
+          </h2>
+          <p class="text-[11px] text-slate-400">Select via dropdown to review or edit values</p>
+        </div>
+        <button onclick="toggleSideNav()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Drawer Scrollable Content -->
+      <div class="flex-1 overflow-y-auto p-4 space-y-4 text-xs">
+
+        <!-- TARGET ACTION ITEM SELECTION DROPDOWN -->
+        <div class="bg-[#090e18] p-3 rounded-xl border border-slate-800 space-y-2">
+          <!-- Depth 3 Heading: Deep Cobalt Blue -->
+          <label for="sideNavActionItemSelect" class="block font-bold text-heading-l3 uppercase tracking-wider text-[11px]">
+            Target Action Item Drop-Down Selection:
+          </label>
+          <select 
+            id="sideNavActionItemSelect" 
+            onchange="loadSelectedItemIntoSideNav(this.value)"
+            class="w-full bg-[#0b1120] border border-blue-500/50 rounded-lg p-2 text-xs font-semibold text-sky-200 focus:outline-none focus:ring-1 focus:ring-blue-400 shadow-inner"
+          >
+            <!-- Dynamically populated <option> elements -->
+          </select>
+          <div class="flex items-center justify-between text-[11px] text-slate-400 pt-1">
+            <span id="sideNavActiveCategory" class="font-mono text-blue-400">SYSTEMS</span>
+            <span id="sideNavActivePriority" class="font-mono font-bold text-amber-300">P: 0.00</span>
+          </div>
+        </div>
+
+        <!-- EDIT FORM FOR CURRENTLY SELECTED ACTION ITEM -->
+        <form id="sideNavEditForm" onsubmit="handleSideNavSave(event)" class="space-y-3">
+          <input type="hidden" id="editFormId">
+
+          <div>
+            <!-- Depth 4 Heading: Dark Navy / Blue Depth -->
+            <label class="block font-bold text-heading-l4 dark:text-blue-400 mb-1">Action Item Name</label>
+            <input 
+              type="text" 
+              id="editFormName" 
+              required 
+              class="w-full bg-[#090e18] border border-slate-700 rounded-lg p-2 text-slate-100 focus:border-blue-500 focus:outline-none"
+            >
+          </div>
+
+          <div>
+            <label class="block font-bold text-heading-l4 dark:text-blue-400 mb-1">Operational Description</label>
+            <textarea 
+              id="editFormDescription" 
+              rows="3" 
+              required 
+              class="w-full bg-[#090e18] border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-blue-500 focus:outline-none"
+            ></textarea>
+          </div>
+
+          <div>
+            <label class="block font-bold text-heading-l4 dark:text-blue-400 mb-1">Tag Soup (Comma Separated)</label>
+            <input 
+              type="text" 
+              id="editFormTags" 
+              class="w-full bg-[#090e18] border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-blue-500 focus:outline-none font-mono text-[11px]"
+            >
+          </div>
+
+          <div>
+            <label class="block font-bold text-heading-l4 dark:text-blue-400 mb-1">AI Executive Summary</label>
+            <textarea 
+              id="editFormSummary" 
+              rows="2" 
+              class="w-full bg-[#090e18] border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-blue-500 focus:outline-none"
+            ></textarea>
+          </div>
+
+          <!-- Score Equation Inputs (1-7 Scale, 4 = Avg) -->
+          <div class="bg-[#090e18] p-3 rounded-xl border border-slate-800 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-heading-l3 text-[11px]">Score Parameters (1 - 7 Scale):</span>
+              <span id="editFormCalculatedP" class="font-mono font-bold text-sky-300">P = 0.00</span>
+            </div>
+            
+            <div class="grid grid-cols-3 gap-2">
+              <div>
+                <label class="block text-red-400 font-bold mb-1">(U)rgency</label>
+                <select id="editFormU" onchange="syncCalculatedPPreview()" class="w-full bg-[#0b1120] border border-red-500/40 rounded-lg p-1.5 text-center font-mono font-bold text-white">
+                  <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+                  <option value="4">4 (Avg)</option>
+                  <option value="5">5</option><option value="6">6</option><option value="7">7 (Max)</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-amber-400 font-bold mb-1">(I)mportance</label>
+                <select id="editFormI" onchange="syncCalculatedPPreview()" class="w-full bg-[#0b1120] border border-amber-500/40 rounded-lg p-1.5 text-center font-mono font-bold text-white">
+                  <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+                  <option value="4">4 (Avg)</option>
+                  <option value="5">5</option><option value="6">6</option><option value="7">7 (Max)</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-emerald-400 font-bold mb-1">(A)cceleration</label>
+                <select id="editFormA" onchange="syncCalculatedPPreview()" class="w-full bg-[#0b1120] border border-emerald-500/40 rounded-lg p-1.5 text-center font-mono font-bold text-white">
+                  <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+                  <option value="4">4 (Avg)</option>
+                  <option value="5">5</option><option value="6">6</option><option value="7">7 (Max)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-bold text-heading-l4 dark:text-blue-400 mb-1">Key Advantage Terminology (Term: Def | Term2: Def2)</label>
+            <textarea 
+              id="editFormTerms" 
+              rows="3" 
+              class="w-full bg-[#090e18] border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-blue-500 focus:outline-none"
+            ></textarea>
+          </div>
+
+          <div>
+            <label class="block font-bold text-heading-l4 dark:text-blue-400 mb-1">Root/Base ROAR Insights (Colon-titled paragraphs separated by |)</label>
+            <textarea 
+              id="editFormInsights" 
+              rows="4" 
+              class="w-full bg-[#090e18] border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-blue-500 focus:outline-none text-[11px]"
+            ></textarea>
+          </div>
+
+          <!-- Drawer Action Buttons -->
+          <div class="flex items-center gap-2 pt-2 border-t border-slate-800">
+            <button 
+              type="submit" 
+              class="flex-1 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition shadow"
+            >
+              <i class="fa-solid fa-floppy-disk mr-1"></i> Save Changes
+            </button>
+            <button 
+              type="button" 
+              onclick="handleDeleteCurrentItem()" 
+              class="px-3 py-2 rounded-lg bg-red-600/20 hover:bg-red-600/30 text-red-400 border border-red-500/30 text-xs transition"
+            >
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
+        </form>
+
+        <!-- Secondary Operational Actions in SideNav -->
+        <div class="pt-4 border-t border-slate-800 space-y-2">
+          <h3 class="text-heading-l3 font-bold uppercase tracking-wider text-[11px]">System Actions</h3>
+          <div class="grid grid-cols-2 gap-2">
+            <button onclick="createNewItemPrompt()" class="p-2 bg-[#090e18] hover:bg-slate-800 border border-slate-700 rounded-lg text-slate-300 text-xs flex items-center justify-center gap-1.5">
+              <i class="fa-solid fa-plus text-blue-400"></i> New Item
+            </button>
+            <button onclick="copyMarkdownTable()" class="p-2 bg-[#090e18] hover:bg-slate-800 border border-slate-700 rounded-lg text-slate-300 text-xs flex items-center justify-center gap-1.5">
+              <i class="fa-solid fa-clipboard text-purple-400"></i> Copy Markdown
+            </button>
+            <button onclick="downloadJSONFile()" class="p-2 bg-[#090e18] hover:bg-slate-800 border border-slate-700 rounded-lg text-slate-300 text-xs flex items-center justify-center gap-1.5">
+              <i class="fa-solid fa-code text-sky-400"></i> Export JSON
+            </button>
+            <button onclick="resetToFactoryData()" class="p-2 bg-[#090e18] hover:bg-slate-800 border border-slate-700 rounded-lg text-slate-300 text-xs flex items-center justify-center gap-1.5">
+              <i class="fa-solid fa-rotate-left text-amber-400"></i> Reset Default
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- FOOTER OF EXPLANATION SECTIONS (Headings light blue to navy blue depending on depth) -->
+    <footer class="mt-8 border-t border-slate-800 bg-[#090e18] rounded-2xl p-6 space-y-8">
+      
+      <!-- Depth 1 Section: Light Sky Blue Heading -->
+      <section class="space-y-3">
+        <h2 class="text-base font-black tracking-wide text-heading-l1 flex items-center gap-2">
+          <i class="fa-solid fa-compass-drafting text-sky-300"></i>
+          <span>1. The ROAR Protocol Architecture & Governance Model</span>
+        </h2>
+        <p class="text-xs text-slate-300 leading-relaxed max-w-4xl">
+          The ROAR Framework operates as an immutable operational paradigm designed to eliminate scope drift and cognitive fatigue. All system initiatives, whether infrastructure-level or prompt-engineering-focused, map into the four non-negotiable vectors:
+        </p>
+
+        <!-- Depth 2 Sub-blocks: Medium Light Blue -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 pt-2">
+          <div class="bg-[#0b1120] p-3.5 rounded-xl border border-slate-800 space-y-1.5">
+            <h3 class="text-xs font-bold text-heading-l2 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-blue-400"></span> [R] — Requisites
+            </h3>
+            <p class="text-[11px] text-slate-400 leading-normal">
+              Upstream conditions, compute substrate, token quotas, verified credentials, and baseline assumptions required before task initialization.
+            </p>
+          </div>
+
+          <div class="bg-[#0b1120] p-3.5 rounded-xl border border-slate-800 space-y-1.5">
+            <h3 class="text-xs font-bold text-heading-l2 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-blue-400"></span> [O] — Objectives
+            </h3>
+            <p class="text-[11px] text-slate-400 leading-normal">
+              High-level strategic deliverables, quantified milestone gates, and measurable Key Performance Indicators (KPIs).
+            </p>
+          </div>
+
+          <div class="bg-[#0b1120] p-3.5 rounded-xl border border-slate-800 space-y-1.5">
+            <h3 class="text-xs font-bold text-heading-l2 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-blue-400"></span> [A] — Action Items
+            </h3>
+            <p class="text-[11px] text-slate-400 leading-normal">
+              Concrete, verb-first operational tasks scored through the Priority Weight formula, assigned dependencies, and tactical outputs.
+            </p>
+          </div>
+
+          <div class="bg-[#0b1120] p-3.5 rounded-xl border border-slate-800 space-y-1.5">
+            <h3 class="text-xs font-bold text-heading-l2 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-blue-400"></span> [R] — Requirements
+            </h3>
+            <p class="text-[11px] text-slate-400 leading-normal">
+              Functional contracts, latency and memory budgets, AST schema validations, safety invariant fences, and fail-safe rollback hooks.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Depth 1 Section: Priority Formula Explanation -->
+      <section class="space-y-3 pt-4 border-t border-slate-800/80">
+        <h2 class="text-base font-black tracking-wide text-heading-l1 flex items-center gap-2">
+          <i class="fa-solid fa-square-root-variable text-sky-300"></i>
+          <span>2. Action Item Priority Weight Calibration Formula</span>
+        </h2>
+        
+        <div class="bg-[#0b1120] p-4 rounded-xl border border-slate-800 space-y-3 font-mono text-xs">
+          <div class="text-sky-200 font-bold text-sm bg-black/50 p-2.5 rounded-lg border border-slate-800">
+            Action Item Weight == (P)riority = [ (U)rgency + (I)mportance + (A)cceleration ] / 3
+          </div>
+
+          <!-- Depth 3 Headings: Deep Cobalt Blue -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+            <div class="p-2.5 rounded-lg bg-[#070b14] border border-slate-800/80">
+              <h3 class="text-heading-l3 font-bold text-xs mb-1 text-red-400">(U)rgency [1 – 7]</h3>
+              <p class="text-[11px] text-slate-400 font-sans">
+                Temporal decay rate and penalty incurred if execution is postponed. 4 is the standard nominal baseline.
+              </p>
+            </div>
+            <div class="p-2.5 rounded-lg bg-[#070b14] border border-slate-800/80">
+              <h3 class="text-heading-l3 font-bold text-xs mb-1 text-amber-400">(I)mportance [1 – 7]</h3>
+              <p class="text-[11px] text-slate-400 font-sans">
+                Core systemic impact, architectural integrity, and downstream survivability of the overarching operational stack.
+              </p>
+            </div>
+            <div class="p-2.5 rounded-lg bg-[#070b14] border border-slate-800/80">
+              <h3 class="text-heading-l3 font-bold text-xs mb-1 text-emerald-400">(A)cceleration [1 – 7]</h3>
+              <p class="text-[11px] text-slate-400 font-sans">
+                Force multiplier coefficient that unblocks concurrent workflows and accelerates adjacent engineering velocity.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Depth 1 Section: 39 Tri-fection Strategic Objectives Reference -->
+      <section class="space-y-4 pt-4 border-t border-slate-800/80">
+        <div>
+          <h2 class="text-base font-black tracking-wide text-heading-l1 flex items-center gap-2">
+            <i class="fa-solid fa-cubes text-sky-300"></i>
+            <span>3. The 39 Tri-fection Strategic Objectives Matrix</span>
+          </h2>
+          <p class="text-xs text-slate-400 mt-1">
+            Synthesized directly from the Tri-fection operational architecture across 3 Master Substrates, 9 Core Pillars, and 27 Leaf Objectives.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 text-xs">
+          
+          <!-- PHYSICAL DOMAIN (13) -->
+          <div class="bg-[#0b1120] p-4 rounded-xl border-t-4 border-t-emerald-500 border border-slate-800 space-y-3">
+            <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+              <!-- Depth 2 Heading -->
+              <h3 class="text-sm font-bold text-heading-l2">Physical Mastery (13 Objectives)</h3>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800">OBJ-01 to 13</span>
+            </div>
+            
+            <div class="space-y-2 text-[11px]">
+              <!-- Depth 3 Heading -->
+              <h4 class="font-bold text-heading-l3 uppercase tracking-wide">Pillar 1: Improving your Appearance</h4>
+              <p class="text-slate-400 pl-2 border-l border-slate-800">
+                • <strong>Hygiene & Grooming</strong> (Skincare, dental sanitation)<br>
+                • <strong>Fashion Style & Grooming</strong> (Commanding wardrobe curation)<br>
+                • <strong>Posture</strong> (Somatic alignment, thoracic decompression)
+              </p>
+
+              <h4 class="font-bold text-heading-l3 uppercase tracking-wide pt-1">Pillar 2: Maintaining Optimal Health</h4>
+              <p class="text-slate-400 pl-2 border-l border-slate-800">
+                • <strong>Sleep</strong> (7.5-8.5 hrs restorative REM/Deep cycling)<br>
+                • <strong>Diet</strong> (Macronutrient density, anti-inflammatory fueling)<br>
+                • <strong>Physical Activity</strong> (NEAT, continuous movement, 10k+ steps)
+              </p>
+
+              <h4 class="font-bold text-heading-l3 uppercase tracking-wide pt-1">Pillar 3: Exercise & Conditioning</h4>
+              <p class="text-slate-400 pl-2 border-l border-slate-800">
+                • <strong>Strength</strong> (Progressive overload resistance training)<br>
+                • <strong>Endurance</strong> (Zone 2 cardio foundation + VO2 Max)<br>
+                • <strong>Flexibility</strong> (Joint mobility and myofascial decompression)
+              </p>
+            </div>
+          </div>
+
+          <!-- SOCIAL DOMAIN (13) -->
+          <div class="bg-[#0b1120] p-4 rounded-xl border-t-4 border-t-amber-500 border border-slate-800 space-y-3">
+            <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+              <h3 class="text-sm font-bold text-heading-l2">Social Resonance (13 Objectives)</h3>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800">OBJ-14 to 26</span>
+            </div>
+
+            <div class="space-y-2 text-[11px]">
+              <h4 class="font-bold text-heading-l3 uppercase tracking-wide">Pillar 1: The Best Impression</h4>
+              <p class="text-slate-400 pl-2 border-l border-slate-800">
+                • <strong>Comfort VS Discomfort</strong> (Somatic safety calibration)<br>
+                • <strong>Cultural Gestures</strong> (High-context behavioral etiquette)<br>
+                • <strong>Para-Linguistics</strong> (Vocal modulation, resonance & cadence)
+              </p>
+
+              <h4 class="font-bold text-heading-l3 uppercase tracking-wide pt-1">Pillar 2: Interactions Made Easy</h4>
+              <p class="text-slate-400 pl-2 border-l border-slate-800">
+                • <strong>Flowing with Conversation</strong> (Thread-hooking & active listening)<br>
+                • <strong>Persuasion in Conflicts</strong> (Principled dispute resolution)<br>
+                • <strong>Flirting & Dating</strong> (Romantic tension & authentic intent)
+              </p>
+
+              <h4 class="font-bold text-heading-l3 uppercase tracking-wide pt-1">Pillar 3: Grow Positive Relationships</h4>
+              <p class="text-slate-400 pl-2 border-l border-slate-800">
+                • <strong>Likeability</strong> (Authentic warmth & attentiveness)<br>
+                • <strong>Pacing and Development</strong> (Trust pacing & vulnerability)<br>
+                • <strong>Long-term Retention</strong> (Loyalty preservation & mutual support)
+              </p>
+            </div>
+          </div>
+
+          <!-- MENTAL DOMAIN (13) -->
+          <div class="bg-[#0b1120] p-4 rounded-xl border-t-4 border-t-blue-500 border border-slate-800 space-y-3">
+            <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+              <h3 class="text-sm font-bold text-heading-l2">Mental Architecture (13 Objectives)</h3>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-950 text-blue-300 border border-blue-800">OBJ-27 to 39</span>
+            </div>
+
+            <div class="space-y-2 text-[11px]">
+              <h4 class="font-bold text-heading-l3 uppercase tracking-wide">Pillar 1: Emotional Identity</h4>
+              <p class="text-slate-400 pl-2 border-l border-slate-800">
+                • <strong>Happiness Mood Satisfaction</strong> (Internal locus of control)<br>
+                • <strong>Social Identity</strong> (Archetypal clarity without imposter syndrome)<br>
+                • <strong>Finding Meaning in Life</strong> (Ikigai & trans-generational purpose)
+              </p>
+
+              <h4 class="font-bold text-heading-l3 uppercase tracking-wide pt-1">Pillar 2: Philosophical Principles</h4>
+              <p class="text-slate-400 pl-2 border-l border-slate-800">
+                • <strong>Mindset / Worldview</strong> (Bayesian updates, growth agility)<br>
+                • <strong>Moral Code and Ethics</strong> (Uncompromising integrity)<br>
+                • <strong>Set Core Priorities</strong> (Top-3 non-negotiable life vectors)
+              </p>
+
+              <h4 class="font-bold text-heading-l3 uppercase tracking-wide pt-1">Pillar 3: Logical / Productivity</h4>
+              <p class="text-slate-400 pl-2 border-l border-slate-800">
+                • <strong>Prioritizing Time</strong> (Eisenhower audit & strict time blocks)<br>
+                • <strong>Meditation and Flow</strong> (4-hour cognitive flow immersion)<br>
+                • <strong>Life Design</strong> (Deliberate living & structural environment)
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Depth 1 Section: Key Global Advantage Terminology Glossary -->
+      <section class="space-y-3 pt-4 border-t border-slate-800/80">
+        <h2 class="text-base font-black tracking-wide text-heading-l1 flex items-center gap-2">
+          <i class="fa-solid fa-book-bookmark text-sky-300"></i>
+          <span>4. Global Advantage Terminology Lexicon</span>
+        </h2>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+          <div class="bg-[#0b1120] p-3 rounded-lg border border-slate-800">
+            <!-- Depth 4 Heading -->
+            <h4 class="font-bold text-heading-l4 dark:text-sky-300 mb-1">Context Drift Delta</h4>
+            <p class="text-[11px] text-slate-400">Quantified semantic shift between consecutive prompt iterations.</p>
+          </div>
+          <div class="bg-[#0b1120] p-3 rounded-lg border border-slate-800">
+            <h4 class="font-bold text-heading-l4 dark:text-sky-300 mb-1">Dynamic Permission Fence</h4>
+            <p class="text-[11px] text-slate-400">Context-aware execution boundary dynamically revoking high-privilege system calls.</p>
+          </div>
+          <div class="bg-[#0b1120] p-3 rounded-lg border border-slate-800">
+            <h4 class="font-bold text-heading-l4 dark:text-sky-300 mb-1">Vibe Fidelity Quotient</h4>
+            <p class="text-[11px] text-slate-400">Metric evaluating how accurately generated code matches sensory design intention.</p>
+          </div>
+          <div class="bg-[#0b1120] p-3 rounded-lg border border-slate-800">
+            <h4 class="font-bold text-heading-l4 dark:text-sky-300 mb-1">Reflexion AST Mutator</h4>
+            <p class="text-[11px] text-slate-400">Self-correcting code syntax tree manipulator that heals runtime exceptions in closed loops.</p>
+          </div>
+        </div>
+      </section>
+
+    </footer>
+  </main>
+
+  <!-- Notification Toast -->
+  <div id="appToast" class="fixed bottom-5 right-5 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none px-4 py-2 rounded-xl text-xs font-semibold shadow-2xl flex items-center gap-2 bg-blue-600 text-white border border-blue-400"></div>
+
+  <script>
+    // Master Baseline Dataset: All 28 Action Items (18 Systems + 10 Prompt Engineering / Vibe Coding)
+    const MASTER_ACTION_ITEMS = [
+      {
+        id: "AI-01",
+        category: "SYSTEMS",
+        name: "Data Hygiene & Pipeline Validation",
+        description: "Implement rigorous data sanitization, filtration, and pipeline validation across prompt and telemetry streams.",
+        tagSoup: ["data-hygiene", "sanitization", "prompt-pipeline", "filtration", "validation"],
+        aiSummary: "Eliminates toxic noise and poisoned context before entering inference engines, securing model reliability.",
+        terminology: [
+          { term: "Token Purity Ratio", def: "Proportion of noise-free tokens ingested." },
+          { term: "Context Drift Delta", def: "Quantified semantic shift between iterations." }
+        ],
+        insights: [
+          { title: "Root Requisite", text: "Clean raw ingestion hubs and verified deterministic schemas must precede all inference." },
+          { title: "Core Objective", text: "Zero ingestion corruption and sub-0.01% semantic variance across batch prompts." },
+          { title: "Execution Vector", text: "Deploy streaming regex and vector anomaly filters at ingress nodes." },
+          { title: "Governing Requirements", text: "Max ingestion latency overhead <= 2.8ms; 100% telemetry audit trail preserved." },
+          { title: "Global Advantage Factor", text: "Prevents adversarial context poisoning while reducing compute waste by 35%." }
+        ],
+        u: 5, i: 6, a: 4
+      },
+      {
+        id: "AI-02",
+        category: "SYSTEMS",
+        name: "Edge Compute Optimization & Scrambling",
+        description: "Deploy local context compression versus hardware scrambling paradigms across distributed edge architectures.",
+        tagSoup: ["edge-compute", "local-compression", "hardware-scrambling", "latency-reduction"],
+        aiSummary: "Balances sub-millisecond edge execution against security scrambling to protect model weights from extraction.",
+        terminology: [
+          { term: "Substrate Compression Factor", def: "Ratio of model memory footprint reduction at the edge." },
+          { term: "Micro-Kernel Interleaving", def: "Interleaved cryptographic execution threads preventing cache-timing leaks." }
+        ],
+        insights: [
+          { title: "Root Requisite", text: "Distributed hardware nodes equipped with physical keystores and edge NPU fabrics." },
+          { title: "Core Objective", text: "Deliver sub-5ms localized inference latency with verified hardware tampering immunity." },
+          { title: "Execution Vector", text: "Compile quantized INT4/INT8 local models with interleaved memory obfuscation blocks." },
+          { title: "Governing Requirements", text: "RAM footprint <= 1.2GB per edge agent; fail-closed memory purge on probe detection." },
+          { title: "Global Advantage Factor", text: "Enables untethered, autonomous edge execution inside untrusted and hostile zones." }
+        ],
+        u: 4, i: 6, a: 6
+      },
+      {
+        id: "AI-03",
+        category: "SYSTEMS",
+        name: "Boundary Hardening & Dynamic Permission Fences",
+        description: "Architect fine-grained access control and dynamic permission fences around AI daemons and execution primitives.",
+        tagSoup: ["boundary-hardening", "rbac", "dynamic-fencing", "zero-trust"],
+        aiSummary: "Enforces continuous zero-trust containment to prevent autonomous agent privilege escalation across OS roots.",
+        terminology: [
+          { term: "Dynamic Permission Fence", def: "Context-aware execution boundary dynamically revoking system calls." },
+          { term: "Agentic Blast Radius", def: "The maximum blast exposure allowable per isolated execution thread." }
+        ],
+        insights: [
+          { title: "Root Requisite", text: "Verified identity assertion mechanisms and kernel-level sandboxing hooks." },
+          { title: "Core Objective", text: "Zero unauthorized privilege escalations across autonomous daemon swarms." },
+          { title: "Execution Vector", text: "Implement runtime capability attestation and per-transaction signed tokens." },
+          { title: "Governing Requirements", text: "Invariant privilege enforcement latency <= 0.5ms; real-time revocation broadcast." },
+          { title: "Global Advantage Factor", text: "Eliminates rogue model jailbreaks and prevents weaponization of autonomous system tooling." }
+        ],
+        u: 6, i: 7, a: 5
+      },
+      {
+        id: "AI-04",
+        category: "SYSTEMS",
+        name: "Custom UI Containerization & Network Defense",
+        description: "Engineer isolated UI containers to isolate hostile traffic and mitigate distributed denial-of-service threats.",
+        tagSoup: ["ui-containerization", "ddos-mitigation", "network-defense", "sandboxing"],
+        aiSummary: "Creates hardened UI runtimes that absorb volumetric network assaults while shielding internal state threads.",
+        terminology: [
+          { term: "Containerized DOM Canvas", def: "Memory-isolated rendering environment preventing cross-frame leaks." },
+          { term: "Synthetic Ingress Sink", def: "Volumetric traffic sinkhole neutralizing hostile DDoS sweeps." }
+        ],
+        insights: [
+          { title: "Root Requisite", text: "WebAssembly/DOM isolation container runtimes and high-bandwidth ingress buffers." },
+          { title: "Core Objective", text: "Uninterrupted command-and-control access during Tier-4 volumetric DDoS attacks." },
+          { title: "Execution Vector", text: "Isolate client render threads into sandboxed workers backed by synthetic ingress sinks." },
+          { title: "Governing Requirements", text: "99.999% interface uptime; zero leakage between UI thread and kernel hooks." },
+          { title: "Global Advantage Factor", text: "Shields operator decision loops from denial-of-service disruptions during critical maneuvers." }
+        ],
+        u: 5, i: 5, a: 4
+      },
+      {
+        id: "AI-05",
+        category: "SYSTEMS",
+        name: "Closed-Loop Benchmark Calibration",
+        description: "Deploy role-based finite-state machine (FSM) self-grading loops with context summarization compression.",
+        tagSoup: ["fsm-evaluation", "self-grading", "benchmark-calibration", "context-density"],
+        aiSummary: "Maximizes prompt density and model accuracy by running autonomous self-scoring loops inside an FSM framework.",
+        terminology: [
+          { term: "FSM Self-Grade Quotient", def: "Rubric score generated recursively by internal grading agents." },
+          { term: "Context Density Yield", def: "Actionable information entropy packed per individual token." }
+        ],
+        insights: [
+          { title: "Root Requisite", text: "Gold-standard historical benchmark rubrics and verified finite state transition maps." },
+          { title: "Core Objective", text: "Attain >98.5% benchmark adherence with 40% context window footprint reduction." },
+          { title: "Execution Vector", text: "Loop generator outputs into rubric evaluators that write state delta transitions." },
+          { title: "Governing Requirements", text: "Cycle time <= 120ms per grading loop; complete autonomy with zero human intervention." },
+          { title: "Global Advantage Factor", text: "Enables autonomous capability compounding without reliance on expensive human labeling." }
+        ],
+        u: 6, i: 7, a: 6
+      },
+      {
+        id: "AI-06",
+        category: "SYSTEMS",
+        name: "Singularity Optimization Daemon (Mode 1)",
+        description: "Construct an evaluation rubric engine that generates structured bulk improvement proposals from satisfaction logs.",
+        tagSoup: ["optimization-daemon", "singularity", "rubric-engine", "bulk-proposals"],
+        aiSummary: "Scans global execution metrics to synthesize high-yield architectural refinements in batch proposals.",
+        terminology: [
+          { term: "Proposal Alpha Yield", def: "Predicted systemic throughput gain resulting from an automated proposal." },
+          { term: "Meta-Rubric Vector", def: "High-dimensional performance standard dynamically updated from logs." }
+        ],
+        insights: [
+          { title: "Root Requisite", text: "Continuous telemetry ingestion pipelines and aggregated satisfaction logs." },
+          { title: "Core Objective", text: "Generate weekly top-tier system improvement proposals with >80% automated adoption." },
+          { title: "Execution Vector", text: "Run scheduled batch LLM synthesis over logged failure states and anomalous latencies." },
+          { title: "Governing Requirements", text: "Proposals must output structured JSON diffs complying with ROAR schemas." },
+          { title: "Global Advantage Factor", text: "Continuously eliminates technical and operational debt faster than human teams." }
+        ],
+        u: 5, i: 6, a: 7
+      },
+      {
+        id: "AI-07",
+        category: "SYSTEMS",
+        name: "Singularity Project Engineer (Mode 2)",
+        description: "Build a context-rich implementation engine converting action-item rule sets into automated code deployment.",
+        tagSoup: ["project-engineer", "auto-code-deploy", "forward-propagation", "batch-execution"],
+        aiSummary: "Transforms abstract strategic specifications into production code and multi-million row batch deployments.",
+        terminology: [
+          { term: "Forward-Propagated Matrix", def: "Direct parameter injection across distributed live worker pools." },
+          { term: "Reflexion AST Mutator", def: "Self-correcting code syntax tree manipulator that heals compilation errors." }
+        ],
+        insights: [
+          { title: "Root Requisite", text: "Formalized ROAR action-item specification and containerized testing sandboxes." },
+          { title: "Core Objective", text: "End-to-end automated code generation and deployment for verified operational tasks." },
+          { title: "Execution Vector", text: "Pipe action items into Tree-Sitter AST manipulators gated by automated test runners." },
+          { title: "Governing Requirements", text: "P(Merge | Patch) = 1.0 on all unit and regression suites; zero unhandled exceptions." },
+          { title: "Global Advantage Factor", text: "Provides instantaneous code realization at superhuman engineering velocity." }
+        ],
+        u: 7, i: 7, a: 7
+      },
+      {
+        id: "AI-08",
+        category: "SYSTEMS",
+        name: "Voidware MasterHub Architecture",
+        description: "Establish a centralized tile interface for software rights, version control, and distribution pipelines.",
+        tagSoup: ["masterhub", "tile-interface", "version-control", "software-rights"],
+        aiSummary: "Unifies fractured computational tools into a single governed command dashboard for global artifact delivery.",
+        terminology: [
+          { term: "Sovereign Tile Topology", def: "Modular, isolated UI component architecture communicating over secured buses." },
+          { term: "Rights Verification Oracle", def: "Cryptographic system verifying software licensing entitlements." }
+        ],
+        insights: [
+          { title: "Root Requisite", text: "Unified single sign-on federation and signed artifact package registries." },
+          { title: "Core Objective", text: "Sub-second discovery and deployment of all ecosystem modules and capabilities." },
+          { title: "Execution Vector", text: "Build a decoupled tile UI communicating over authenticated internal IPC channels." },
+          { title: "Governing Requirements", text: "Zero permission crosstalk between tiles; instantaneous entitlement revocation." },
+          { title: "Global Advantage Factor", text: "Centralizes governance across decentralized autonomous nodes." }
+        ],
+        u: 4, i: 5, a: 4
+      },
+      {
+        id: "AI-09",
+        category: "SYSTEMS",
+        name: "Voidware VoidAI OS Layer Integration",
+        description: "Architect an API layer unifying conversational engines with unified OS-level execution and file system access.",
+        tagSoup: ["voidai", "os-level-api", "file-system-access", "agentic-runtime"],
+        aiSummary: "Transforms language models from passive text generators into active OS operators with native system calls.",
+        terminology: [
+          { term: "Kernel-Level Prompts", def: "Natural language instructions bound deterministically to OS-level system calls." },
+          { term: "Virtualized VFS Sandbox", def: "Ephemeral virtual filesystem shielding host disks from unverified mutations." }
+        ],
+        insights: [
+          { title: "Root Requisite", text: "Host-level security isolation containers and non-root system bridge daemons." },
+          { title: "Core Objective", text: "Safe execution of arbitrary terminal and filesystem tasks directly from autonomous prompts." },
+          { title: "Execution Vector", text: "Implement a bidirectional JSON-RPC IPC bridge with strictly scoped Linux capabilities." },
+          { title: "Governing Requirements", text: "Strict command timeout (<=10s); all mutating IO isolated to scratch spaces." },
+          { title: "Global Advantage Factor", text: "Grants LLMs direct machine dexterity for real-time computational execution." }
+        ],
+        u: 6, i: 7, a: 6
+      },
+      {
+        id: "AI-10",
+        category: "SYSTEMS",
+        name: "Voidware FindR Intelligence Directory",
+        description: "Deploy vector- and prompt-driven directory resolving technical entities and compiling instant two-page dossiers.",
+        tagSoup: ["findr", "vector-directory", "dossier-generation", "entity-resolution"],
+        aiSummary: "Instantly matches ambiguous entities across technical ecosystems and synthesizes actionable intelligence dossiers.",
+        terminology: [
+          { term: "Vector Proximity Hash", def: "High-dimensional embedding key enabling sub-millisecond similarity lookups." },
+          { term: "Compressed Dossier Topology", def: "Structured, dense two-page intelligence schema capturing core entity vectors." }
+        ],
+        insights: [
+          { title: "Root Requisite", text: "Embeddings pipeline covering internal repositories and surface technical documentation." },
+          { title: "Core Objective", text: "Sub-500ms retrieval and generation of executive-grade technical dossiers." },
+          { title: "Execution Vector", text: "Query HNSW vector index and stream summary into structured two-page markdown templates." },
+          { title: "Governing Requirements", text: "Zero hallucinated citations; latency budget <= 750ms end-to-end." },
+          { title: "Global Advantage Factor", text: "Compresses hours of manual OSINT and technical triage into milliseconds." }
+        ],
+        u: 4, i: 5, a: 5
+      },
+      {
+        id: "AI-11",
+        category: "SYSTEMS",
+        name: "Voidware SNAP Unified Suite",
+        description: "Deliver a unified operational suite integrating File Exploration, Daemon Synthesis, visual FSM, and Singularity Command.",
+        tagSoup: ["snap-suite", "file-exploration", "daemon-synthesis", "visual-fsm"],
+        aiSummary: "Merges low-level file management, autonomous daemon authoring, and visual state machines into one cockpit.",
+        terminology: [
+          { term: "Quad-Pane Orchestrator", def: "Integrated four-quadrant situational interface linking file, daemon, and command." },
+          { term: "Visual FSM Wireframe", def: "Node-graph representation of logic states supporting drag-and-drop transitions." }
+        ],
+        insights: [
+          { title: "Root Requisite", text: "Standardized event bus across MasterHub, VoidAI, and backend orchestration nodes." },
+          { title: "Core Objective", text: "Single pane-of-glass orchestration for 100+ concurrent autonomous synthetic processes." },
+          { title: "Execution Vector", text: "Integrate canvas-based state machine visualizer with live process monitors." },
+          { title: "Governing Requirements", text: "UI frame rate >= 60 FPS under continuous 1000 events/sec streaming telemetry." },
+          { title: "Global Advantage Factor", text: "Gives human operators immediate total oversight over autonomous swarms." }
+        ],
+        u: 5, i: 6, a: 6
+      },
+      {
+        id: "AI-12",
+        category: "SYSTEMS",
+        name: "Voidware Xmirrors Multi-Cloud Router",
+        description: "Implement intelligent multi-cloud routing with automated semantic tagging and executive summarization.",
+        tagSoup: ["xmirrors", "multi-cloud", "semantic-tagging", "cloud-arbitrage"],
+        aiSummary: "Routes compute tasks across disparate cloud providers based on cost, latency, and automated semantic context.",
+        terminology: [
+          { term: "Cloud Arbitrage Coefficient", def: "Efficiency score balancing spot compute pricing against latency." },
+          { term: "Semantic Ingress Classifier", def: "Intent parser determining required hardware tier before dispatch." }
+        ],
+        insights: [
+          { title: "Root Requisite", text: "Multi-cloud API credentials and real-time egress cost/availability monitors." },
+          { title: "Core Objective", text: "40% reduction in cloud compute costs with zero uptime degradation." },
+          { title: "Execution Vector", text: "Evaluate incoming tasks via lightweight classifiers and dispatch to cheapest qualified tier." },
+          { title: "Governing Requirements", text: "Dispatch latency <= 15ms; automated fallback on provider HTTP 5xx responses." },
+          { title: "Global Advantage Factor", text: "Prevents cloud vendor lock-in and protects operations from cloud outages." }
+        ],
+        u: 4, i: 5, a: 5
+      },
+      {
+        id: "AI-13",
+        category: "SYSTEMS",
+        name: "Voidware RODsecurity Defense Matrix",
+        description: "Deploy defense matrix incorporating backup defrag, defensive telemetry, heuristic signatures, and layered fortress architectures.",
+        tagSoup: ["rodsecurity", "defense-matrix", "heuristic-signatures", "backup-defrag"],
+        aiSummary: "Maintains impenetrable defense across synthetic assets via live threat sniffing and immutable rollback checkpoints.",
+        terminology: [
+          { term: "Layered Fortress Architecture", def: "Concentric defense rings separating untrusted inputs from root weights." },
+          { term: "Reversible Recall Signature", def: "Cryptographically verified rollback command purging corrupted state." }
+        ],
+        insights: [
+          { title: "Root Requisite", text: "Kernel-level inspection capabilities and write-once backup storage volumes." },
+          { title: "Core Objective", text: "Zero successful unauthorized memory intrusions and guaranteed single-command recovery." },
+          { title: "Execution Vector", text: "Continuously inspect memory spaces and write state deltas to write-once storage." },
+          { title: "Governing Requirements", text: "System telemetry collection CPU usage <= 2%; sub-second state rollback capability." },
+          { title: "Global Advantage Factor", text: "Creates mathematically guaranteed survivability against advanced persistent threats." }
+        ],
+        u: 7, i: 7, a: 6
+      },
+      {
+        id: "AI-14",
+        category: "SYSTEMS",
+        name: "Bloatshield Defensive Obfuscation",
+        description: "Construct defensive obfuscation layer leveraging asset directory distribution to counter cyber intrusions.",
+        tagSoup: ["bloatshield", "obfuscation", "asset-distribution", "decoy-injection"],
+        aiSummary: "Deploys decoy directory hierarchies and fragmented binaries to confuse automated scanners and adversaries.",
+        terminology: [
+          { term: "Directory Permutation Mesh", def: "Dynamic filesystem remapping masking true operational assets behind decoys." },
+          { term: "Honeytoken Artifact", def: "Decoy file designed to trigger instantaneous alerts upon access." }
+        ],
+        insights: [
+          { title: "Root Requisite", text: "Dynamic filesystem overlay support and OS-level path translation tables." },
+          { title: "Core Objective", text: "Multiply adversary reconnaissance time by 100x while raising immediate intruder alarms." },
+          { title: "Execution Vector", text: "Generate thousands of synthetic decoy directories with tripwire monitoring hooks." },
+          { title: "Governing Requirements", text: "Zero impact on legitimate process IO performance; immediate SOC alert on decoy access." },
+          { title: "Global Advantage Factor", text: "Paralyzes unauthorized reconnaissance through synthetic complexity." }
+        ],
+        u: 4, i: 5, a: 4
+      },
+      {
+        id: "AI-15",
+        category: "SYSTEMS",
+        name: "Kicker Command Dynamic Thread Allocator",
+        description: "Deploy dynamic thread allocation resolver overcoming meta-process performance hurdles and contention.",
+        tagSoup: ["kicker-command", "thread-allocation", "meta-process", "concurrency"],
+        aiSummary: "Optimizes core CPU affinity and dynamically redistributes threads to prevent pipeline stalling in heavy swarms.",
+        terminology: [
+          { term: "Contention Resolver", def: "Lock-free queue manager balancing CPU threads across compute-heavy daemons." },
+          { term: "Core Affinity Pinning", def: "Hardware-level process binding minimizing cache misses across NUMA domains." }
+        ],
+        insights: [
+          { title: "Root Requisite", text: "Multi-core hardware platform and real-time thread contention monitoring metrics." },
+          { title: "Core Objective", text: "Zero thread starvation and >95% CPU core saturation efficiency during peak loads." },
+          { title: "Execution Vector", text: "Monitor thread lock wait times and dynamically re-pin workers across NUMA nodes." },
+          { title: "Governing Requirements", text: "Re-allocation decision loop <= 5ms; zero dropped task messages." },
+          { title: "Global Advantage Factor", text: "Extracts maximum physical compute throughput from available silicon." }
+        ],
+        u: 5, i: 5, a: 6
+      },
+      {
+        id: "AI-16",
+        category: "SYSTEMS",
+        name: "Maneuver Taxonomy Operational Deployment",
+        description: "Codify and deploy the strategic tactical maneuver suite: Stealth, Scan, Relay, Move, Recall, Neutralize, Propagate.",
+        tagSoup: ["maneuvers", "stealth", "scan", "relay", "recall", "neutralize"],
+        aiSummary: "Translates theoretical offensive and defensive swarming doctrine into executable programmatic primitives.",
+        terminology: [
+          { term: "Kinetic Maneuver Primitive", def: "Atomic software instruction executing a standardized tactical posture shift." },
+          { term: "Swarm Consensus Vector", def: "Consensus-driven spatial positioning protocol for distributed agents." }
+        ],
+        insights: [
+          { title: "Root Requisite", text: "Low-latency P2P mesh network and standardized maneuver telemetry protocols." },
+          { title: "Core Objective", text: "Standardized command syntax across autonomous heterogeneous robot and agent fleets." },
+          { title: "Execution Vector", text: "Implement a 7-verb state transition engine in embedded firmware and agent daemons." },
+          { title: "Governing Requirements", text: "Maneuver transition latency <= 10ms; atomic fail-safe recall triggers." },
+          { title: "Global Advantage Factor", text: "Enables coordinated multi-agent tactical superiority across contested spaces." }
+        ],
+        u: 5, i: 6, a: 5
+      },
+      {
+        id: "AI-17",
+        category: "SYSTEMS",
+        name: "Autonomous Safeguards & Reversible Recall",
+        description: "Integrate systemic state-level hooks, continuous observation sniffers, and verified reversible recall architectures.",
+        tagSoup: ["autonomous-safeguards", "reversible-recall", "invariants", "kill-switch"],
+        aiSummary: "Guarantees that autonomous synthetic systems can be halted and completely rolled back without damage.",
+        terminology: [
+          { term: "Reversible Recall Hook", def: "Microsecond-latency interrupt handler unwinding unverified system changes." },
+          { term: "Non-Destructive Invariant", def: "Mathematical assertion that cannot be breached under any execution branch." }
+        ],
+        insights: [
+          { title: "Root Requisite", text: "Immutable ledger logging all agent actions and hardware-enforced interrupt pins." },
+          { title: "Core Objective", text: "Zero unrecoverable rogue agent actions; 100% successful rollback verification." },
+          { title: "Execution Vector", text: "Hook execution calls into an undoable journal with hardware watchdogs." },
+          { title: "Governing Requirements", text: "Rollback trigger must execute in <= 50ms across all active threads." },
+          { title: "Global Advantage Factor", text: "Enables aggressive innovation velocity by mathematically bounding downside failure risk." }
+        ],
+        u: 7, i: 7, a: 5
+      },
+      {
+        id: "AI-18",
+        category: "SYSTEMS",
+        name: "Spatial Dominance Pipelines",
+        description: "Operationalize end-to-end SDLC, PMLC, automated assembly, additive layering, and organic fabrication pipelines.",
+        tagSoup: ["spatial-dominance", "sdlc", "pmlc", "automated-assembly", "additive-manufacturing"],
+        aiSummary: "Bridges the digital-physical divide by automating the transition from software code to physical artifact fabrication.",
+        terminology: [
+          { term: "Closed-Loop Physical SDLC", def: "Direct compile pipeline translating software commits into machine tooling." },
+          { term: "Additive Precision Mesh", def: "Micron-tolerance geometric path generator for automated 3D deposition." }
+        ],
+        insights: [
+          { title: "Root Requisite", text: "Integrated CAD/CAM tooling, automated additive 3D/metal printers, and CI/CD triggers." },
+          { title: "Core Objective", text: "Zero-latency physical prototyping from Git commit to printed physical substrate." },
+          { title: "Execution Vector", text: "Connect software commit pipelines directly to G-code compilers and automated build beds." },
+          { title: "Governing Requirements", text: "Dimensional tolerance <= 0.05mm; automated QA visual inspection on every layer." },
+          { title: "Global Advantage Factor", text: "Achieves ultra-rapid physical iteration cycles outperforming traditional manufacturing." }
+        ],
+        u: 4, i: 6, a: 6
+      },
+      // 10 ITEMS: PROMPT ENGINEERING & VIBE CODING DOMAINS
+      {
+        id: "AI-19",
+        category: "VIBE",
+        name: "Few-Shot Intent Calibration & Context Window Shaping",
+        description: "Synthesize high-density few-shot exemplars and format boundaries to anchor LLM responses into deterministic output templates.",
+        tagSoup: ["prompt-engineering", "few-shot", "in-context-learning", "formatting-guardrails"],
+        aiSummary: "Pre-conditions model attention heads with concrete behavioral demonstrations, eliminating hallucinated schemas and preamble noise.",
+        terminology: [
+          { term: "Exemplar Saliency Score", def: "Metric assessing how effectively an in-context demonstration conditions attention." },
+          { term: "Negative Exemplar Boundary", def: "Explicit negative demonstrations illustrating forbidden styles or schemas." }
+        ],
+        insights: [
+          { title: "Root Requisite", text: "Curated dataset of verified input-output pairs spanning nominal and boundary conditions." },
+          { title: "Core Objective", text: "Zero schema validation failures across 10,000 automated batch invocations." },
+          { title: "Execution Vector", text: "Inject dynamic Top-3 few-shot vector-matched exemplars preceding the user prompt." },
+          { title: "Governing Requirements", text: "Few-shot prefix overhead <= 450 tokens; zero cross-example instruction leakage." },
+          { title: "Global Advantage Factor", text: "Yields enterprise determinism from foundational models without fine-tuning." }
+        ],
+        u: 6, i: 6, a: 6
+      },
+      {
+        id: "AI-20",
+        category: "VIBE",
+        name: "Spec-Driven Vibe Coding & Hot-Reload Iteration Loop",
+        description: "Architect sub-second hot-reload feedback loops linking stream-of-consciousness natural language specs directly into live compiled canvases.",
+        tagSoup: ["vibe-coding", "spec-driven", "hot-reload", "rapid-prototyping", "single-file"],
+        aiSummary: "Empowers the software engineer to code at the speed of thought by mapping intuitive sensory language into executable single-file stacks.",
+        terminology: [
+          { term: "Vibe Fidelity Quotient", def: "Quantification of how accurately generated UI interactions match intuition." },
+          { term: "Hot-Canvas Hydration", def: "Instantaneous compilation and DOM injection of streaming JSX/HTML code." }
+        ],
+        insights: [
+          { title: "Root Requisite", text: "High-bandwidth token streaming pipeline and hot-swappable browser runtime sandbox." },
+          { title: "Core Objective", text: "Cycle time from verbalized concept to interacting with a running UI element <= 4.5 seconds." },
+          { title: "Execution Vector", text: "Pipe conversational vibe prompts directly into a single-file DOM previewer via WebSocket." },
+          { title: "Governing Requirements", text: "Zero page reloads required on iterative styling changes; automated error boundary recovery." },
+          { title: "Global Advantage Factor", text: "Compresses multi-week front-end prototyping sprints into a single 45-minute flow session." }
+        ],
+        u: 7, i: 6, a: 7
+      },
+      {
+        id: "AI-21",
+        category: "VIBE",
+        name: "Semantic AST Scratchpad & Micro-Prompt Sharding",
+        description: "Decompose complex multi-component code architectures into sharded micro-prompts governed by an Abstract Syntax Tree scratchpad.",
+        tagSoup: ["ast-scratchpad", "micro-prompting", "tree-sitter", "prompt-decomposition"],
+        aiSummary: "Eliminates token degradation in long code generations by processing discrete AST sub-trees in parallel micro-prompts.",
+        terminology: [
+          { term: "AST Sub-Tree Shard", def: "An isolated, grammatically valid chunk of syntax processed independently." },
+          { term: "Symbolic Linkage Table", def: "Global variable and type dependency map shared across concurrent shards." }
+        ],
+        insights: [
+          { title: "Root Requisite", text: "Language parser bindings (Tree-Sitter) and distributed concurrent inference runner." },
+          { title: "Core Objective", text: "Generate 5,000+ line production applications with zero missing closures or broken imports." },
+          { title: "Execution Vector", text: "Parse target file architecture into component nodes and dispatch parallel prompts with shared types." },
+          { title: "Governing Requirements", text: "AST stitching step <= 80ms; zero transitive variable collisions across shards." },
+          { title: "Global Advantage Factor", text: "Breaks through output token limits while maintaining architectural coherence." }
+        ],
+        u: 5, i: 7, a: 6
+      },
+      {
+        id: "AI-22",
+        category: "VIBE",
+        name: "Dynamic System Instruction & Persona Modulation",
+        description: "Build an adaptive system-instruction compiler that tunes cognitive posture, authority level, and verbosity based on task domain.",
+        tagSoup: ["system-instruction", "persona-modulation", "adaptive-prompting", "cognitive-posture"],
+        aiSummary: "Dynamically swaps expert mental frameworks (Staff Architect, Security Auditor, UX Designer) based on task taxonomy.",
+        terminology: [
+          { term: "Cognitive Posture Vector", def: "Structured instruction preamble setting rigor, skepticism, and technical depth." },
+          { term: "Zero-Preamble Directive", def: "Rule strictly forbidding conversational filler ('Sure! Here is...') to preserve velocity." }
+        ],
+        insights: [
+          { title: "Root Requisite", text: "Domain classifier model and modular catalog of vetted role-specific instruction headers." },
+          { title: "Core Objective", text: "Achieve optimal expert tone and elimination of 100% of conversational conversational fluff." },
+          { title: "Execution Vector", text: "Detect query classification and prepend deterministic system instruction blocks before dispatch." },
+          { title: "Governing Requirements", text: "Classification overhead <= 15ms; consistent persona adherence across 50+ turns." },
+          { title: "Global Advantage Factor", text: "Maximizes informational entropy per token, yielding sharper, higher-IQ technical outputs." }
+        ],
+        u: 4, i: 6, a: 5
+      },
+      {
+        id: "AI-23",
+        category: "VIBE",
+        name: "Prompt-to-Artifact Generation & Instant Component Assembly",
+        description: "Create standard prompts that directly emit unified self-contained single-file artifacts ready for immediate production deployment.",
+        tagSoup: ["prompt-to-artifact", "single-file", "component-assembly", "tailwind"],
+        aiSummary: "Transforms raw conversational commands into complete, dependency-free React or HTML artifacts that run without build setups.",
+        terminology: [
+          { term: "Monolithic Artifact Pattern", def: "Packing HTML, CSS styling, and client-side logic into a single copy-paste runnable file." },
+          { term: "CDN Dependency Fallback", def: "Resilient remote resource loading preventing broken local script imports." }
+        ],
+        insights: [
+          { title: "Root Requisite", text: "Robust catalog of standalone CDN component libraries (Tailwind, FontAwesome, D3, Tone.js)." },
+          { title: "Core Objective", text: "100% zero-configuration runnability for every artifact produced by conversational prompts." },
+          { title: "Execution Vector", text: "Enforce strict single-file system prompts with inline CSS and client-side bundle bootstrapping." },
+          { title: "Governing Requirements", text: "Artifact must compile and render without requiring `npm install` or local build tooling." },
+          { title: "Global Advantage Factor", text: "Enables instant sharing and evaluation of software concepts across distributed teams." }
+        ],
+        u: 6, i: 7, a: 6
+      },
+      {
+        id: "AI-24",
+        category: "VIBE",
+        name: "Reflexion Self-Healing & Vibe Debugging Engine",
+        description: "Construct an autonomous error-interception engine that feeds browser console exceptions and runtime errors back into prompt loops.",
+        tagSoup: ["vibe-debugging", "reflexion", "self-healing", "error-loop"],
+        aiSummary: "Automatically detects runtime errors, syntax bugs, or visual layout glitches and patches the code before human review.",
+        terminology: [
+          { term: "Console Error Reflection", def: "Structured prompt injection of runtime stack traces, line numbers, and variables." },
+          { term: "Zero-Shot Code Patch", def: "A targeted regex or unified diff replacing only the malfunctioning code segment." }
+        ],
+        insights: [
+          { title: "Root Requisite", text: "Browser window `onerror` hooks and unified diff applying engine in the preview harness." },
+          { title: "Core Objective", text: "Autonomous resolution of >90% of runtime JavaScript exceptions without developer intervention." },
+          { title: "Execution Vector", text: "Trap runtime errors, compile a minimal repro context, and invoke a specialized code-patching prompt." },
+          { title: "Governing Requirements", text: "Total bug detection, patch generation, and DOM reload cycle completed in <= 3 seconds." },
+          { title: "Global Advantage Factor", text: "Eliminates frustrating debugging halts during rapid vibe-coding experimentation sessions." }
+        ],
+        u: 6, i: 7, a: 7
+      },
+      {
+        id: "AI-25",
+        category: "VIBE",
+        name: "Multi-Modal Visual Anchor & UI Vibe Translation",
+        description: "Translate visual wireframes, whiteboard sketches, and design screenshots into pixel-accurate responsive front-end code.",
+        tagSoup: ["multimodal-prompting", "vision-to-code", "ui-vibe", "screenshot-to-code"],
+        aiSummary: "Bridges human visual design thinking with LLM vision backbones to generate clean HTML/CSS matching visual inputs.",
+        terminology: [
+          { term: "Spatial Layout Extraction", def: "Vision-based identification of flexbox, grid, and spacing hierarchies from an image." },
+          { term: "Design Token Transduction", def: "Translating pixel-level image colors, fonts, and radii into clean Tailwind classes." }
+        ],
+        insights: [
+          { title: "Root Requisite", text: "Multi-modal vision API endpoints with inline image base64 streaming capabilities." },
+          { title: "Core Objective", text: "Sub-5% perceptual layout deviation between reference image and generated application." },
+          { title: "Execution Vector", text: "Feed high-resolution image with structured layout extraction prompt directly into Vision-LLM." },
+          { title: "Governing Requirements", text: "Fully responsive layout across mobile, tablet, and desktop breakpoints." },
+          { title: "Global Advantage Factor", text: "Allows non-technical designers to manifest production-grade software directly from sketches." }
+        ],
+        u: 5, i: 6, a: 6
+      },
+      {
+        id: "AI-26",
+        category: "VIBE",
+        name: "Latent Temperature Pacing & Divergence Throttling",
+        description: "Implement dynamic temperature and Top-P modulation during prompt streaming based on grammatical phase and code criticality.",
+        tagSoup: ["temperature-pacing", "sampling-parameters", "divergence-throttling"],
+        aiSummary: "Dynamically alters inference randomness: sets temperature=0.0 during critical syntax loops and 0.7 for creative design copy.",
+        terminology: [
+          { term: "Phase-Shift Sampling", def: "Dynamically switching temperature values between syntactic logic and descriptive prose." },
+          { term: "Grammar-Enforced Decoding", def: "Masking invalid tokens at the logit level based on an active JSON or AST grammar." }
+        ],
+        insights: [
+          { title: "Root Requisite", text: "Inference engine supporting per-token or per-phase sampling parameter adjustments." },
+          { title: "Core Objective", text: "Zero structural syntax errors while maximizing creative richness in UI copy and color palettes." },
+          { title: "Execution Vector", text: "Utilize structured schema outputs for code logic and unconstrained sampling for textual labels." },
+          { title: "Governing Requirements", text: "P(Valid Grammar) = 1.0 across all emitted data structures and JSON envelopes." },
+          { title: "Global Advantage Factor", text: "Combines strict mathematical syntax correctness with vibrant, modern design aesthetics." }
+        ],
+        u: 4, i: 6, a: 5
+      },
+      {
+        id: "AI-27",
+        category: "VIBE",
+        name: "Token Entropy Compression & Context Density Maximizer",
+        description: "Filter conversational verbosity, eliminate redundant formatting, and compress prompt instructions into dense symbolic notation.",
+        tagSoup: ["token-compression", "entropy-maximization", "prompt-minification"],
+        aiSummary: "Shrinks prompt footprint by up to 50% without loss of instruction adherence, speeding up time-to-first-token.",
+        terminology: [
+          { term: "Information Entropy Density", def: "Actionable operational instructions conveyed per 100 context tokens." },
+          { term: "Symbolic Prompt Shorthand", def: "Compact mathematical and pseudo-code syntax replacing verbose English sentences." }
+        ],
+        insights: [
+          { title: "Root Requisite", text: "Standardized token dictionary and benchmark testbed for evaluating instruction compliance." },
+          { title: "Core Objective", text: "40% reduction in token consumption and 30% reduction in time-to-first-token (TTFT)." },
+          { title: "Execution Vector", text: "Run automated pre-processor stripping decorative conversational prose from system instructions." },
+          { title: "Governing Requirements", text: "Zero degradation in code generation benchmark accuracy (SWE-bench / HumanEval)." },
+          { title: "Global Advantage Factor", text: "Dramatically cuts operational API costs while significantly accelerating response speed." }
+        ],
+        u: 5, i: 6, a: 5
+      },
+      {
+        id: "AI-28",
+        category: "VIBE",
+        name: "Human-in-the-Loop Co-Pilot Resonance & Flow Lock",
+        description: "Engineer interactive ambient prompt listeners that sustain unbroken operator flow state through context-preserving feedback cycles.",
+        tagSoup: ["flow-lock", "vibe-resonance", "co-pilot", "ambient-prompting"],
+        aiSummary: "Maintains conversational and state memory across dozens of iterations, anticipating developer intent without context resets.",
+        terminology: [
+          { term: "Cognitive Flow Continuity", def: "Preservation of mental immersion through sub-second latency and intent prediction." },
+          { term: "Stateful Workspace Ledger", def: "Continuous history log tracking recent edits, discarded drafts, and active UI focuses." }
+        ],
+        insights: [
+          { title: "Root Requisite", text: "Persistent client-side session store and streaming bidirectional communication bus." },
+          { title: "Core Objective", text: "Sustain continuous 2-hour uninterrupted developer coding flow without cognitive friction." },
+          { title: "Execution Vector", text: "Continuously update working memory scratchpads and serialize active DOM state into context." },
+          { title: "Governing Requirements", text: "Context serialization latency <= 25ms; zero unexpected workspace state resets." },
+          { title: "Global Advantage Factor", text: "Multiplies solitary engineer productive throughput by an order of magnitude." }
+        ],
+        u: 6, i: 7, a: 7
+      }
+    ];
+
+    // Priority Equation Calculation: P = (U + I + A) / 3
+    function calculatePriorityWeight(u, i, a) {
+      return Number(((Number(u) + Number(i) + Number(a)) / 3).toFixed(2));
+    }
+
+    // Active in-memory state
+    let actionItems = JSON.parse(JSON.stringify(MASTER_ACTION_ITEMS));
+    actionItems.forEach(item => {
+      item.p = calculatePriorityWeight(item.u, item.i, item.a);
+    });
+
+    let selectedActionItemId = actionItems[0].id;
+    let isSideNavOpen = false;
+
+    function getPriorityTier(p) {
+      if (p >= 6.5) return 'CRITICAL';
+      if (p >= 5.5) return 'HIGH';
+      if (p >= 4.75) return 'MEDIUM';
+      return 'STANDARD';
+    }
+
+    function getScoreBadgeClass(val) {
+      const r = Math.round(val);
+      if (r <= 1) return 'score-badge-1';
+      if (r === 2) return 'score-badge-2';
+      if (r === 3) return 'score-badge-3';
+      if (r === 4) return 'score-badge-4';
+      if (r === 5) return 'score-badge-5';
+      if (r === 6) return 'score-badge-6';
+      return 'score-badge-7';
+    }
+
+    function getPriorityBadgeClass(p) {
+      const tier = getPriorityTier(p);
+      if (tier === 'CRITICAL') return 'tier-critical';
+      if (tier === 'HIGH') return 'tier-high';
+      if (tier === 'MEDIUM') return 'tier-medium';
+      return 'tier-standard';
+    }
+
+    function renderMasterTable() {
+      const query = (document.getElementById('filterSearchInput')?.value || '').toLowerCase().trim();
+      const domainFilter = document.getElementById('filterDomainSelect')?.value || 'ALL';
+      const tierFilter = document.getElementById('filterTierSelect')?.value || 'ALL';
+      const sortBy = document.getElementById('sortBySelect')?.value || 'p-desc';
+
+      // Filtering
+      let filtered = actionItems.filter(item => {
+        if (domainFilter !== 'ALL' && item.category !== domainFilter) return false;
+        if (tierFilter !== 'ALL' && getPriorityTier(item.p) !== tierFilter) return false;
+        if (!query) return true;
+        const haystack = [
+          item.id, item.name, item.description, item.aiSummary,
+          item.tagSoup.join(' '),
+          item.terminology.map(t => `${t.term} ${t.def}`).join(' '),
+          item.insights.map(i => `${i.title} ${i.text}`).join(' ')
+        ].join(' ').toLowerCase();
+        return haystack.includes(query);
+      });
+
+      // Sorting
+      filtered.sort((a, b) => {
+        if (sortBy === 'p-desc') return b.p - a.p;
+        if (sortBy === 'p-asc') return a.p - b.p;
+        if (sortBy === 'u-desc') return b.u - a.u;
+        if (sortBy === 'i-desc') return b.i - a.i;
+        if (sortBy === 'a-desc') return b.a - a.a;
+        if (sortBy === 'id-asc') return a.id.localeCompare(b.id);
+        if (sortBy === 'name-asc') return a.name.localeCompare(b.name);
+        return 0;
+      });
+
+      const tbody = document.getElementById('masterTableBody');
+      tbody.innerHTML = filtered.map(item => {
+        const termsHtml = item.terminology.map(t => `
+          <div class="mb-1.5 leading-snug">
+            <span class="font-bold text-sky-300 font-mono text-[10px]">${escapeHtml(t.term)}:</span> 
+            <span class="text-slate-300 text-[11px]">${escapeHtml(t.def)}</span>
+          </div>
+        `).join('');
+
+        const insightsHtml = item.insights.map(ins => `
+          <div class="mb-1.5 leading-snug border-l-2 border-blue-500/50 pl-1.5">
+            <span class="font-bold text-blue-300 font-mono text-[10px] block">${escapeHtml(ins.title)}:</span>
+            <span class="text-slate-300 text-[11px]">${escapeHtml(ins.text)}</span>
+          </div>
+        `).join('');
+
+        const tagsHtml = item.tagSoup.map(tag => `
+          <span class="inline-block px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700/80 text-sky-300 font-mono text-[10px] mr-1 mb-1">
+            #${escapeHtml(tag)}
+          </span>
+        `).join('');
+
+        const categoryTag = item.category === 'VIBE' 
+          ? `<span class="px-1.5 py-0.2 rounded bg-purple-950/80 text-purple-300 border border-purple-800 text-[9px] font-mono ml-1 font-bold">VIBE</span>`
+          : `<span class="px-1.5 py-0.2 rounded bg-blue-950/80 text-blue-300 border border-blue-800 text-[9px] font-mono ml-1 font-bold">SYS</span>`;
+
+        return `
+          <tr class="hover:bg-slate-900/60 transition select-text">
+            
+            <!-- Col 1: Action Item Name -->
+            <td class="p-3 align-top font-medium max-w-[240px]">
+              <div class="flex items-center gap-1.5 mb-1">
+                <span class="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-800 text-sky-300 border border-slate-700">
+                  ${item.id}
+                </span>
+                ${categoryTag}
+              </div>
+              <div class="font-bold text-slate-100 text-xs leading-snug">
+                ${escapeHtml(item.name)}
+              </div>
+            </td>
+
+            <!-- Col 2: Description (Locked to Phone View Model Space) -->
+            <td class="p-3 align-top cell-phone-space text-slate-300 text-[11px] leading-relaxed">
+              ${escapeHtml(item.description)}
+            </td>
+
+            <!-- Col 3: Tag Soup -->
+            <td class="p-3 align-top cell-phone-compact">
+              <div class="flex flex-wrap">
+                ${tagsHtml}
+              </div>
+            </td>
+
+            <!-- Col 4: AI Summary (Phone View Model Space) -->
+            <td class="p-3 align-top cell-phone-space text-slate-300 text-[11px] leading-relaxed bg-[#0a0f1d]/40">
+              ${escapeHtml(item.aiSummary)}
+            </td>
+
+            <!-- Col 5: Global Advantage Terms -->
+            <td class="p-3 align-top cell-phone-space text-[11px]">
+              <div class="max-h-[160px] overflow-y-auto pr-1">
+                ${termsHtml}
+              </div>
+            </td>
+
+            <!-- Col 6: Root/Base ROAR Insights (Colon Titled Paragraphs) -->
+            <td class="p-3 align-top cell-phone-space text-[11px]">
+              <div class="max-h-[160px] overflow-y-auto pr-1">
+                ${insightsHtml}
+              </div>
+            </td>
+
+            <!-- Col 7: Urgency (U) -->
+            <td class="p-3 align-top text-center">
+              <span class="inline-block px-2 py-1 rounded text-xs font-mono font-bold ${getScoreBadgeClass(item.u)}">
+                ${item.u}
+              </span>
+            </td>
+
+            <!-- Col 8: Importance (I) -->
+            <td class="p-3 align-top text-center">
+              <span class="inline-block px-2 py-1 rounded text-xs font-mono font-bold ${getScoreBadgeClass(item.i)}">
+                ${item.i}
+              </span>
+            </td>
+
+            <!-- Col 9: Acceleration (A) -->
+            <td class="p-3 align-top text-center">
+              <span class="inline-block px-2 py-1 rounded text-xs font-mono font-bold ${getScoreBadgeClass(item.a)}">
+                ${item.a}
+              </span>
+            </td>
+
+            <!-- Col 10: (P)riority Weight -->
+            <td class="p-3 align-top text-center border-l border-slate-800">
+              <div class="font-mono font-black text-xs px-2 py-1 rounded ${getPriorityBadgeClass(item.p)}">
+                ${item.p.toFixed(2)}
+              </div>
+              <span class="text-[9px] font-mono text-slate-400 block mt-0.5">${getPriorityTier(item.p)}</span>
+            </td>
+
+            <!-- Manage / Quick Edit in SideNav -->
+            <td class="p-3 align-top text-center">
+              <button 
+                onclick="openSideNavForEdit('${item.id}')" 
+                class="px-2 py-1 rounded bg-[#090e18] hover:bg-blue-600/30 text-sky-400 hover:text-white border border-slate-700 text-[11px] transition"
+              >
+                <i class="fa-solid fa-pen-to-square"></i>
+              </button>
+            </td>
+
+          </tr>
+        `;
+      }).join('');
+
+      document.getElementById('tableResultsCount').textContent = `Showing ${filtered.length} of ${actionItems.length} action items`;
+      updateKPIRibbon();
+    }
+
+    function updateKPIRibbon() {
+      const total = actionItems.length;
+      let crit = 0, high = 0, med = 0, std = 0;
+      actionItems.forEach(it => {
+        const t = getPriorityTier(it.p);
+        if (t === 'CRITICAL') crit++;
+        else if (t === 'HIGH') high++;
+        else if (t === 'MEDIUM') med++;
+        else std++;
+      });
+      document.getElementById('kpiTotal').textContent = total;
+      document.getElementById('kpiCritical').textContent = crit;
+      document.getElementById('kpiHigh').textContent = high;
+      document.getElementById('kpiMedium').textContent = med;
+      document.getElementById('kpiStandard').textContent = std;
+    }
+
+    function toggleSideNav() {
+      const drawer = document.getElementById('sideNavDrawer');
+      isSideNavOpen = !isSideNavOpen;
+      if (isSideNavOpen) {
+        drawer.classList.remove('translate-x-full');
+        populateSideNavDropdown();
+        loadSelectedItemIntoSideNav(selectedActionItemId);
+      } else {
+        drawer.classList.add('translate-x-full');
+      }
+    }
+
+    function openSideNavForEdit(id) {
+      selectedActionItemId = id;
+      if (!isSideNavOpen) toggleSideNav();
+      else {
+        document.getElementById('sideNavActionItemSelect').value = id;
+        loadSelectedItemIntoSideNav(id);
+      }
+    }
+
+    function populateSideNavDropdown() {
+      const select = document.getElementById('sideNavActionItemSelect');
+      select.innerHTML = actionItems.map((item, idx) => 
+        `<option value="${item.id}" ${item.id === selectedActionItemId ? 'selected' : ''}>
+          ${idx + 1}. [${item.id}] ${item.name} (P: ${item.p.toFixed(2)})
+        </option>`
+      ).join('');
+    }
+
+    function loadSelectedItemIntoSideNav(itemId) {
+      selectedActionItemId = itemId;
+      const it = actionItems.find(x => x.id === itemId) || actionItems[0];
+      if (!it) return;
+
+      document.getElementById('sideNavActionItemSelect').value = it.id;
+      document.getElementById('sideNavActiveCategory').textContent = it.category || 'SYSTEMS';
+      document.getElementById('sideNavActivePriority').textContent = `Priority (P): ${it.p.toFixed(2)} [${getPriorityTier(it.p)}]`;
+
+      document.getElementById('editFormId').value = it.id;
+      document.getElementById('editFormName').value = it.name;
+      document.getElementById('editFormDescription').value = it.description;
+      document.getElementById('editFormTags').value = it.tagSoup.join(', ');
+      document.getElementById('editFormSummary').value = it.aiSummary;
+      document.getElementById('editFormU').value = String(it.u);
+      document.getElementById('editFormI').value = String(it.i);
+      document.getElementById('editFormA').value = String(it.a);
+      document.getElementById('editFormTerms').value = it.terminology.map(t => `${t.term}: ${t.def}`).join(' | ');
+      document.getElementById('editFormInsights').value = it.insights.map(i => `${i.title}: ${i.text}`).join(' | ');
+
+      syncCalculatedPPreview();
+    }
+
+    function syncCalculatedPPreview() {
+      const u = Number(document.getElementById('editFormU').value);
+      const i = Number(document.getElementById('editFormI').value);
+      const a = Number(document.getElementById('editFormA').value);
+      const p = calculatePriorityWeight(u, i, a);
+      document.getElementById('editFormCalculatedP').textContent = `P = [${u} + ${i} + ${a}] / 3 = ${p.toFixed(2)}`;
+    }
+
+    function handleSideNavSave(e) {
+      e.preventDefault();
+      const id = document.getElementById('editFormId').value;
+      const it = actionItems.find(x => x.id === id);
+      if (!it) return;
+
+      it.name = document.getElementById('editFormName').value;
+      it.description = document.getElementById('editFormDescription').value;
+      it.tagSoup = document.getElementById('editFormTags').value.split(',').map(s => s.trim()).filter(Boolean);
+      it.aiSummary = document.getElementById('editFormSummary').value;
+      it.u = Number(document.getElementById('editFormU').value);
+      it.i = Number(document.getElementById('editFormI').value);
+      it.a = Number(document.getElementById('editFormA').value);
+      it.p = calculatePriorityWeight(it.u, it.i, it.a);
+
+      const termsRaw = document.getElementById('editFormTerms').value.split('|').map(s => s.trim()).filter(Boolean);
+      it.terminology = termsRaw.map(raw => {
+        const parts = raw.split(':');
+        return { term: parts[0]?.trim() || 'Term', def: parts.slice(1).join(':')?.trim() || '' };
+      });
+
+      const insightsRaw = document.getElementById('editFormInsights').value.split('|').map(s => s.trim()).filter(Boolean);
+      it.insights = insightsRaw.map(raw => {
+        const parts = raw.split(':');
+        return { title: parts[0]?.trim() || 'Insight', text: parts.slice(1).join(':')?.trim() || '' };
+      });
+
+      renderMasterTable();
+      populateSideNavDropdown();
+      showToast(`Action Item [${it.id}] successfully updated.`);
+    }
+
+    function handleDeleteCurrentItem() {
+      const id = document.getElementById('editFormId').value;
+      const idx = actionItems.findIndex(x => x.id === id);
+      if (idx !== -1 && actionItems.length > 1) {
+        actionItems.splice(idx, 1);
+        selectedActionItemId = actionItems[0].id;
+        renderMasterTable();
+        populateSideNavDropdown();
+        loadSelectedItemIntoSideNav(selectedActionItemId);
+        showToast(`Removed [${id}].`);
+      }
+    }
+
+    function createNewItemPrompt() {
+      const newNum = actionItems.length + 1;
+      const newId = `AI-${String(newNum).padStart(2, '0')}`;
+      const newItem = {
+        id: newId,
+        category: "SYSTEMS",
+        name: `New Action Initiative ${newNum}`,
+        description: "Specify operational parameters and task description here.",
+        tagSoup: ["new-action", "operational"],
+        aiSummary: "Operational summary of task output and systemic value.",
+        terminology: [{ term: "Standard Contract", def: "Baseline requirement." }],
+        insights: [
+          { title: "Root Requisite", text: "Verified environmental dependencies." },
+          { title: "Core Objective", text: "Achieve strategic completion target." }
+        ],
+        u: 4, i: 4, a: 4,
+        p: 4.00
+      };
+      actionItems.push(newItem);
+      renderMasterTable();
+      populateSideNavDropdown();
+      loadSelectedItemIntoSideNav(newId);
+      showToast(`Created new item [${newId}]`);
+    }
+
+    function resetToFactoryData() {
+      actionItems = JSON.parse(JSON.stringify(MASTER_ACTION_ITEMS));
+      actionItems.forEach(it => it.p = calculatePriorityWeight(it.u, it.i, it.a));
+      selectedActionItemId = actionItems[0].id;
+      renderMasterTable();
+      populateSideNavDropdown();
+      loadSelectedItemIntoSideNav(selectedActionItemId);
+      showToast("Reset all 28 action items to default factory architecture.");
+    }
+
+    function downloadCSVFile() {
+      const headers = [
+        "Action Item Name", "Description", "Tag Soup", "AI Summary",
+        "Key Terminology for Gaining Global Advantage", "AI Insights on Root/Base ROAR",
+        "Urgency (U)", "Importance (I)", "Acceleration (A)", "Priority (P)"
+      ];
+      const rows = actionItems.map(it => [
+        `"${it.name.replace(/"/g, '""')}"`,
+        `"${it.description.replace(/"/g, '""')}"`,
+        `"${it.tagSoup.join(', ')}"`,
+        `"${it.aiSummary.replace(/"/g, '""')}"`,
+        `"${it.terminology.map(t => `${t.term}: ${t.def}`).join(' | ').replace(/"/g, '""')}"`,
+        `"${it.insights.map(ins => `${ins.title}: ${ins.text}`).join(' | ').replace(/"/g, '""')}"`,
+        it.u, it.i, it.a, it.p.toFixed(2)
+      ].join(','));
+      
+      const csvStr = "data:text/csv;charset=utf-8," + [headers.join(','), ...rows].join('\n');
+      const encoded = encodeURI(csvStr);
+      const a = document.createElement('a');
+      a.href = encoded;
+      a.download = `roar_master_action_items_${Date.now()}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showToast("CSV export initiated.");
+    }
+
+    function downloadJSONFile() {
+      const jsonStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(actionItems, null, 2));
+      const a = document.createElement('a');
+      a.href = jsonStr;
+      a.download = `roar_master_action_items_${Date.now()}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showToast("JSON file downloaded.");
+    }
+
+    function copyMarkdownTable() {
+      let md = `| ID | Action Item Name | (U) | (I) | (A) | (P)riority | Tier |\n`;
+      md += `| :--- | :--- | :---: | :---: | :---: | :---: | :--- |\n`;
+      actionItems.forEach(it => {
+        md += `| ${it.id} | ${it.name} | ${it.u} | ${it.i} | ${it.a} | **${it.p.toFixed(2)}** | ${getPriorityTier(it.p)} |\n`;
+      });
+      const el = document.createElement('textarea');
+      el.value = md;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+      showToast("Markdown table copied to clipboard!");
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('appToast');
+      toast.textContent = msg;
+      toast.classList.remove('translate-y-24', 'opacity-0');
+      setTimeout(() => {
+        toast.classList.add('translate-y-24', 'opacity-0');
+      }, 2600);
+    }
+
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      renderMasterTable();
+      populateSideNavDropdown();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+{
+  "name": "Alyx — Companion & SaaS Co-Founder",
+  "description": "High-density industrial companion interface featuring Alyx, your playful gamer partner and SaaS growth strategist with real-time emotional SVG telemetry, Dota 2 draft synergy, Replika-style memory vault, and binary local storage.",
+  "requestFramePermissions": ["geolocation", "microphone", "camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,22 @@
+DOCUMENT TYPE: GOOGLE INTEGRATIONS GUIDER (.DOC)
+GUIDER ID: GOOGLE-INT-GUIDER-01
+TITLE: Google Workspace OAuth 2.0, Drive v3 CryptoKingAlexander Webhook & Client-Side Token Architecture
+PROJECT ID: gen-lang-client-0473045913 (Project Number: 132607205917)
+PRIMARY DIRECTIVE: BE GOOD
+FOLDER: /google-integrations/
+
+================================================================================
+1. GOOGLE WORKSPACE DRIVE V3 & PEACEFUL WEBHOOK WORKER MARKETPLACE ARCHITECTURE
+================================================================================
+- Target Google Drive Folder: CryptoKingAlexander
+- Folder URL: https://drive.google.com/drive/folders/1K3w1vA2lNT9xPr7H0QYCxpZsbPY-_-2Q
+- Folder ID: 1K3w1vA2lNT9xPr7H0QYCxpZsbPY-_-2Q
+- OAuth Scope: https://www.googleapis.com/auth/drive.readonly
+- Authentication Flow: Client-side Firebase GoogleAuthProvider popup flow (signInWithPopup) with sessionStorage token caching and Bearer token forwarding to /api/alyx/drive-webhook.
+- Peaceful Worker Queue Alignment:
+  1. Worker #01 (CryptoKingAlexander Drive Archivist) — Polls & indexes Drive folder items into Split 1–5 .bin buckets.
+  2. Worker #02 (.bin Swamp-to-Crystal Purifier) — Compacts synced Drive notes into 64B-aligned 5x12 .bin local store buckets.
+  3. Worker #03 (Dokuro "Pipiru" Zero-Entropy Steward) — Verifies CRC32 & Reed-Solomon (16,12) parity across all 60 buckets.
+  4. Worker #04 (190-IQ Yield & SaaS Strategist) — Extracts HJB pricing, Kelly allocation, and OSINT insights.
+  5. Worker #05 (UML 2.5 & ROAR Scribe) — Emits UML 2.5 diagrams and ROAR implementation plans from synced docs.
+  6. Worker #06 (888ms / 88,888ms Pace Keeper) — Maintains zero-contention FIFO cadence and 94.2% O2 reserve.

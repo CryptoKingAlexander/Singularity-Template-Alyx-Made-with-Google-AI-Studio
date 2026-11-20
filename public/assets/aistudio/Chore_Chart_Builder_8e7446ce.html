@@ -1,0 +1,2808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chore Management System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- SheetJS for Google Sheets / Excel compatible XLSX export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <!-- jsPDF & AutoTable for direct local PDF file download -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+  <!-- FileSaver for bulletproof fallback local disk saving -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, Calibri, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: #e2e8f0;
+      color: #0f172a;
+      user-select: none;
+    }
+
+    /* 6 Difficulty Levels: Green -> Yellow -> Crimson (faded to rich hues) */
+    .diff-1 { background-color: #dcfce7 !important; color: #14532d !important; } /* Faded Green */
+    .diff-2 { background-color: #86efac !important; color: #166534 !important; } /* Rich Green */
+    .diff-3 { background-color: #fef08a !important; color: #713f12 !important; } /* Faded Yellow */
+    .diff-4 { background-color: #facc15 !important; color: #854d0e !important; } /* Rich Yellow */
+    .diff-5 { background-color: #fca5a5 !important; color: #7f1d1d !important; } /* Faded Crimson */
+    .diff-6 { background-color: #f87171 !important; color: #450a0a !important; } /* Rich Crimson */
+
+    /* Spreadsheet Grid Styles replicating Excel / Google Sheets */
+    .sheet-grid {
+      border-collapse: collapse;
+      table-layout: fixed;
+      width: 1600px;
+      min-width: 1600px;
+      background: #ffffff;
+      font-size: 11px;
+    }
+
+    .sheet-grid th, .sheet-grid td {
+      border: 1px solid #cbd5e1;
+      height: 22px;
+      line-height: 20px;
+      padding: 0 3px;
+      text-align: left;
+      vertical-align: middle;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Spreadsheet Row / Column Header Indicators */
+    .header-cell-index {
+      background-color: #f8fafc;
+      color: #64748b;
+      font-size: 9px;
+      font-weight: 500;
+      text-align: center !important;
+      width: 28px;
+      min-width: 28px;
+      max-width: 28px;
+      border: 1px solid #cbd5e1;
+      user-select: none;
+    }
+
+    .col-header {
+      background-color: #f8fafc;
+      color: #475569;
+      font-size: 10px;
+      font-weight: 600;
+      text-align: center !important;
+      border: 1px solid #cbd5e1;
+      height: 18px;
+    }
+
+    /* Section Tint Headers matching exact image palette */
+    .th-sun { background-color: #f7a8b8 !important; color: #000000; font-weight: 700; text-align: center !important; font-size: 11px; }
+    .th-mon { background-color: #fed7aa !important; color: #000000; font-weight: 700; text-align: center !important; font-size: 11px; }
+    .th-tue { background-color: #fef08a !important; color: #000000; font-weight: 700; text-align: center !important; font-size: 11px; }
+    .th-wed { background-color: #bbf7d0 !important; color: #000000; font-weight: 700; text-align: center !important; font-size: 11px; }
+    .th-thu { background-color: #bbf2f6 !important; color: #000000; font-weight: 700; text-align: center !important; font-size: 11px; }
+    .th-fri { background-color: #bfdbfe !important; color: #000000; font-weight: 700; text-align: center !important; font-size: 11px; }
+    .th-sat { background-color: #ddd6fe !important; color: #000000; font-weight: 700; text-align: center !important; font-size: 11px; }
+    .th-timeless { background-color: #e0e7ff !important; color: #1e1b4b; font-weight: 700; text-align: center !important; font-size: 11px; }
+
+    .sec-everyday { background-color: #e2e8f0; font-weight: 700; text-align: center !important; }
+    .sec-monthly { background-color: #dbeafe; font-weight: 700; text-align: center !important; }
+    .sec-quarterly { background-color: #ffedd5; font-weight: 700; text-align: center !important; }
+    .sec-semiannual { background-color: #dbeafe; font-weight: 700; text-align: center !important; }
+    .sec-annual { background-color: #fce7f3; font-weight: 700; text-align: center !important; }
+
+    .matrix-th-day { background-color: #f1f5f9; font-weight: 700; text-align: center !important; font-size: 10px; width: 20px; }
+    .matrix-th-month { background-color: #eff6ff; font-weight: 700; text-align: center !important; font-size: 10px; width: 17px; }
+    .matrix-th-season { background-color: #fef3c7; font-weight: 700; text-align: center !important; font-size: 10px; width: 20px; }
+    .matrix-th-semi { background-color: #eff6ff; font-weight: 700; text-align: center !important; font-size: 10px; width: 24px; }
+
+    /* Interactive Slot Cell */
+    .sheet-slot {
+      cursor: pointer;
+      position: relative;
+      height: 100%;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 4px;
+      font-size: 11px;
+      transition: background-color 0.15s ease, outline 0.15s ease;
+    }
+    .sheet-slot:hover {
+      outline: 1.5px solid #2563eb;
+      outline-offset: -1px;
+    }
+    .sheet-slot.drag-over {
+      background-color: #bfdbfe !important;
+      outline: 2px dashed #1d4ed8 !important;
+    }
+    .sheet-slot.dragging-active {
+      opacity: 0.45;
+    }
+
+    /* Square Checkbox inside Sheet */
+    .sheet-check-cell {
+      text-align: center !important;
+      vertical-align: middle !important;
+      padding: 0 !important;
+      cursor: pointer;
+      width: 24px;
+      min-width: 24px;
+      max-width: 24px;
+      background: #ffffff;
+    }
+    .sheet-checkbox {
+      width: 13px;
+      height: 13px;
+      border: 1.5px solid #64748b;
+      margin: 0 auto;
+      border-radius: 1px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      background: white;
+    }
+    .sheet-checkbox.checked {
+      background-color: #3b82f6;
+      border-color: #1d4ed8;
+    }
+    .sheet-checkbox.checked::after {
+      content: '✓';
+      color: white;
+      font-size: 10px;
+      font-weight: bold;
+      line-height: 10px;
+    }
+
+    /* Tracking Matrix Cells (Days, Months, Quarters) */
+    .matrix-check {
+      text-align: center !important;
+      cursor: pointer;
+      font-size: 10px;
+      font-weight: bold;
+      padding: 0 !important;
+      background: #ffffff;
+    }
+    .matrix-check.marked {
+      background-color: #cbd5e1;
+    }
+    .matrix-check.marked-blue {
+      background-color: #93c5fd;
+    }
+    .matrix-check.marked-amber {
+      background-color: #fde68a;
+    }
+
+    /* Month Tag Cells for Annual */
+    .ann-month-tag {
+      width: 22px;
+      min-width: 22px;
+      font-weight: bold;
+      text-align: center !important;
+      background-color: #fff1f2;
+      font-size: 10px;
+      color: #1e293b;
+    }
+
+    /* Blank spacer rows */
+    .spacer-row td {
+      background-color: #ffffff !important;
+      border-left: 1px solid #cbd5e1;
+      border-right: 1px solid #cbd5e1;
+      border-top: 1px solid #cbd5e1;
+      border-bottom: 1px solid #cbd5e1;
+      height: 14px !important;
+    }
+
+    /* Responsive horizontal scrolling rules */
+    .scrollable-x-container {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 7px;
+      height: 7px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #94a3b8;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #64748b;
+    }
+
+    /* Tri-Fection Bubble Nodes */
+    .bubble-card {
+      border-radius: 1.5rem;
+      transition: all 0.2s ease;
+    }
+    .bubble-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Template Switcher Dropdown Styling */
+    .template-dropdown-menu {
+      animation: fadeIn 0.15s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media print {
+      body {
+        background: white;
+        overflow: visible;
+      }
+      #header-bar, #drawer-bar, #modal-overlay, #guide-modal, #toast-container, #export-fallback-modal, #sheets-modal {
+        display: none !important;
+      }
+      #spreadsheet-canvas {
+        height: auto !important;
+        overflow: visible !important;
+        padding: 0 !important;
+      }
+      .sheet-grid th, .sheet-grid td {
+        border-color: #64748b !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+  </style>
+</head>
+<body class="flex flex-col h-screen select-none">
+
+  <!-- TOPMOST 1/8: Clean Header Bar without text on buttons, justified horizontally -->
+  <header id="header-bar" class="h-[12.5vh] min-h-[58px] max-h-[70px] bg-white border-b border-slate-300 px-6 flex items-center justify-between shadow-sm z-30">
+    <!-- Left: Guide Button (Icon only with tooltip) & Template Sheet Switcher -->
+    <div class="flex items-center gap-3">
+      <button onclick="openGuideModal()" title="Life Management Guide & Tri-Fection Infographic" aria-label="Open Guide"
+              class="w-10 h-10 bg-sky-600 hover:bg-sky-700 active:bg-sky-800 text-white rounded-lg shadow-sm flex items-center justify-center transition focus:outline-none focus:ring-2 focus:ring-sky-400">
+        <i class="fa-solid fa-book-open text-base"></i>
+      </button>
+
+      <!-- Multi-Sheet Template Switcher Button & Dropdown -->
+      <div class="relative">
+        <button id="template-switch-btn" onclick="toggleTemplateMenu()" title="Switch or Manage Sheet Templates" aria-label="Manage Sheets"
+                class="h-10 px-3 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-800 rounded-lg border border-slate-300 shadow-sm flex items-center gap-2 transition focus:outline-none focus:ring-2 focus:ring-slate-400">
+          <i class="fa-solid fa-layer-group text-slate-600 text-sm"></i>
+          <span id="active-template-label" class="text-xs font-semibold max-w-[130px] truncate text-slate-700 hidden sm:inline">Apartment Living</span>
+          <i class="fa-solid fa-chevron-down text-[10px] text-slate-500"></i>
+        </button>
+
+        <!-- Template Menu Dropdown -->
+        <div id="template-dropdown" class="template-dropdown-menu hidden absolute left-0 mt-1.5 w-64 bg-white border border-slate-300 rounded-lg shadow-xl py-1.5 z-40 text-xs">
+          <div class="px-3 py-1 text-[10px] uppercase font-bold text-slate-400 tracking-wider">Saved Life Templates</div>
+          <div id="template-list-container" class="max-h-56 overflow-y-auto">
+            <!-- Dynamically populated -->
+          </div>
+          <div class="border-t border-slate-200 mt-1 pt-1 px-2 flex justify-between gap-1">
+            <button onclick="createNewSheetTemplate()" class="flex-1 py-1.5 px-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold rounded text-[11px] flex items-center justify-center gap-1">
+              <i class="fa-solid fa-plus text-[10px]"></i> New Sheet
+            </button>
+            <button onclick="duplicateActiveTemplate()" class="py-1.5 px-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded text-[11px] flex items-center justify-center gap-1" title="Clone current sheet">
+              <i class="fa-solid fa-clone text-[10px]"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Center: Quick Task Addition & Template Reset (Icon only with tooltips) -->
+    <div class="flex items-center gap-3">
+      <button onclick="openAddChoreModal()" title="Create New Task / Habit" aria-label="Add Task"
+              class="w-10 h-10 bg-indigo-50 hover:bg-indigo-100 active:bg-indigo-200 text-indigo-700 rounded-lg border border-indigo-200 shadow-sm flex items-center justify-center transition focus:outline-none focus:ring-2 focus:ring-indigo-400">
+        <i class="fa-solid fa-plus text-sm"></i>
+      </button>
+      <button onclick="resetToDefaultTemplate()" title="Reset Active Chart to Default State" aria-label="Reset Chart"
+              class="w-10 h-10 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 rounded-lg border border-slate-300 shadow-sm flex items-center justify-center transition focus:outline-none focus:ring-2 focus:ring-slate-400">
+        <i class="fa-solid fa-arrow-rotate-left text-sm"></i>
+      </button>
+    </div>
+
+    <!-- Right: Export Sheets & Export PDF (Icon only with tooltips) -->
+    <div class="flex items-center gap-3">
+      <button onclick="exportToSheetsFlawless()" title="Download Spreadsheet (.xlsx / Sheets)" aria-label="Export Sheets"
+              class="w-10 h-10 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white rounded-lg shadow-sm flex items-center justify-center transition focus:outline-none focus:ring-2 focus:ring-emerald-400">
+        <i class="fa-solid fa-file-excel text-base"></i>
+      </button>
+      <button onclick="exportToPdfFlawless()" title="Download or Print PDF File" aria-label="Export PDF"
+              class="w-10 h-10 bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white rounded-lg shadow-sm flex items-center justify-center transition focus:outline-none focus:ring-2 focus:ring-rose-400">
+        <i class="fa-solid fa-file-pdf text-base"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- TOP 5/8: Fully Horizontally & Vertically Scrollable Spreadsheet Canvas -->
+  <main id="spreadsheet-canvas" class="h-[62.5vh] overflow-auto p-2 bg-slate-200 scrollable-x-container flex justify-start lg:justify-center">
+    <div class="bg-white p-2 shadow rounded border border-slate-300 overflow-x-auto min-w-max">
+      
+      <table class="sheet-grid">
+        <!-- Spreadsheet Column Headers C through BE to replicate image plus top-right Timeless list -->
+        <colgroup>
+          <col style="width: 28px;">
+          <!-- Day 1 SUN -->
+          <col style="width: 156px;"><col style="width: 24px;">
+          <!-- Day 2 MON -->
+          <col style="width: 156px;"><col style="width: 24px;">
+          <!-- Day 3 TUE -->
+          <col style="width: 156px;"><col style="width: 24px;">
+          <!-- Day 4 WED -->
+          <col style="width: 156px;"><col style="width: 24px;">
+          <!-- Day 5 THU -->
+          <col style="width: 156px;"><col style="width: 24px;">
+          <!-- Day 6 FRI -->
+          <col style="width: 156px;"><col style="width: 24px;">
+          <!-- Day 7 SAT -->
+          <col style="width: 156px;"><col style="width: 24px;">
+          <!-- Timeless List (Top Right, aligned flush with annual border) -->
+          <col style="width: 156px;"><col style="width: 24px;">
+        </colgroup>
+        <thead>
+          <tr>
+            <th class="header-cell-index"></th>
+            <th class="col-header" colspan="2">C - D</th>
+            <th class="col-header" colspan="2">E - F</th>
+            <th class="col-header" colspan="2">G - H</th>
+            <th class="col-header" colspan="2">I - J</th>
+            <th class="col-header" colspan="2">K - L</th>
+            <th class="col-header" colspan="2">M - N</th>
+            <th class="col-header" colspan="2">O - P</th>
+            <th class="col-header" colspan="2">Q - R</th>
+          </tr>
+        </thead>
+        <tbody id="sheet-main-body">
+          <!-- Dynamically populated to replicate Rows 1 to 31 -->
+        </tbody>
+      </table>
+
+    </div>
+  </main>
+
+  <!-- BOTTOM 1/4 (25vh): Scrollable Drawer with Left Drag Buttons -->
+  <footer id="drawer-bar" class="h-[25vh] min-h-[170px] bg-slate-900 text-slate-100 border-t border-slate-700 flex flex-col z-20">
+    <!-- Drawer Toolbar: Responsive scrollable container -->
+    <div class="px-3 py-1.5 bg-slate-950 flex flex-nowrap items-center justify-between gap-2 border-b border-slate-800 overflow-x-auto scrollable-x-container">
+      <div class="flex items-center gap-2 shrink-0">
+        <span class="text-xs font-bold text-slate-300 tracking-wider">CHORE & HABIT POOL</span>
+        <span id="pool-count" class="text-[10px] bg-slate-800 text-indigo-300 px-2 py-0.5 rounded-full font-mono font-semibold">Loading...</span>
+        <span class="text-[10px] text-slate-400 italic hidden md:inline">Drag from left icon into cell</span>
+      </div>
+
+      <!-- Filters & Search -->
+      <div class="flex items-center gap-2 shrink-0">
+        <div class="relative">
+          <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+          <input type="text" id="chore-search" oninput="renderDrawer()" placeholder="Search 400+ chores/habits..." 
+                 class="bg-slate-800 border border-slate-700 rounded pl-7 pr-2.5 py-1 text-xs text-slate-200 placeholder-slate-400 focus:outline-none focus:border-indigo-500 w-44 sm:w-56">
+        </div>
+        
+        <select id="category-filter" onchange="renderDrawer()" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
+          <option value="ALL">All Life Domains</option>
+          <optgroup label="Parenting & Romance Balance">
+            <option value="Parenting - Daily Care & Logistics">Parenting: Daily Care & Logistics</option>
+            <option value="Parenting - Education & Connection">Parenting: Education & Emotional</option>
+            <option value="Romance - Dates & Intimacy">Romance: Dates & Intimacy</option>
+            <option value="Romance - Communication & Balance">Romance: Partnership & Balance</option>
+          </optgroup>
+          <optgroup label="Physical Tri-Fection">
+            <option value="Physical - Hygiene & Appearance">Physical: Hygiene & Appearance</option>
+            <option value="Physical - Health & Nutrition">Physical: Health & Nutrition</option>
+            <option value="Physical - Exercise & Movement">Physical: Exercise & Fitness</option>
+          </optgroup>
+          <optgroup label="Social Tri-Fection">
+            <option value="Social - First Impression & Nonverbal">Social: First Impression & Nonverbals</option>
+            <option value="Social - Conversations & Flirting">Social: Conversations & Flirting</option>
+            <option value="Social - Relationships & Trust">Social: Relationships & Trust</option>
+          </optgroup>
+          <optgroup label="Mental Tri-Fection">
+            <option value="Mental - Emotional & Purpose">Mental: Emotional & Purpose</option>
+            <option value="Mental - Philosophical & Ethics">Mental: Philosophical & Ethics</option>
+            <option value="Mental - Logic & Productivity">Mental: Logic & Productivity</option>
+          </optgroup>
+          <optgroup label="Household Management">
+            <option value="Kitchen">Kitchen Care</option>
+            <option value="Bathroom">Bathroom Care</option>
+            <option value="Living & Bedroom">Living & Bedroom</option>
+            <option value="Pets & Plants">Pets & Plants</option>
+            <option value="Laundry & Fabrics">Laundry & Fabrics</option>
+            <option value="Maintenance & Systems">Maintenance & Systems</option>
+            <option value="Deep Clean & Declutter">Deep Declutter</option>
+            <option value="Seasonal & Outdoor">Outdoor & Annual</option>
+          </optgroup>
+        </select>
+
+        <select id="diff-filter" onchange="renderDrawer()" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
+          <option value="ALL">All Tiers (1-6)</option>
+          <option value="1">1 - Micro Quick</option>
+          <option value="2">2 - Light Routine</option>
+          <option value="3">3 - Moderate</option>
+          <option value="4">4 - Engaged</option>
+          <option value="5">5 - Heavy Scrub / Deep</option>
+          <option value="6">6 - Exhaustive / Annual</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Scrollable Drawer Container with Left Drag Buttons -->
+    <div id="drawer-items" class="flex-1 overflow-y-auto p-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-1.5 content-start bg-slate-900 scrollable-x-container">
+      <!-- Injected by JavaScript -->
+    </div>
+  </footer>
+
+  <!-- GUIDE MODAL (Top-Left Button Trigger): Habit Psychology & Tri-Fection Infographic / Bubble Maps -->
+  <div id="guide-modal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50 p-3 sm:p-6 overflow-y-auto">
+    <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[92vh] flex flex-col border border-slate-300 overflow-hidden">
+      <!-- Header -->
+      <div class="px-5 py-3.5 bg-slate-900 text-white flex justify-between items-center border-b border-slate-800 shrink-0">
+        <div class="flex items-center gap-2.5">
+          <i class="fa-solid fa-book-open text-sky-400 text-base"></i>
+          <div>
+            <h2 class="text-sm font-bold tracking-wide uppercase">Life Management & Habit Psychology Guide</h2>
+            <p class="text-[11px] text-slate-300 font-normal">Instructions, Difficulty Tiers, Psychological Models, and the Tri-Fection System</p>
+          </div>
+        </div>
+        <button onclick="closeGuideModal()" class="text-slate-400 hover:text-white p-1 text-base">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Scrollable Body with Infographics & Bubble Maps -->
+      <div class="p-6 overflow-y-auto space-y-6 text-slate-800 text-xs">
+
+        <!-- INSTRUCTIONS & DIFFICULTY TIERS (Cleanly stuffed into Guide) -->
+        <div class="bg-slate-50 border border-slate-200 rounded-lg p-4">
+          <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+            <i class="fa-solid fa-circle-info text-sky-600"></i> How to Use This System
+          </h3>
+          <p class="text-[11px] text-slate-600 mb-3 leading-relaxed">
+            Drag chore chips by their left handle icon into any cell in the spreadsheet grid or into the Timeless bucket. You can click any cell to edit or clear it. Reorder items across cells with direct drag-and-drop feedback.
+          </p>
+          <div class="font-bold text-slate-800 text-[11px] mb-1.5 uppercase tracking-wide">6-Level Chore Involvedness Scale:</div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+            <div class="p-2 rounded diff-1 border border-green-300 text-center">
+              <span class="font-bold block text-[11px]">1 Micro</span>
+              <span class="text-[10px] opacity-80">&lt; 5 mins, low friction</span>
+            </div>
+            <div class="p-2 rounded diff-2 border border-green-400 text-center">
+              <span class="font-bold block text-[11px]">2 Light</span>
+              <span class="text-[10px] opacity-80">5-15 mins routine</span>
+            </div>
+            <div class="p-2 rounded diff-3 border border-yellow-300 text-center">
+              <span class="font-bold block text-[11px]">3 Moderate</span>
+              <span class="text-[10px] opacity-80">15-30 mins active focus</span>
+            </div>
+            <div class="p-2 rounded diff-4 border border-yellow-400 text-center">
+              <span class="font-bold block text-[11px]">4 Engaged</span>
+              <span class="text-[10px] opacity-80">30-60 mins committed work</span>
+            </div>
+            <div class="p-2 rounded diff-5 border border-red-300 text-center">
+              <span class="font-bold block text-[11px]">5 Heavy</span>
+              <span class="text-[10px] opacity-80">1-2 hrs deep effort</span>
+            </div>
+            <div class="p-2 rounded diff-6 border border-red-400 text-center">
+              <span class="font-bold block text-[11px]">6 Deep/Annual</span>
+              <span class="text-[10px] opacity-80">Exhaustive macro project</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 1: Behavioral Habit Loop Infographic List -->
+        <div class="bg-slate-50 border border-slate-200 rounded-lg p-4">
+          <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-rotate text-indigo-600"></i> The 4 Laws of Chore & Habit Psychology
+          </h3>
+          <p class="text-slate-600 mb-3 leading-relaxed">
+            Based on behavioral economics (James Clear, BJ Fogg, Wendy Wood), chore fatigue stems from high cognitive load and unclear trigger moments. This chart distributes friction across balanced cadence horizons:
+          </p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div class="bg-white p-3 rounded border border-slate-200 shadow-sm flex flex-col">
+              <span class="text-indigo-600 font-bold text-xs uppercase mb-1">1. Cue (Make it Obvious)</span>
+              <p class="text-[11px] text-slate-600">Anchor chores to specific days (e.g. Sunday bedsheets, Tuesday kitchen sink). Consistent visual scheduling removes decision paralysis.</p>
+            </div>
+            <div class="bg-white p-3 rounded border border-slate-200 shadow-sm flex flex-col">
+              <span class="text-emerald-600 font-bold text-xs uppercase mb-1">2. Craving (Make it Attractive)</span>
+              <p class="text-[11px] text-slate-600">Pair low-dopamine tasks with habit bundling (e.g., podcast during laundry; favorite tea while planning core priorities).</p>
+            </div>
+            <div class="bg-white p-3 rounded border border-slate-200 shadow-sm flex flex-col">
+              <span class="text-amber-600 font-bold text-xs uppercase mb-1">3. Response (Make it Easy)</span>
+              <p class="text-[11px] text-slate-600">The 6-tier difficulty scale prevents overcommitting. Do not schedule more than one Tier-5/6 chore on any single weekday.</p>
+            </div>
+            <div class="bg-white p-3 rounded border border-slate-200 shadow-sm flex flex-col">
+              <span class="text-rose-600 font-bold text-xs uppercase mb-1">4. Reward (Make it Satisfying)</span>
+              <p class="text-[11px] text-slate-600">Clicking checkboxes delivers an instant micro-dopamine release and creates self-reinforcing behavioral momentum.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 2: TRI-FECTION ARCHITECTURE & BUBBLE MAP -->
+        <div class="border border-slate-200 rounded-lg p-4 bg-white">
+          <div class="text-center mb-4">
+            <h3 class="text-base font-extrabold text-slate-900 tracking-wide">THE TRI-FECTION HOLISTIC SYSTEM</h3>
+            <p class="text-xs text-slate-500">Integrated framework balancing somatic health, inter-relational competence, and cognitive sovereignty</p>
+          </div>
+
+          <!-- Bubble Map Visual Layout -->
+          <div class="space-y-4">
+            
+            <!-- 1. Physical Domain -->
+            <div class="bubble-card bg-slate-900 text-white p-4 border border-slate-800">
+              <div class="text-center pb-2 mb-3 border-b border-slate-700">
+                <span class="text-base font-bold text-slate-100 uppercase tracking-widest">Physical Domain</span>
+                <span class="text-[10px] text-slate-400 block">Somatic mastery, biological longevity, physical vitality</span>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div class="bg-slate-800/80 p-3 rounded-xl border border-emerald-500/30">
+                  <div class="bg-emerald-800 text-emerald-100 text-[11px] font-bold px-2 py-0.5 rounded text-center mb-2">Improving Your Appearance</div>
+                  <ul class="text-[11px] space-y-1 text-slate-200">
+                    <li class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span><strong>Hygiene & Grooming:</strong> Skin care, oral health, clean hair.</li>
+                    <li class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span><strong>Fashion Style:</strong> Capsule wardrobe, ironed garments, fit.</li>
+                    <li class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span><strong>Posture:</strong> Spine alignment, ergonomic adjustments.</li>
+                  </ul>
+                </div>
+                <div class="bg-slate-800/80 p-3 rounded-xl border border-sky-500/30">
+                  <div class="bg-blue-800 text-sky-100 text-[11px] font-bold px-2 py-0.5 rounded text-center mb-2">Maintaining Optimal Health</div>
+                  <ul class="text-[11px] space-y-1 text-slate-200">
+                    <li class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-sky-400"></span><strong>Sleep:</strong> 7-9 hr consistency, circadian darkness.</li>
+                    <li class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-sky-400"></span><strong>Diet:</strong> Whole nutrition, hydration, anti-inflammatory fuel.</li>
+                    <li class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-sky-400"></span><strong>Physical Activity:</strong> 10k daily steps, NEAT movement.</li>
+                  </ul>
+                </div>
+                <div class="bg-slate-800/80 p-3 rounded-xl border border-indigo-500/30">
+                  <div class="bg-indigo-900 text-indigo-100 text-[11px] font-bold px-2 py-0.5 rounded text-center mb-2">Exercise</div>
+                  <ul class="text-[11px] space-y-1 text-slate-200">
+                    <li class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span><strong>Strength:</strong> Progressive overload, core stabilization.</li>
+                    <li class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span><strong>Endurance:</strong> Zone 2 cardio, cardiovascular stamina.</li>
+                    <li class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span><strong>Flexibility:</strong> Dynamic mobility, tendon health.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. Social & Mental Domains -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <!-- Social -->
+              <div class="bubble-card bg-amber-950/20 border-2 border-amber-600/40 p-4 rounded-xl">
+                <div class="text-center pb-2 mb-3 border-b border-amber-300">
+                  <span class="text-sm font-bold text-amber-900 uppercase tracking-widest">Social Domain</span>
+                  <span class="text-[10px] text-amber-700 block">Relational warmth, nonverbal eloquence, deep human bonds</span>
+                </div>
+                <div class="space-y-2.5">
+                  <div class="bg-white p-2.5 rounded-lg border border-amber-200 shadow-sm">
+                    <div class="font-bold text-emerald-800 text-[11px] mb-1">The Best Impression</div>
+                    <p class="text-[10px] text-slate-600">Comfort vs. Discomfort cues, cultural sensitivity, para-linguistics (tone, pacing, timbre).</p>
+                  </div>
+                  <div class="bg-white p-2.5 rounded-lg border border-amber-200 shadow-sm">
+                    <div class="font-bold text-sky-800 text-[11px] mb-1">Interactions Made Easy</div>
+                    <p class="text-[10px] text-slate-600">Flowing conversation transitions, de-escalating conflicts, charismatic persuasion, flirting.</p>
+                  </div>
+                  <div class="bg-white p-2.5 rounded-lg border border-amber-200 shadow-sm">
+                    <div class="font-bold text-indigo-800 text-[11px] mb-1">Grow Positive Relationships</div>
+                    <p class="text-[10px] text-slate-600">Likeability factors, intentional intimacy pacing, authentic reciprocity, long-term retention.</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Mental -->
+              <div class="bubble-card bg-amber-900/10 border-2 border-yellow-700/40 p-4 rounded-xl">
+                <div class="text-center pb-2 mb-3 border-b border-yellow-300">
+                  <span class="text-sm font-bold text-yellow-950 uppercase tracking-widest">Mental Domain</span>
+                  <span class="text-[10px] text-yellow-800 block">Intellectual hygiene, psychological fortitude, life architecture</span>
+                </div>
+                <div class="space-y-2.5">
+                  <div class="bg-white p-2.5 rounded-lg border border-yellow-200 shadow-sm">
+                    <div class="font-bold text-emerald-800 text-[11px] mb-1">Emotional Identity</div>
+                    <p class="text-[10px] text-slate-600">Mood satisfaction auditing, social belonging, purpose discovery, inner child work.</p>
+                  </div>
+                  <div class="bg-white p-2.5 rounded-lg border border-yellow-200 shadow-sm">
+                    <div class="font-bold text-sky-800 text-[11px] mb-1">Philosophical Principles</div>
+                    <p class="text-[10px] text-slate-600">Worldview calibration, moral code adherence, stoic reflection, clarifying non-negotiables.</p>
+                  </div>
+                  <div class="bg-white p-2.5 rounded-lg border border-yellow-200 shadow-sm">
+                    <div class="font-bold text-indigo-800 text-[11px] mb-1">Logical / Productivity</div>
+                    <p class="text-[10px] text-slate-600">Time blocking, flow state cultivation, life design sprints, deep work optimization.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- SECTION 3: CADENCE HORIZONS EXPLANATION -->
+        <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+          <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider mb-2">Cadence Distribution Logic</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-2 text-[11px]">
+            <div class="bg-white p-2 rounded border border-slate-200">
+              <span class="font-bold text-slate-800 block">Weekly Slots</span>
+              <span class="text-slate-500">Day-specific domestic upkeep to avoid weekend backlog.</span>
+            </div>
+            <div class="bg-white p-2 rounded border border-slate-200">
+              <span class="font-bold text-slate-800 block">Timeless</span>
+              <span class="text-slate-500">Top-right unscheduled priorities, anytime habits & ongoing tasks.</span>
+            </div>
+            <div class="bg-white p-2 rounded border border-slate-200">
+              <span class="font-bold text-slate-800 block">Every Day</span>
+              <span class="text-slate-500">Micro-habits checked across S-M-T-W-T-F-S.</span>
+            </div>
+            <div class="bg-white p-2 rounded border border-slate-200">
+              <span class="font-bold text-slate-800 block">Monthly</span>
+              <span class="text-slate-500">Maintenance resets tracked Jan through Dec.</span>
+            </div>
+            <div class="bg-white p-2 rounded border border-slate-200">
+              <span class="font-bold text-slate-800 block">Quarterly & Semi</span>
+              <span class="text-slate-500">Seasonal shifts paced per season (S-S-F-W) & halves.</span>
+            </div>
+            <div class="bg-white p-2 rounded border border-slate-200">
+              <span class="font-bold text-slate-800 block">Annual</span>
+              <span class="text-slate-500">Macro life reassessment & deep decluttering by assigned month.</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <div class="px-5 py-3 bg-slate-100 border-t border-slate-200 flex justify-end">
+        <button onclick="closeGuideModal()" class="px-4 py-1.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded">
+          Close Guide
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for Creating & Editing Chores -->
+  <div id="modal-overlay" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-md shadow-2xl max-w-md w-full p-5 border border-slate-200">
+      <div class="flex justify-between items-center mb-4">
+        <h3 id="modal-title" class="text-xs font-bold text-slate-800 uppercase tracking-wide">Edit Task</h3>
+        <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 text-sm">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Task / Habit Name</label>
+          <input type="text" id="modal-name" class="w-full text-xs border border-slate-300 rounded px-3 py-1.5 focus:outline-none focus:border-indigo-500" placeholder="e.g. Zone 2 Cardio & VO2 Interval">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Category / Domain</label>
+          <select id="modal-cat" class="w-full text-xs border border-slate-300 rounded px-3 py-1.5 focus:outline-none focus:border-indigo-500">
+            <option value="Parenting - Daily Care & Logistics">Parenting: Daily Care & Logistics</option>
+            <option value="Parenting - Education & Connection">Parenting: Education & Connection</option>
+            <option value="Romance - Dates & Intimacy">Romance: Dates & Intimacy</option>
+            <option value="Romance - Communication & Balance">Romance: Partnership & Balance</option>
+            <option value="Physical - Hygiene & Appearance">Physical: Hygiene & Appearance</option>
+            <option value="Physical - Health & Nutrition">Physical: Health & Nutrition</option>
+            <option value="Physical - Exercise & Movement">Physical: Exercise & Fitness</option>
+            <option value="Social - First Impression & Nonverbal">Social: First Impression & Nonverbal</option>
+            <option value="Social - Conversations & Flirting">Social: Conversations & Flirting</option>
+            <option value="Social - Relationships & Trust">Social: Relationships & Trust</option>
+            <option value="Mental - Emotional & Purpose">Mental: Emotional & Purpose</option>
+            <option value="Mental - Philosophical & Ethics">Mental: Philosophical & Ethics</option>
+            <option value="Mental - Logic & Productivity">Mental: Logic & Productivity</option>
+            <option value="Kitchen">Kitchen Care</option>
+            <option value="Bathroom">Bathroom Care</option>
+            <option value="Living & Bedroom">Living & Bedroom</option>
+            <option value="Pets & Plants">Pets & Plants</option>
+            <option value="Laundry & Fabrics">Laundry & Fabrics</option>
+            <option value="Maintenance & Systems">Maintenance & Systems</option>
+            <option value="Deep Clean & Declutter">Deep Clean & Declutter</option>
+            <option value="Seasonal & Outdoor">Seasonal & Outdoor</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Difficulty & Involvedness Level</label>
+          <div class="grid grid-cols-3 gap-2">
+            <label class="diff-1 border border-green-300 p-1.5 rounded flex items-center justify-center gap-1 text-[11px] font-semibold cursor-pointer">
+              <input type="radio" name="modal-diff" value="1"> 1 Micro
+            </label>
+            <label class="diff-2 border border-green-400 p-1.5 rounded flex items-center justify-center gap-1 text-[11px] font-semibold cursor-pointer">
+              <input type="radio" name="modal-diff" value="2"> 2 Light
+            </label>
+            <label class="diff-3 border border-yellow-300 p-1.5 rounded flex items-center justify-center gap-1 text-[11px] font-semibold cursor-pointer">
+              <input type="radio" name="modal-diff" value="3"> 3 Mod
+            </label>
+            <label class="diff-4 border border-yellow-400 p-1.5 rounded flex items-center justify-center gap-1 text-[11px] font-semibold cursor-pointer">
+              <input type="radio" name="modal-diff" value="4"> 4 Engaged
+            </label>
+            <label class="diff-5 border border-red-300 p-1.5 rounded flex items-center justify-center gap-1 text-[11px] font-semibold cursor-pointer">
+              <input type="radio" name="modal-diff" value="5"> 5 Heavy
+            </label>
+            <label class="diff-6 border border-red-400 p-1.5 rounded flex items-center justify-center gap-1 text-[11px] font-semibold cursor-pointer">
+              <input type="radio" name="modal-diff" value="6"> 6 Deep
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-5 flex justify-end gap-2">
+        <button onclick="closeModal()" class="px-3 py-1.5 bg-slate-100 text-slate-700 text-xs font-medium rounded hover:bg-slate-200">Cancel</button>
+        <button onclick="saveModalChore()" class="px-4 py-1.5 bg-indigo-600 text-white text-xs font-semibold rounded hover:bg-indigo-700">Save Task</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container for Backend Assurance Tests -->
+  <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- Direct Export Download & Copy Modal (Guaranteed Fallback for Sandboxed Iframes) -->
+  <div id="export-fallback-modal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full p-5 border border-slate-300">
+      <div class="flex justify-between items-center mb-3">
+        <h3 id="export-fallback-title" class="text-sm font-bold text-slate-800 uppercase tracking-wide flex items-center gap-2">
+          <i class="fa-solid fa-file-arrow-down text-emerald-600"></i> File Ready for Download
+        </h3>
+        <button onclick="closeExportModal()" class="text-slate-400 hover:text-slate-600 p-1">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <p id="export-fallback-desc" class="text-xs text-slate-600 mb-4 leading-relaxed">
+        Your file has been generated. Click the primary button below to save directly to your computer.
+      </p>
+
+      <div class="space-y-3">
+        <div id="direct-download-action-slot" class="flex flex-col gap-2">
+          <!-- Populated by JavaScript -->
+        </div>
+
+        <div class="border-t border-slate-200 pt-3">
+          <button id="export-clipboard-btn" onclick="copyCsvToClipboard()" class="w-full py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded text-xs flex items-center justify-center gap-2 transition">
+            <i class="fa-solid fa-clipboard"></i> Copy Spreadsheet Data (Paste into Google Sheets / Excel)
+          </button>
+        </div>
+      </div>
+
+      <div class="mt-4 flex justify-end">
+        <button onclick="closeExportModal()" class="px-4 py-1.5 bg-slate-800 text-white rounded text-xs hover:bg-slate-700 font-medium">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- 1. EXPANDED DATABASE: ~580+ CHORES INCLUDING 64 PARENTING & ROMANTIC BALANCE TASKS ---
+    const RAW_CHORE_DATABASE = [
+      // --- 64 PARENTING & ROMANTIC BALANCE TASKS ---
+      // Parenting: Daily Care & Logistics (16 items)
+      { name: "Pack Kids School Lunches", cat: "Parenting - Daily Care & Logistics", diff: 2 },
+      { name: "Sanitize Baby Bottles / Sippy Cups", cat: "Parenting - Daily Care & Logistics", diff: 2 },
+      { name: "Restock Diaper & Wipe Caddies", cat: "Parenting - Daily Care & Logistics", diff: 1 },
+      { name: "Check School Backpacks & Sign Slips", cat: "Parenting - Daily Care & Logistics", diff: 1 },
+      { name: "Lay Out Kids Outfits for Tomorrow", cat: "Parenting - Daily Care & Logistics", diff: 2 },
+      { name: "Wash Stuffed Animals & Teething Toys", cat: "Parenting - Daily Care & Logistics", diff: 3 },
+      { name: "Clean & Disinfect High Chair / Booster", cat: "Parenting - Daily Care & Logistics", diff: 2 },
+      { name: "Rotate Kids Toy Bins & Bookshelves", cat: "Parenting - Daily Care & Logistics", diff: 3 },
+      { name: "Audit Kids Clothes for Outgrown Sizes", cat: "Parenting - Daily Care & Logistics", diff: 4 },
+      { name: "Organize Carseat Crumbs & Seat Covers", cat: "Parenting - Daily Care & Logistics", diff: 3 },
+      { name: "Refill Kids Vitamin & Medicine Kit", cat: "Parenting - Daily Care & Logistics", diff: 1 },
+      { name: "Wash Stroller Fabrics & Clean Wheels", cat: "Parenting - Daily Care & Logistics", diff: 4 },
+      { name: "Schedule Pediatrician Checkup / Shots", cat: "Parenting - Daily Care & Logistics", diff: 2 },
+      { name: "Schedule Kids Dentist Visit", cat: "Parenting - Daily Care & Logistics", diff: 2 },
+      { name: "Prep Emergency Diaper Bag Supplies", cat: "Parenting - Daily Care & Logistics", diff: 2 },
+      { name: "Clip Kids Fingernails & Toenails", cat: "Parenting - Daily Care & Logistics", diff: 2 },
+
+      // Parenting: Education & Emotional Connection (16 items)
+      { name: "Read Bedtime Story (20m Unplugged)", cat: "Parenting - Education & Connection", diff: 2 },
+      { name: "Conduct Daily 'Highs & Lows' Dinner Chat", cat: "Parenting - Education & Connection", diff: 1 },
+      { name: "Help with Homework / Reading Practice", cat: "Parenting - Education & Connection", diff: 3 },
+      { name: "One-on-One Solo Outing with Child", cat: "Parenting - Education & Connection", diff: 4 },
+      { name: "Practice Emotion Naming with Child", cat: "Parenting - Education & Connection", diff: 2 },
+      { name: "Build LEGO / Craft Project Together", cat: "Parenting - Education & Connection", diff: 3 },
+      { name: "Dance Party / Living Room Freeze Game", cat: "Parenting - Education & Connection", diff: 2 },
+      { name: "Review Weekly School Newsletter & Events", cat: "Parenting - Education & Connection", diff: 2 },
+      { name: "Practice Gratitude Ritual Before Sleep", cat: "Parenting - Education & Connection", diff: 1 },
+      { name: "Teach Simple Cooking / Baking Skill", cat: "Parenting - Education & Connection", diff: 3 },
+      { name: "Visit Local Library for New Storybooks", cat: "Parenting - Education & Connection", diff: 3 },
+      { name: "Play Outdoors in Park / Playground (1hr)", cat: "Parenting - Education & Connection", diff: 3 },
+      { name: "Practice Calming Breath / Meltdown Reset", cat: "Parenting - Education & Connection", diff: 2 },
+      { name: "Teach Kids Age-Appropriate Chore Routine", cat: "Parenting - Education & Connection", diff: 3 },
+      { name: "Review Screen Time Limits & Content", cat: "Parenting - Education & Connection", diff: 2 },
+      { name: "Save School Artworks & Archive Favorites", cat: "Parenting - Education & Connection", diff: 3 },
+
+      // Romance: Dates & Intimacy (16 items)
+      { name: "Schedule Bi-Weekly Date Night", cat: "Romance - Dates & Intimacy", diff: 3 },
+      { name: "Give Focused 15m Shoulder/Back Rub", cat: "Romance - Dates & Intimacy", diff: 2 },
+      { name: "Long 30-Second Embrace Greeting", cat: "Romance - Dates & Intimacy", diff: 1 },
+      { name: "Cook Fancy Dinner Together at Home", cat: "Romance - Dates & Intimacy", diff: 4 },
+      { name: "Leave Love Note in Partner's Bag/Pillow", cat: "Romance - Dates & Intimacy", diff: 1 },
+      { name: "Cuddle with No Screens for 20 Minutes", cat: "Romance - Dates & Intimacy", diff: 2 },
+      { name: "Send Flirty or Appreciative Midday Text", cat: "Romance - Dates & Intimacy", diff: 1 },
+      { name: "Plan Weekend Getaway / Day Trip", cat: "Romance - Dates & Intimacy", diff: 5 },
+      { name: "Bring Partner Morning Coffee / Tea in Bed", cat: "Romance - Dates & Intimacy", diff: 1 },
+      { name: "Reminisce Over Old Photos / First Dates", cat: "Romance - Dates & Intimacy", diff: 2 },
+      { name: "Surprise Partner with Favorite Treat", cat: "Romance - Dates & Intimacy", diff: 2 },
+      { name: "Unplugged Evening Walk & Handholding", cat: "Romance - Dates & Intimacy", diff: 2 },
+      { name: "Order Dessert Takeout for Two After Bedtime", cat: "Romance - Dates & Intimacy", diff: 2 },
+      { name: "Celebrate 'Our Song' / Slow Dance at Home", cat: "Romance - Dates & Intimacy", diff: 1 },
+      { name: "Share 3 Things You Deeply Admire in Partner", cat: "Romance - Dates & Intimacy", diff: 1 },
+      { name: "Give Unprompted Focused Foot Massage", cat: "Romance - Dates & Intimacy", diff: 3 },
+
+      // Romance: Partnership, Communication & Solo Rest (16 items)
+      { name: "Conduct Sunday Couple Sync (Logistics)", cat: "Romance - Communication & Balance", diff: 2 },
+      { name: "Check In on Mental Load & Chore Equity", cat: "Romance - Communication & Balance", diff: 3 },
+      { name: "Give Partner 2 Hours of Pure Solo Free Time", cat: "Romance - Communication & Balance", diff: 4 },
+      { name: "Take 2 Hours Solo Recharge Rest for Self", cat: "Romance - Communication & Balance", diff: 4 },
+      { name: "Say 'Thank You for Working Hard Today'", cat: "Romance - Communication & Balance", diff: 1 },
+      { name: "Budget & Savings Goal Alignment Meeting", cat: "Romance - Communication & Balance", diff: 3 },
+      { name: "Revisit 5-Year Family Vision Together", cat: "Romance - Communication & Balance", diff: 4 },
+      { name: "Apologize Honestly with Zero Justification", cat: "Romance - Communication & Balance", diff: 2 },
+      { name: "Ask 'How Can I Support You Most This Week?'", cat: "Romance - Communication & Balance", diff: 1 },
+      { name: "Confirm Babysitter / Grandparent Date Night", cat: "Romance - Communication & Balance", diff: 2 },
+      { name: "Tackle a Dreaded Chore Partner Dislikes", cat: "Romance - Communication & Balance", diff: 3 },
+      { name: "Establish Zero-Grievance Bedroom Rule", cat: "Romance - Communication & Balance", diff: 2 },
+      { name: "Compliment Partner's Appearance Directly", cat: "Romance - Communication & Balance", diff: 1 },
+      { name: "Vent-Free Listening for 10 Minutes", cat: "Romance - Communication & Balance", diff: 2 },
+      { name: "Celebrate Partner's Personal/Work Victory", cat: "Romance - Communication & Balance", diff: 1 },
+      { name: "Review Division of Morning/Evening Shifts", cat: "Romance - Communication & Balance", diff: 3 },
+
+      // KITCHEN
+      { name: "Clean Stove Top", cat: "Kitchen", diff: 3 },
+      { name: "Disinfect Kit. Sink", cat: "Kitchen", diff: 2 },
+      { name: "Change/Wash Kit. Towel", cat: "Kitchen", diff: 1 },
+      { name: "Clean Microwave", cat: "Kitchen", diff: 2 },
+      { name: "Clean Counter", cat: "Kitchen", diff: 2 },
+      { name: "Cleanout Fridge", cat: "Kitchen", diff: 4 },
+      { name: "Tidy Pantry", cat: "Kitchen", diff: 3 },
+      { name: "Descale Coffee Maker", cat: "Kitchen", diff: 3 },
+      { name: "Degrease Backsplash", cat: "Kitchen", diff: 4 },
+      { name: "Clean Dishwasher/Fridge", cat: "Kitchen", diff: 4 },
+      { name: "Clean Range Hood", cat: "Kitchen", diff: 5 },
+      { name: "Clean Oven", cat: "Kitchen", diff: 5 },
+      { name: "Clean Behind Stove/Fridge", cat: "Kitchen", diff: 6 },
+      { name: "Do a Load of Dishes", cat: "Kitchen", diff: 2 },
+      { name: "Replace Kitchen Sponge", cat: "Kitchen", diff: 1 },
+      { name: "Clean/Organize Pantry", cat: "Kitchen", diff: 4 },
+      { name: "Wipe Cabinet Faces", cat: "Kitchen", diff: 3 },
+      { name: "Deep Clean Dishwasher Filter", cat: "Kitchen", diff: 3 },
+      { name: "Sanitize Garbage Disposal", cat: "Kitchen", diff: 2 },
+      { name: "Clean Toaster Crumb Tray", cat: "Kitchen", diff: 1 },
+      { name: "Organize Tupperware Drawer", cat: "Kitchen", diff: 3 },
+      { name: "Wipe Down Small Appliances", cat: "Kitchen", diff: 2 },
+      { name: "Clean Air Fryer Basket", cat: "Kitchen", diff: 2 },
+      { name: "Sharpen Kitchen Knives", cat: "Kitchen", diff: 3 },
+      { name: "Disinfect Cutting Boards", cat: "Kitchen", diff: 2 },
+      { name: "Polish Stainless Steel", cat: "Kitchen", diff: 3 },
+      { name: "Clean Condiment Bottles", cat: "Kitchen", diff: 2 },
+      { name: "Scrub Baking Sheets", cat: "Kitchen", diff: 4 },
+      { name: "Clean Under Microwave Turntable", cat: "Kitchen", diff: 1 },
+      { name: "Rotate Freezer Stock", cat: "Kitchen", diff: 3 },
+      { name: "Oil Wooden Butcher Blocks", cat: "Kitchen", diff: 2 },
+
+      // BATHROOM
+      { name: "Clean Toilet", cat: "Bathroom", diff: 3 },
+      { name: "Clean Bath. Sink", cat: "Bathroom", diff: 2 },
+      { name: "Clean Tub", cat: "Bathroom", diff: 4 },
+      { name: "Clean Mirror", cat: "Bathroom", diff: 1 },
+      { name: "Change/Wash Towels", cat: "Bathroom", diff: 2 },
+      { name: "Take Bath. Trash Out", cat: "Bathroom", diff: 1 },
+      { name: "Clean Shower Curtain", cat: "Bathroom", diff: 3 },
+      { name: "Replace Loofahs", cat: "Bathroom", diff: 1 },
+      { name: "Replace Razors", cat: "Bathroom", diff: 1 },
+      { name: "Change Toothbrush Heads", cat: "Bathroom", diff: 1 },
+      { name: "Scrub Tile Grout", cat: "Bathroom", diff: 5 },
+      { name: "Clear Bathroom Drain Hair", cat: "Bathroom", diff: 3 },
+      { name: "Disinfect Bath Toys", cat: "Bathroom", diff: 2 },
+      { name: "Wash Bath Mats", cat: "Bathroom", diff: 2 },
+      { name: "Clean Soap Dispenser Pump", cat: "Bathroom", diff: 1 },
+      { name: "Wipe Down Medicine Cabinet", cat: "Bathroom", diff: 2 },
+      { name: "Descale Shower Head", cat: "Bathroom", diff: 4 },
+      { name: "Squeegee Shower Glass", cat: "Bathroom", diff: 1 },
+      { name: "Sanitize Toothbrush Holder", cat: "Bathroom", diff: 1 },
+      { name: "Clean Exhaust Fan Grate", cat: "Bathroom", diff: 4 },
+
+      // LIVING & BEDROOM
+      { name: "Wash Bedsheets", cat: "Living & Bedroom", diff: 3 },
+      { name: "Dust All", cat: "Living & Bedroom", diff: 2 },
+      { name: "Sweep/Mop Floors", cat: "Living & Bedroom", diff: 3 },
+      { name: "Declutter All", cat: "Living & Bedroom", diff: 3 },
+      { name: "Tidy Up", cat: "Living & Bedroom", diff: 1 },
+      { name: "Deep Clean Couch", cat: "Living & Bedroom", diff: 5 },
+      { name: "Wash Curtains", cat: "Living & Bedroom", diff: 4 },
+      { name: "Vacuum Under Bed & Sofa", cat: "Living & Bedroom", diff: 4 },
+      { name: "Rotate/Flip Mattress", cat: "Living & Bedroom", diff: 4 },
+      { name: "Wash Mattress Protector", cat: "Living & Bedroom", diff: 3 },
+      { name: "Dust Ceiling Fan Blades", cat: "Living & Bedroom", diff: 2 },
+      { name: "Wipe Window Blinds", cat: "Living & Bedroom", diff: 4 },
+      { name: "Clean TV & Monitor Screens", cat: "Living & Bedroom", diff: 1 },
+      { name: "Disinfect Remote Controls", cat: "Living & Bedroom", diff: 1 },
+      { name: "Fluff & Vacuum Pillows", cat: "Living & Bedroom", diff: 2 },
+      { name: "Organize Entryway Shoes", cat: "Living & Bedroom", diff: 2 },
+      { name: "Polish Wood Furniture", cat: "Living & Bedroom", diff: 3 },
+      { name: "Clean Baseboards Behind Furniture", cat: "Living & Bedroom", diff: 5 },
+      { name: "Shampoo Area Rugs", cat: "Living & Bedroom", diff: 5 },
+      { name: "Sort Junk Drawer", cat: "Living & Bedroom", diff: 3 },
+
+      // PETS & PLANTS
+      { name: "Wash Pet Beds", cat: "Pets & Plants", diff: 3 },
+      { name: "Wash Dog Bowls/Water", cat: "Pets & Plants", diff: 1 },
+      { name: "Brush Dogs", cat: "Pets & Plants", diff: 2 },
+      { name: "Clip Dogs Toenails", cat: "Pets & Plants", diff: 3 },
+      { name: "Bath Dogs", cat: "Pets & Plants", diff: 4 },
+      { name: "Wash/Declutter Dog Toys", cat: "Pets & Plants", diff: 2 },
+      { name: "Water Plants", cat: "Pets & Plants", diff: 1 },
+      { name: "Scoop Cat Litter Box", cat: "Pets & Plants", diff: 2 },
+      { name: "Deep Wash Litter Pan", cat: "Pets & Plants", diff: 4 },
+      { name: "Dust Houseplant Leaves", cat: "Pets & Plants", diff: 2 },
+      { name: "Prune Dead Plant Foliage", cat: "Pets & Plants", diff: 2 },
+      { name: "Fertilize Indoor Plants", cat: "Pets & Plants", diff: 2 },
+      { name: "Vacuum Pet Fur From Furniture", cat: "Pets & Plants", diff: 3 },
+      { name: "Wash Pet Collars & Leashes", cat: "Pets & Plants", diff: 2 },
+      { name: "Clean Aquarium / Fish Bowl", cat: "Pets & Plants", diff: 4 },
+      { name: "Flea & Tick Treatment Application", cat: "Pets & Plants", diff: 1 },
+
+      // LAUNDRY & FABRICS
+      { name: "Do a Load of Laundry", cat: "Laundry & Fabrics", diff: 2 },
+      { name: "Wash Towels", cat: "Laundry & Fabrics", diff: 2 },
+      { name: "Fold & Put Away Clothes", cat: "Laundry & Fabrics", diff: 3 },
+      { name: "Clean Dryer Lint Trap", cat: "Laundry & Fabrics", diff: 1 },
+      { name: "Vacuum Dryer Duct / Vent", cat: "Laundry & Fabrics", diff: 4 },
+      { name: "Deep Clean Washer Drum", cat: "Laundry & Fabrics", diff: 3 },
+      { name: "Wipe Down Washer Rubber Gasket", cat: "Laundry & Fabrics", diff: 2 },
+      { name: "Wash Heavy Blankets / Duvets", cat: "Laundry & Fabrics", diff: 4 },
+      { name: "Hand Wash Delicates", cat: "Laundry & Fabrics", diff: 3 },
+      { name: "Iron Dress Clothes", cat: "Laundry & Fabrics", diff: 3 },
+      { name: "Sew Torn Buttons / Mending", cat: "Laundry & Fabrics", diff: 3 },
+      { name: "Wash Reusable Grocery Totes", cat: "Laundry & Fabrics", diff: 2 },
+
+      // MAINTENANCE & SYSTEMS
+      { name: "Break Down Boxes", cat: "Maintenance & Systems", diff: 2 },
+      { name: "Take Trash Out", cat: "Maintenance & Systems", diff: 1 },
+      { name: "Take Recycling Out", cat: "Maintenance & Systems", diff: 1 },
+      { name: "Change Air Filter", cat: "Maintenance & Systems", diff: 2 },
+      { name: "Clean Vents/Ceiling Fans", cat: "Maintenance & Systems", diff: 3 },
+      { name: "Clean Vacuum/Change Filter", cat: "Maintenance & Systems", diff: 3 },
+      { name: "Test Smoke & CO Detectors", cat: "Maintenance & Systems", diff: 1 },
+      { name: "Replace Smoke Detector Batteries", cat: "Maintenance & Systems", diff: 2 },
+      { name: "Check Fire Extinguisher Gauge", cat: "Maintenance & Systems", diff: 1 },
+      { name: "Drain Water Heater Sediment", cat: "Maintenance & Systems", diff: 5 },
+      { name: "Inspect Sump Pump Function", cat: "Maintenance & Systems", diff: 3 },
+      { name: "Lubricate Garage Door Tracks", cat: "Maintenance & Systems", diff: 3 },
+      { name: "Check Plumbing Under Sinks for Leaks", cat: "Maintenance & Systems", diff: 2 },
+      { name: "Vacuum Refrigerator Coils", cat: "Maintenance & Systems", diff: 4 },
+      { name: "Clean Dehumidifier Bucket/Coils", cat: "Maintenance & Systems", diff: 2 },
+
+      // DEEP CLEAN & DECLUTTER
+      { name: "Wash Windows", cat: "Deep Clean & Declutter", diff: 4 },
+      { name: "Wash Walls and Baseboards", cat: "Deep Clean & Declutter", diff: 5 },
+      { name: "Disinfect Light Switches/Doorknobs", cat: "Deep Clean & Declutter", diff: 2 },
+      { name: "Declutter/Sort Paper Files", cat: "Deep Clean & Declutter", diff: 4 },
+      { name: "Declutter Closet", cat: "Deep Clean & Declutter", diff: 4 },
+      { name: "Clean Trash Cans (Inside and Out)", cat: "Deep Clean & Declutter", diff: 3 },
+      { name: "Purge Expired Medicines", cat: "Deep Clean & Declutter", diff: 2 },
+      { name: "Donate Unused Clothes", cat: "Deep Clean & Declutter", diff: 3 },
+      { name: "Organize Tool Bench / Shed", cat: "Deep Clean & Declutter", diff: 4 },
+      { name: "Clean Window Sills and Tracks", cat: "Deep Clean & Declutter", diff: 3 },
+      { name: "Shred Old Financial Receipts", cat: "Deep Clean & Declutter", diff: 2 },
+      { name: "Back Up Computer Hard Drives", cat: "Deep Clean & Declutter", diff: 3 },
+      { name: "Clean Car Interior & Vacuum", cat: "Deep Clean & Declutter", diff: 4 },
+      { name: "Wash Exterior Car", cat: "Deep Clean & Declutter", diff: 3 },
+
+      // SEASONAL & OUTDOOR
+      { name: "Grocery Shop", cat: "Seasonal & Outdoor", diff: 3 },
+      { name: "Check Weather Stripping", cat: "Seasonal & Outdoor", diff: 2 },
+      { name: "Clean Gutters", cat: "Seasonal & Outdoor", diff: 5 },
+      { name: "Hurrice Prep", cat: "Seasonal & Outdoor", diff: 5 },
+      { name: "Reasses Chore Chart", cat: "Seasonal & Outdoor", diff: 2 },
+      { name: "Reasses Belongings", cat: "Seasonal & Outdoor", diff: 3 },
+      { name: "Donate Items", cat: "Seasonal & Outdoor", diff: 3 },
+      { name: "Powerwash Patio / Deck", cat: "Seasonal & Outdoor", diff: 5 },
+      { name: "Mow Lawn & Edge Borders", cat: "Seasonal & Outdoor", diff: 4 },
+      { name: "Weed Garden Beds", cat: "Seasonal & Outdoor", diff: 3 },
+      { name: "Store / Uncover Patio Furniture", cat: "Seasonal & Outdoor", diff: 4 },
+      { name: "Clean Grill & Replace Grease Pan", cat: "Seasonal & Outdoor", diff: 4 },
+      { name: "Inspect Roof for Damaged Shingles", cat: "Seasonal & Outdoor", diff: 4 },
+      { name: "Drain Exterior Garden Hoses", cat: "Seasonal & Outdoor", diff: 2 },
+      { name: "Rake & Bag Fallen Leaves", cat: "Seasonal & Outdoor", diff: 4 },
+      { name: "Sweep Front Porch and Steps", cat: "Seasonal & Outdoor", diff: 2 },
+
+      // PHYSICAL: APPEARANCE & HYGIENE
+      { name: "Morning Skin Cleansing & SPF", cat: "Physical - Hygiene & Appearance", diff: 1 },
+      { name: "Night Facial Double Cleanse", cat: "Physical - Hygiene & Appearance", diff: 1 },
+      { name: "Floss & Scrape Tongue", cat: "Physical - Hygiene & Appearance", diff: 1 },
+      { name: "Exfoliate Face & Body", cat: "Physical - Hygiene & Appearance", diff: 2 },
+      { name: "Deep Conditioning Hair Mask", cat: "Physical - Hygiene & Appearance", diff: 2 },
+      { name: "Trim & File Nails", cat: "Physical - Hygiene & Appearance", diff: 2 },
+      { name: "Shape & Trim Eyebrows", cat: "Physical - Hygiene & Appearance", diff: 2 },
+      { name: "Beard Oil & Facial Hair Groom", cat: "Physical - Hygiene & Appearance", diff: 2 },
+      { name: "Moisturize Hands & Cuticles", cat: "Physical - Hygiene & Appearance", diff: 1 },
+      { name: "Whiten Teeth Treatment", cat: "Physical - Hygiene & Appearance", diff: 3 },
+      { name: "Audit Wardrobe for Worn Items", cat: "Physical - Hygiene & Appearance", diff: 3 },
+      { name: "Steam/Iron Outfits for Week", cat: "Physical - Hygiene & Appearance", diff: 3 },
+      { name: "Polish Dress Shoes & Leather", cat: "Physical - Hygiene & Appearance", diff: 3 },
+      { name: "De-pill Wool Sweaters", cat: "Physical - Hygiene & Appearance", diff: 2 },
+      { name: "Curate Seasonal Capsule Outfits", cat: "Physical - Hygiene & Appearance", diff: 4 },
+      { name: "Schedule Haircut / Barber", cat: "Physical - Hygiene & Appearance", diff: 2 },
+      { name: "Check Scent / Cologne Rotation", cat: "Physical - Hygiene & Appearance", diff: 1 },
+      { name: "Wall Angels Posture Drill", cat: "Physical - Hygiene & Appearance", diff: 1 },
+      { name: "Thoracic Spine Foam Rolling", cat: "Physical - Hygiene & Appearance", diff: 2 },
+      { name: "Chin Tucks & Neck Reset", cat: "Physical - Hygiene & Appearance", diff: 1 },
+      { name: "Ergonomic Desk Height Calibration", cat: "Physical - Hygiene & Appearance", diff: 2 },
+      { name: "Pelvic Tilt & Glute Activation Drill", cat: "Physical - Hygiene & Appearance", diff: 2 },
+      { name: "Standing Posture Body Scan", cat: "Physical - Hygiene & Appearance", diff: 1 },
+      { name: "Feet & Arch Strengthening Drills", cat: "Physical - Hygiene & Appearance", diff: 2 },
+
+      // PHYSICAL: HEALTH & NUTRITION
+      { name: "Set 10 PM Screen Cutoff Cue", cat: "Physical - Health & Nutrition", diff: 1 },
+      { name: "Morning Sunlight Exposure (15m)", cat: "Physical - Health & Nutrition", diff: 1 },
+      { name: "Cool Bedroom to 66°F for Sleep", cat: "Physical - Health & Nutrition", diff: 1 },
+      { name: "Track Sleep Cycles & REM Data", cat: "Physical - Health & Nutrition", diff: 1 },
+      { name: "Wash Pillowcases for Skin/Allergy", cat: "Physical - Health & Nutrition", diff: 2 },
+      { name: "No Caffeine After 1:00 PM", cat: "Physical - Health & Nutrition", diff: 1 },
+      { name: "Drink 1L Electrolyte Water AM", cat: "Physical - Health & Nutrition", diff: 1 },
+      { name: "Prep High-Protein Lunches", cat: "Physical - Health & Nutrition", diff: 4 },
+      { name: "Chop Fresh Vegetables for Snacking", cat: "Physical - Health & Nutrition", diff: 3 },
+      { name: "Log Daily Macronutrients", cat: "Physical - Health & Nutrition", diff: 2 },
+      { name: "Refill Daily Vitamin Pack", cat: "Physical - Health & Nutrition", diff: 1 },
+      { name: "Drink 3L Hydration Target", cat: "Physical - Health & Nutrition", diff: 2 },
+      { name: "Fast for 14-Hour Digestive Rest", cat: "Physical - Health & Nutrition", diff: 2 },
+      { name: "Bake Gut-Healthy Sourdough/Ferments", cat: "Physical - Health & Nutrition", diff: 4 },
+      { name: "Hit 10,000 Step Daily Target", cat: "Physical - Health & Nutrition", diff: 3 },
+      { name: "Take Post-Meal 15m Walk", cat: "Physical - Health & Nutrition", diff: 2 },
+      { name: "Take Stairs Instead of Elevators", cat: "Physical - Health & Nutrition", diff: 1 },
+      { name: "Perform 5m Hourly Standing Break", cat: "Physical - Health & Nutrition", diff: 1 },
+      { name: "Annual Comprehensive Bloodwork", cat: "Physical - Health & Nutrition", diff: 4 },
+      { name: "Dental Cleaning & Checkup", cat: "Physical - Health & Nutrition", diff: 4 },
+      { name: "Dermatologist Skin Mole Scan", cat: "Physical - Health & Nutrition", diff: 4 },
+      { name: "Vision Exam & Eyewear Check", cat: "Physical - Health & Nutrition", diff: 3 },
+
+      // PHYSICAL: EXERCISE & MOVEMENT
+      { name: "Upper Body Hypertrophy Session", cat: "Physical - Exercise & Movement", diff: 4 },
+      { name: "Lower Body Squat & Deadlift", cat: "Physical - Exercise & Movement", diff: 5 },
+      { name: "Core & Abdominal Circuit", cat: "Physical - Exercise & Movement", diff: 2 },
+      { name: "Kettlebell Swing Finisher", cat: "Physical - Exercise & Movement", diff: 3 },
+      { name: "Grip & Forearm Farmer Carries", cat: "Physical - Exercise & Movement", diff: 2 },
+      { name: "Bodyweight Push-Up / Pull-Up Test", cat: "Physical - Exercise & Movement", diff: 3 },
+      { name: "Zone 2 Low-Intensity Cardio (45m)", cat: "Physical - Exercise & Movement", diff: 3 },
+      { name: "High Intensity Sprint Intervals", cat: "Physical - Exercise & Movement", diff: 4 },
+      { name: "5K Trail Run or Road Run", cat: "Physical - Exercise & Movement", diff: 4 },
+      { name: "Ruck Walk with Weighted Backpack", cat: "Physical - Exercise & Movement", diff: 3 },
+      { name: "Swimming Laps Endurance Session", cat: "Physical - Exercise & Movement", diff: 4 },
+      { name: "Indoor Rowing Machine 5000m", cat: "Physical - Exercise & Movement", diff: 4 },
+      { name: "Full Body Dynamic Hip Mobility", cat: "Physical - Exercise & Movement", diff: 2 },
+      { name: "Hamstring & Calf Lengthening", cat: "Physical - Exercise & Movement", diff: 1 },
+      { name: "Shoulder Dislocates & Band Work", cat: "Physical - Exercise & Movement", diff: 1 },
+      { name: "Evening Yin Yoga Practice", cat: "Physical - Exercise & Movement", diff: 2 },
+      { name: "Pigeon Pose Hip Opener (3m)", cat: "Physical - Exercise & Movement", diff: 1 },
+      { name: "Ankle Dorsiflexion Mobility Routine", cat: "Physical - Exercise & Movement", diff: 2 },
+      { name: "Thoracic Bridge Flexibility", cat: "Physical - Exercise & Movement", diff: 2 },
+
+      // SOCIAL: FIRST IMPRESSIONS & NONVERBAL
+      { name: "Audit Comfort Body Language Cues", cat: "Social - First Impression & Nonverbal", diff: 2 },
+      { name: "Eliminate Pacifying Gestures", cat: "Social - First Impression & Nonverbal", diff: 2 },
+      { name: "Practice Open Torso Posture", cat: "Social - First Impression & Nonverbal", diff: 1 },
+      { name: "Eye Contact 60/40 Ratio Practice", cat: "Social - First Impression & Nonverbal", diff: 2 },
+      { name: "Warm Smile Greeting Calibration", cat: "Social - First Impression & Nonverbal", diff: 1 },
+      { name: "Study Contextual Cultural Etiquette", cat: "Social - First Impression & Nonverbal", diff: 3 },
+      { name: "Master Firm Contextual Handshake", cat: "Social - First Impression & Nonverbal", diff: 1 },
+      { name: "Calibrate Personal Space Boundaries", cat: "Social - First Impression & Nonverbal", diff: 1 },
+      { name: "Voice Pitch & Downward Inflection Drill", cat: "Social - First Impression & Nonverbal", diff: 2 },
+      { name: "Eliminate Filler Words (Uhm, Like)", cat: "Social - First Impression & Nonverbal", diff: 2 },
+      { name: "Practice Deliberate 2s Speech Pauses", cat: "Social - First Impression & Nonverbal", diff: 2 },
+      { name: "Vocal Warmup: Resonance & Timbre", cat: "Social - First Impression & Nonverbal", diff: 1 },
+      { name: "Vocal Projection Diaphragm Drill", cat: "Social - First Impression & Nonverbal", diff: 2 },
+      { name: "Mirroring Nonverbal Cadence Drill", cat: "Social - First Impression & Nonverbal", diff: 2 },
+
+      // SOCIAL: CONVERSATIONS & FLIRTING
+      { name: "Open-Ended Question Preparation", cat: "Social - Conversations & Flirting", diff: 2 },
+      { name: "Practice FORD Conversation Method", cat: "Social - Conversations & Flirting", diff: 2 },
+      { name: "Active Listening: Paraphrase Summary", cat: "Social - Conversations & Flirting", diff: 2 },
+      { name: "Share Vulnerable Story in Dialogue", cat: "Social - Conversations & Flirting", diff: 3 },
+      { name: "Compliment 3 People Authentically", cat: "Social - Conversations & Flirting", diff: 2 },
+      { name: "Practice Non-Defensive Conflict Framing", cat: "Social - Conversations & Flirting", diff: 3 },
+      { name: "Identify Emotional Triggers in Debates", cat: "Social - Conversations & Flirting", diff: 3 },
+      { name: "De-escalate Disagreements Calmly", cat: "Social - Conversations & Flirting", diff: 3 },
+      { name: "Negotiate Win-Win Terms in Conflict", cat: "Social - Conversations & Flirting", diff: 4 },
+      { name: "Send Thoughtful Flirty / Sweet Text", cat: "Social - Conversations & Flirting", diff: 1 },
+      { name: "Plan Unplugged Date Night", cat: "Social - Conversations & Flirting", diff: 3 },
+      { name: "Playful Teasing & Wit Calibration", cat: "Social - Conversations & Flirting", diff: 2 },
+      { name: "Show Expressive Emotional Warmth", cat: "Social - Conversations & Flirting", diff: 2 },
+      { name: "Review Partner Love Language Needs", cat: "Social - Conversations & Flirting", diff: 2 },
+
+      // SOCIAL: RELATIONSHIPS & TRUST
+      { name: "Remember & Note 3 Friends' Birthdays", cat: "Social - Relationships & Trust", diff: 1 },
+      { name: "Host Casual Dinner / Gathering", cat: "Social - Relationships & Trust", diff: 5 },
+      { name: "Check In on Long-Distance Friend", cat: "Social - Relationships & Trust", diff: 2 },
+      { name: "Write Handwritten Gratitude Note", cat: "Social - Relationships & Trust", diff: 2 },
+      { name: "Offer Unsolicited Help to Peer", cat: "Social - Relationships & Trust", diff: 2 },
+      { name: "Set Healthy Relational Boundaries", cat: "Social - Relationships & Trust", diff: 3 },
+      { name: "Audit Pacing in New Friendship", cat: "Social - Relationships & Trust", diff: 2 },
+      { name: "Apologize Promptly for Missteps", cat: "Social - Relationships & Trust", diff: 2 },
+      { name: "Schedule Weekly Family Call", cat: "Social - Relationships & Trust", diff: 2 },
+      { name: "Plan Annual Friends Trip/Reunion", cat: "Social - Relationships & Trust", diff: 5 },
+      { name: "Celebrate Peer Wins & Milestones", cat: "Social - Relationships & Trust", diff: 1 },
+      { name: "Keep Confidentiality & Guard Secrets", cat: "Social - Relationships & Trust", diff: 2 },
+
+      // MENTAL: EMOTIONAL IDENTITY & PURPOSE
+      { name: "Complete Morning Gratitude Journal", cat: "Mental - Emotional & Purpose", diff: 1 },
+      { name: "Rate Daily Mood & Identify Triggers", cat: "Mental - Emotional & Purpose", diff: 1 },
+      { name: "Engage in Pure Flow Play Activity", cat: "Mental - Emotional & Purpose", diff: 2 },
+      { name: "Practice 15m Self-Compassion Break", cat: "Mental - Emotional & Purpose", diff: 1 },
+      { name: "Identify Comparative Envy & Release", cat: "Mental - Emotional & Purpose", diff: 2 },
+      { name: "Audit Social Circle Alignment", cat: "Mental - Emotional & Purpose", diff: 3 },
+      { name: "Engage in Community Volunteer Work", cat: "Mental - Emotional & Purpose", diff: 4 },
+      { name: "Participate in Interest Club / Sport", cat: "Mental - Emotional & Purpose", diff: 3 },
+      { name: "Draft Personal Legacy Statement", cat: "Mental - Emotional & Purpose", diff: 4 },
+      { name: "Review Ikigai / Purpose Matrix", cat: "Mental - Emotional & Purpose", diff: 3 },
+      { name: "Unplug from News & Social Media Day", cat: "Mental - Emotional & Purpose", diff: 3 },
+      { name: "Reflect on Proudest Accomplishments", cat: "Mental - Emotional & Purpose", diff: 2 },
+
+      // MENTAL: PHILOSOPHICAL & ETHICS
+      { name: "Read 20 Pages of Philosophy/Wisdom", cat: "Mental - Philosophical & Ethics", diff: 2 },
+      { name: "Practice Stoic Dichotomy of Control", cat: "Mental - Philosophical & Ethics", diff: 2 },
+      { name: "Reflect on Memento Mori & Impermanence", cat: "Mental - Philosophical & Ethics", diff: 1 },
+      { name: "Challenge Personal Cognitive Biases", cat: "Mental - Philosophical & Ethics", diff: 3 },
+      { name: "Examine Honesty & Integrity Choices", cat: "Mental - Philosophical & Ethics", diff: 2 },
+      { name: "Conduct Ethical Consumption Audit", cat: "Mental - Philosophical & Ethics", diff: 3 },
+      { name: "Determine Top 3 Life Values for Year", cat: "Mental - Philosophical & Ethics", diff: 4 },
+      { name: "Prune Low-Priority Commitments", cat: "Mental - Philosophical & Ethics", diff: 3 },
+      { name: "Say 'No' to Misaligned Invitations", cat: "Mental - Philosophical & Ethics", diff: 2 },
+      { name: "Review Financial Spending vs Values", cat: "Mental - Philosophical & Ethics", diff: 3 },
+
+      // MENTAL: LOGIC & PRODUCTIVITY
+      { name: "Execute Eisenhower Priority Matrix", cat: "Mental - Logic & Productivity", diff: 2 },
+      { name: "Time-Block Next Day's Top 3 Tasks", cat: "Mental - Logic & Productivity", diff: 1 },
+      { name: "Process Email Inbox to Zero", cat: "Mental - Logic & Productivity", diff: 2 },
+      { name: "Conduct 90-Minute Deep Work Block", cat: "Mental - Logic & Productivity", diff: 4 },
+      { name: "Eliminate Desktop & Browser Clutter", cat: "Mental - Logic & Productivity", diff: 1 },
+      { name: "Conduct 20m Mindfulness Meditation", cat: "Mental - Logic & Productivity", diff: 2 },
+      { name: "Box Breathing Focus Protocol (5m)", cat: "Mental - Logic & Productivity", diff: 1 },
+      { name: "Single-Tasking Discipline Block", cat: "Mental - Logic & Productivity", diff: 2 },
+      { name: "Noise-Cancelling Binaural Flow Sprint", cat: "Mental - Logic & Productivity", diff: 3 },
+      { name: "Weekly Life Architecture Review", cat: "Mental - Logic & Productivity", diff: 4 },
+      { name: "Quarterly OKR & Goal Audit", cat: "Mental - Logic & Productivity", diff: 5 },
+      { name: "Annual Life Design Blueprint Plan", cat: "Mental - Logic & Productivity", diff: 6 },
+      { name: "Automate Recurring Bill Payments", cat: "Mental - Logic & Productivity", diff: 3 },
+      { name: "Review Net Worth & Investments", cat: "Mental - Logic & Productivity", diff: 3 },
+
+      // --- 120 MORE COMPREHENSIVE TASKS ---
+      // Additional Household & Systems (25 items)
+      { name: "Sanitize Kitchen Trash Can Lid", cat: "Kitchen", diff: 1 },
+      { name: "Clean Coffee Grinder Burrs", cat: "Kitchen", diff: 2 },
+      { name: "Wipe Refrigerator Door Seals", cat: "Kitchen", diff: 2 },
+      { name: "Boil Vinegar in Electric Kettle", cat: "Kitchen", diff: 1 },
+      { name: "Scrub Sink Aerator Screen", cat: "Kitchen", diff: 2 },
+      { name: "Purge Stale Pantry Spices", cat: "Kitchen", diff: 3 },
+      { name: "Re-caulk Kitchen Sink Edge", cat: "Kitchen", diff: 4 },
+      { name: "Clean Microwave Charcoal Filter", cat: "Kitchen", diff: 3 },
+      { name: "Vacuum Crumbs from Drawer Organizers", cat: "Kitchen", diff: 2 },
+      { name: "Polish Silverware Cutlery", cat: "Kitchen", diff: 3 },
+      { name: "Disinfect Toilet Plunger Holder", cat: "Bathroom", diff: 2 },
+      { name: "Clean Bathroom Faucet Mineral Buildup", cat: "Bathroom", diff: 2 },
+      { name: "Scrub Behind Bathroom Toilet Base", cat: "Bathroom", diff: 4 },
+      { name: "Wash Makeup Brushes & Sponges", cat: "Bathroom", diff: 2 },
+      { name: "Clean Bathroom Vanity Light Fixtures", cat: "Bathroom", diff: 3 },
+      { name: "Replace Water Pitcher Filter Cartridge", cat: "Maintenance & Systems", diff: 1 },
+      { name: "Bleed Radiators / Check Heating Loops", cat: "Maintenance & Systems", diff: 4 },
+      { name: "Check Attic for Drafts & Rodents", cat: "Maintenance & Systems", diff: 5 },
+      { name: "Clear Dryer External Exhaust Vent Hood", cat: "Maintenance & Systems", diff: 4 },
+      { name: "Test GFCI Electrical Outlets", cat: "Maintenance & Systems", diff: 1 },
+      { name: "Check Foundation for Water Intrusion", cat: "Maintenance & Systems", diff: 4 },
+      { name: "Inspect Gas Meter & Outdoor Shutoff", cat: "Maintenance & Systems", diff: 2 },
+      { name: "Lubricate Window Hinges & Deadbolts", cat: "Maintenance & Systems", diff: 2 },
+      { name: "Clean HVAC Condensate Drain Line", cat: "Maintenance & Systems", diff: 3 },
+      { name: "Test Emergency Generator / Flashlights", cat: "Maintenance & Systems", diff: 2 },
+
+      // Additional Deep Declutter & Organization (20 items)
+      { name: "Archive Old Tax Years & Shred Pre-7yr", cat: "Deep Clean & Declutter", diff: 4 },
+      { name: "Organize Cable & Charger Drawer", cat: "Deep Clean & Declutter", diff: 3 },
+      { name: "Digitize Physical Paper Receipts", cat: "Deep Clean & Declutter", diff: 3 },
+      { name: "Donate Read Books to Library Box", cat: "Deep Clean & Declutter", diff: 2 },
+      { name: "Wipe Down Basement Storage Shelving", cat: "Deep Clean & Declutter", diff: 4 },
+      { name: "Declutter Coat Rack & Seasonal Outerwear", cat: "Deep Clean & Declutter", diff: 3 },
+      { name: "Clean Car Glovebox & Center Console", cat: "Deep Clean & Declutter", diff: 2 },
+      { name: "Check Car Tire Pressure & Refill", cat: "Deep Clean & Declutter", diff: 2 },
+      { name: "Refill Car Windshield Wiper Fluid", cat: "Deep Clean & Declutter", diff: 1 },
+      { name: "Replace Car Windshield Wiper Blades", cat: "Deep Clean & Declutter", diff: 2 },
+      { name: "Wash Car Rubber Floor Mats", cat: "Deep Clean & Declutter", diff: 3 },
+      { name: "Consolidate Half-Used Cleaning Sprays", cat: "Deep Clean & Declutter", diff: 2 },
+      { name: "Sort Luggage & Travel Toiletries Kit", cat: "Deep Clean & Declutter", diff: 2 },
+      { name: "Clean High Dust on Tops of Wardrobes", cat: "Deep Clean & Declutter", diff: 3 },
+      { name: "Organize Bedside Table Drawers", cat: "Deep Clean & Declutter", diff: 2 },
+      { name: "Prune Digital Photo Camera Roll", cat: "Deep Clean & Declutter", diff: 2 },
+      { name: "Clean Out Download Folder on PC/Mac", cat: "Deep Clean & Declutter", diff: 2 },
+      { name: "Export & Backup Smartphone Contacts", cat: "Deep Clean & Declutter", diff: 2 },
+      { name: "Cancel Inactive App Subscriptions", cat: "Deep Clean & Declutter", diff: 2 },
+      { name: "Clean Earbuds & Charging Case Grime", cat: "Deep Clean & Declutter", diff: 1 },
+
+      // Additional Physical: Appearance, Health & Mobility (25 items)
+      { name: "Dry Brush Lymphatic Body Sweep", cat: "Physical - Hygiene & Appearance", diff: 1 },
+      { name: "Apply Hair Scalp Nourishing Serum", cat: "Physical - Hygiene & Appearance", diff: 1 },
+      { name: "Pumice Stone Foot & Heel Care", cat: "Physical - Hygiene & Appearance", diff: 2 },
+      { name: "Wash & Sanitize Glasses Frames", cat: "Physical - Hygiene & Appearance", diff: 1 },
+      { name: "Check Wardrobe Color Harmony", cat: "Physical - Hygiene & Appearance", diff: 2 },
+      { name: "Steam Suit Jackets / Blazers", cat: "Physical - Hygiene & Appearance", diff: 3 },
+      { name: "Inspect Shoe Soles for Uneven Wear", cat: "Physical - Hygiene & Appearance", diff: 1 },
+      { name: "Neck Trapezius Trigger Point Release", cat: "Physical - Hygiene & Appearance", diff: 2 },
+      { name: "Diaphragmatic Rib Expansion Drills", cat: "Physical - Hygiene & Appearance", diff: 1 },
+      { name: "Contrast Hot/Cold Shower Finish", cat: "Physical - Health & Nutrition", diff: 2 },
+      { name: "Take Omega-3 & Zinc Supplements", cat: "Physical - Health & Nutrition", diff: 1 },
+      { name: "Stock Fresh Herbal Tea Selection", cat: "Physical - Health & Nutrition", diff: 1 },
+      { name: "Roast Tray of Root Vegetables", cat: "Physical - Health & Nutrition", diff: 3 },
+      { name: "Calculate Weekly Protein Intake Averages", cat: "Physical - Health & Nutrition", diff: 2 },
+      { name: "Sanitize Reusable Water Bottles", cat: "Physical - Health & Nutrition", diff: 1 },
+      { name: "Install Red Light Night Lighting Bulbs", cat: "Physical - Health & Nutrition", diff: 2 },
+      { name: "30m Outdoor Forest Walking (Shinrin-Yoku)", cat: "Physical - Health & Nutrition", diff: 3 },
+      { name: "Perform 100 Bodyweight Calf Raises", cat: "Physical - Exercise & Movement", diff: 2 },
+      { name: "Dead Hang from Pull-Up Bar (3 x 1m)", cat: "Physical - Exercise & Movement", diff: 2 },
+      { name: "Kettlebell Turkish Get-Up Drills", cat: "Physical - Exercise & Movement", diff: 3 },
+      { name: "Tibialis Ant. Strengthening Shin Drills", cat: "Physical - Exercise & Movement", diff: 2 },
+      { name: "Isometric Wall Sit Hold (3 x 90s)", cat: "Physical - Exercise & Movement", diff: 2 },
+      { name: "Glute Hamstring Nordic Curl Practice", cat: "Physical - Exercise & Movement", diff: 3 },
+      { name: "Side Plank Oblique Alignment Hold", cat: "Physical - Exercise & Movement", diff: 2 },
+      { name: "Wrist & Carpal Tunnel Stretches", cat: "Physical - Exercise & Movement", diff: 1 },
+
+      // Additional Social: Impression, Conversations & Loyalty (25 items)
+      { name: "Practice 3-Second Pause Before Replying", cat: "Social - First Impression & Nonverbal", diff: 1 },
+      { name: "Avoid Crossing Arms When Welcoming", cat: "Social - First Impression & Nonverbal", diff: 1 },
+      { name: "Calibrate Voice Volume in Group Settings", cat: "Social - First Impression & Nonverbal", diff: 1 },
+      { name: "Notice Room Atmosphere Before Speaking", cat: "Social - First Impression & Nonverbal", diff: 2 },
+      { name: "Smile Naturally with Eyes (Duchenne)", cat: "Social - First Impression & Nonverbal", diff: 1 },
+      { name: "Practice Gentle Attentive Head Nods", cat: "Social - First Impression & Nonverbal", diff: 1 },
+      { name: "Avoid Checking Watch or Phone Mid-Talk", cat: "Social - First Impression & Nonverbal", diff: 1 },
+      { name: "Ask 'What Excites You Most Right Now?'", cat: "Social - Conversations & Flirting", diff: 2 },
+      { name: "Practice Validating Others' Emotions", cat: "Social - Conversations & Flirting", diff: 2 },
+      { name: "Acknowledge Disagreements with 'I See...'", cat: "Social - Conversations & Flirting", diff: 2 },
+      { name: "Share Honest Self-Deprecating Joke", cat: "Social - Conversations & Flirting", diff: 2 },
+      { name: "Remember Details of Partner's Weekday", cat: "Social - Conversations & Flirting", diff: 1 },
+      { name: "Leave Surprise Sticky Note of Encouragement", cat: "Social - Conversations & Flirting", diff: 1 },
+      { name: "Give Unprompted Focused Foot Massage", cat: "Social - Conversations & Flirting", diff: 3 },
+      { name: "Send 'Thinking of You' Text Without Asking", cat: "Social - Relationships & Trust", diff: 1 },
+      { name: "Congratulate Coworker on Tough Project", cat: "Social - Relationships & Trust", diff: 1 },
+      { name: "Send Book Recommendation to Peer", cat: "Social - Relationships & Trust", diff: 2 },
+      { name: "Cook Meal Together as a Bonding Ritual", cat: "Social - Relationships & Trust", diff: 3 },
+      { name: "Follow Up on Friend's Medical Appointment", cat: "Social - Relationships & Trust", diff: 1 },
+      { name: "Refrain from Speaking Ill of Anyone Today", cat: "Social - Relationships & Trust", diff: 2 },
+      { name: "Introduce Two Mutual Friends with Context", cat: "Social - Relationships & Trust", diff: 2 },
+      { name: "Honor Small Promise Given to Family Member", cat: "Social - Relationships & Trust", diff: 2 },
+      { name: "Send Coffee Gift Card to Longtime Mentor", cat: "Social - Relationships & Trust", diff: 2 },
+      { name: "Host Board Game Night with Close Circle", cat: "Social - Relationships & Trust", diff: 4 },
+      { name: "Offer Childcare / Petcare Favor to Neighbor", cat: "Social - Relationships & Trust", diff: 4 },
+
+      // Additional Mental: Purpose, Mindset & Life Architecture (25 items)
+      { name: "Review Weekly Wins on Sunday Night", cat: "Mental - Emotional & Purpose", diff: 2 },
+      { name: "Identify One Fear and Test It Gently", cat: "Mental - Emotional & Purpose", diff: 3 },
+      { name: "Write 1 Page of Stream-of-Consciousness", cat: "Mental - Emotional & Purpose", diff: 2 },
+      { name: "List 5 Things in Life Going Remarkably Well", cat: "Mental - Emotional & Purpose", diff: 1 },
+      { name: "Walk in Nature Without Headphones", cat: "Mental - Emotional & Purpose", diff: 2 },
+      { name: "Write Unsent Letter to Release Resentment", cat: "Mental - Emotional & Purpose", diff: 3 },
+      { name: "Celebrate 'Enoughness' and Avoid Impulsive Buys", cat: "Mental - Philosophical & Ethics", diff: 2 },
+      { name: "Practice Epictetus Enchiridion Lesson", cat: "Mental - Philosophical & Ethics", diff: 2 },
+      { name: "Contemplate Universe Scale & Cosmic Perspective", cat: "Mental - Philosophical & Ethics", diff: 1 },
+      { name: "Reflect on Personal Mortality to Prioritize", cat: "Mental - Philosophical & Ethics", diff: 2 },
+      { name: "Choose Integrity Over Convenience in Small Task", cat: "Mental - Philosophical & Ethics", diff: 2 },
+      { name: "Audit Personal Screen Time Weekly Report", cat: "Mental - Logic & Productivity", diff: 1 },
+      { name: "Set Daily 'Highlight' Task Before Noon", cat: "Mental - Logic & Productivity", diff: 1 },
+      { name: "Unsubscribe from 5 Marketing Email Lists", cat: "Mental - Logic & Productivity", diff: 1 },
+      { name: "Group Similar Browser Bookmarks into Folders", cat: "Mental - Logic & Productivity", diff: 2 },
+      { name: "Conduct Pomodoro 25/5 Sprint x 4 Cycles", cat: "Mental - Logic & Productivity", diff: 3 },
+      { name: "Clear Physical Workspace Desk Completely", cat: "Mental - Logic & Productivity", diff: 2 },
+      { name: "Sync Personal Calendar with Household Members", cat: "Mental - Logic & Productivity", diff: 2 },
+      { name: "Audit Auto-Debit Banking Charges for Errors", cat: "Mental - Logic & Productivity", diff: 3 },
+      { name: "Review Insurance Policy Coverages & Deductibles", cat: "Mental - Logic & Productivity", diff: 4 },
+      { name: "Update Emergency Contact Card in Wallet", cat: "Mental - Logic & Productivity", diff: 1 },
+      { name: "Review Will / Beneficiary Designations", cat: "Mental - Logic & Productivity", diff: 5 },
+      { name: "Conduct Quarterly Life Wheel Assessment", cat: "Mental - Logic & Productivity", diff: 4 },
+      { name: "Draft List of 100 Things to Experience in Life", cat: "Mental - Logic & Productivity", diff: 3 },
+      { name: "Plan Next Quarter's Vacation Days", cat: "Mental - Logic & Productivity", diff: 3 }
+    ];
+
+    let chorePool = [...RAW_CHORE_DATABASE];
+
+    // --- 2. MULTI-SHEET TEMPLATE REPOSITORY (Apartment Living, House Living, Parenting & Romance) ---
+    const TEMPLATE_PRESETS = {
+      apartment: {
+        id: "apartment",
+        name: "Apartment Living",
+        week: [
+          [{ text: "Wash Bedsheets", checked: false }, { text: "Clean Toilet", checked: false }, { text: "Disinfect Kit. Sink", checked: false }, { text: "Break Down Delivery Boxes", checked: false }, { text: "Cleanout Fridge", checked: false }, { text: "Declutter Small Spaces", checked: false }, { text: "Dust Baseboards & TV", checked: false }],
+          [{ text: "Wash Towels", checked: false }, { text: "Clean Bath. Sink", checked: false }, { text: "Change/Wash Kit. Towel", checked: false }, { text: "Water Balcony Plants", checked: false }, { text: "Take Trash to Chute", checked: false }, { text: "", checked: false }, { text: "Sweep/Mop Hardwood", checked: false }],
+          [{ text: "Laundromat Run / Washers", checked: false }, { text: "Change/Wash Towels", checked: false }, { text: "Clean Microwave", checked: false }, { text: "Wipe Down Entryway Console", checked: false }, { text: "Take Recycling Down", checked: false }, { text: "", checked: false }, { text: "", checked: false }],
+          [{ text: "Vacuum Area Rugs", checked: false }, { text: "Clean Tub & Shower", checked: false }, { text: "Clean Stove Top", checked: false }, { text: "", checked: false }, { text: "Sort Mail & Shred Junk", checked: false }, { text: "", checked: false }, { text: "", checked: false }],
+          [{ text: "Grocery Shop Trader Joes", checked: false }, { text: "Clean Bathroom Mirror", checked: false }, { text: "Wipe Countertops", checked: false }, { text: "", checked: false }, { text: "Tidy Pantry Cupboard", checked: false }, { text: "", checked: false }, { text: "", checked: false }],
+          [{ text: "", checked: false }, { text: "", checked: false }, { text: "", checked: false }, { text: "", checked: false }, { text: "", checked: false }, { text: "", checked: false }, { text: "", checked: false }],
+          [{ text: "", checked: false }, { text: "", checked: false }, { text: "", checked: false }, { text: "", checked: false }, { text: "", checked: false }, { text: "", checked: false }, { text: "", checked: false }]
+        ],
+        timeless: [
+          { text: "Read 20 Pages of Wisdom", checked: false },
+          { text: "Prune Balcony Herbs", checked: false },
+          { text: "Organize Cable & Charger Drawer", checked: false },
+          { text: "Pumice Stone Foot Care", checked: false },
+          { text: "Backup Laptop to Cloud", checked: false },
+          { text: "Cancel Inactive Subscriptions", checked: false },
+          { text: "", checked: false }
+        ],
+        everyday: [
+          { text: "Do a Load of Dishes", checks: [false,false,false,false,false,false,false] },
+          { text: "Make Bed Daily", checks: [false,false,false,false,false,false,false] },
+          { text: "Wipe Down Coffee Bar", checks: [false,false,false,false,false,false,false] },
+          { text: "15m Evening Speed Tidy", checks: [false,false,false,false,false,false,false] },
+          { text: "Water Indoor Houseplants", checks: [false,false,false,false,false,false,false] },
+          { text: "", checks: [false,false,false,false,false,false,false] },
+          { text: "", checks: [false,false,false,false,false,false,false] },
+          { text: "", checks: [false,false,false,false,false,false,false] },
+          { text: "", checks: [false,false,false,false,false,false,false] },
+          { text: "", checks: [false,false,false,false,false,false,false] }
+        ],
+        monthly: [
+          { text: "Wash Windows & Balcony Rail", checks: new Array(12).fill(false) },
+          { text: "Descale Electric Kettle & Keurig", checks: new Array(12).fill(false) },
+          { text: "Disinfect Doorknobs & Switches", checks: new Array(12).fill(false) },
+          { text: "Deep Clean Range Hood Filter", checks: new Array(12).fill(false) },
+          { text: "Clean Shower Curtain Liner", checks: new Array(12).fill(false) },
+          { text: "Wipe Down Kitchen Cabinets", checks: new Array(12).fill(false) },
+          { text: "Vacuum Under Sofa & Bed", checks: new Array(12).fill(false) },
+          { text: "Check Smoke Alarm / Battery", checks: new Array(12).fill(false) },
+          { text: "Clean Out Coat Closet", checks: new Array(12).fill(false) },
+          { text: "Wash Bathroom Rugs", checks: new Array(12).fill(false) }
+        ],
+        quarterly: [
+          { text: "Wash Window Curtains", checks: [false,false,false,false] },
+          { text: "Replace Brita Water Filter", checks: [false,false,false,false] },
+          { text: "Change Toothbrush Heads", checks: [false,false,false,false] },
+          { text: "Replace Kitchen Sponge", checks: [false,false,false,false] },
+          { text: "Deep Scrub Oven Interior", checks: [false,false,false,false] },
+          { text: "Rotate Bedroom Mattress", checks: [false,false,false,false] },
+          { text: "Declutter Bathroom Vanity", checks: [false,false,false,false] },
+          { text: "Deep Clean Garbage Disposal", checks: [false,false,false,false] },
+          { text: "", checks: [false,false,false,false] }
+        ],
+        semiannual: [
+          { text: "Declutter Wardrobe for Season", checks: [false,false] },
+          { text: "Shred Old Financial Receipts", checks: [false,false] },
+          { text: "Deep Shampoo Living Room Rug", checks: [false,false] },
+          { text: "Clean Behind Fridge & Stove", checks: [false,false] },
+          { text: "Wash Mattress Protector", checks: [false,false] },
+          { text: "Wipe Window Blinds & Sills", checks: [false,false] },
+          { text: "", checks: [false,false] },
+          { text: "", checks: [false,false] },
+          { text: "", checks: [false,false] }
+        ],
+        annual: [
+          { lMonth: "J", lText: "Reasses Chore Chart", rMonth: "J", rText: "Deep Clean Balcony Furniture" },
+          { lMonth: "F", lText: "Audit Apartment Lease & Insurance", rMonth: "A", rText: "Deep Wipe Kitchen Ceiling" },
+          { lMonth: "M", lText: "Donate Spring Clothes", rMonth: "S", rText: "Clean Air Conditioning Filter" },
+          { lMonth: "A", lText: "Check Weather Stripping", rMonth: "O", rText: "Inspect Radiators / Heaters" },
+          { lMonth: "M", lText: "Clean Window Tracks", rMonth: "N", rText: "Stock Winter Storm Supplies" },
+          { lMonth: "J", lText: "Defrost & Deep Clean Freezer", rMonth: "D", rText: "Annual Digital Hard Drive Backup" },
+          { lMonth: "", lText: "", rMonth: "", rText: "" },
+          { lMonth: "", lText: "", rMonth: "", rText: "" },
+          { lMonth: "", lText: "", rMonth: "", rText: "" }
+        ]
+      },
+
+      house: {
+        id: "house",
+        name: "House Living",
+        week: [
+          [{ text: "Wash Bedsheets", checked: false }, { text: "Clean Toilet", checked: false }, { text: "Disinfect Kit. Sink", checked: false }, { text: "Break Down Boxes", checked: false }, { text: "Cleanout Fridge", checked: false }, { text: "Declutter All", checked: false }, { text: "Dust All", checked: false }],
+          [{ text: "Wash Towels", checked: false }, { text: "Clean Bath. Sink", checked: false }, { text: "Change/Wash Kit. Towel", checked: false }, { text: "Brush Dogs", checked: false }, { text: "Take Trash Out", checked: false }, { text: "", checked: false }, { text: "Sweep/Mop Floors", checked: false }],
+          [{ text: "Wash Pet Beds", checked: false }, { text: "Change/Wash Towels", checked: false }, { text: "Clean Microwave", checked: false }, { text: "Clip Dogs Toenails", checked: false }, { text: "Take Bath. Trash Out", checked: false }, { text: "", checked: false }, { text: "", checked: false }],
+          [{ text: "Wash Dog Bowls/Water", checked: false }, { text: "Clean Tub", checked: false }, { text: "Clean Stovetop", checked: false }, { text: "", checked: false }, { text: "Take Recycling Out", checked: false }, { text: "", checked: false }, { text: "", checked: false }],
+          [{ text: "Grocery Shop", checked: false }, { text: "Clean Mirror", checked: false }, { text: "Clean Counter", checked: false }, { text: "", checked: false }, { text: "Tidy Pantry", checked: false }, { text: "", checked: false }, { text: "", checked: false }],
+          [{ text: "", checked: false }, { text: "", checked: false }, { text: "", checked: false }, { text: "", checked: false }, { text: "", checked: false }, { text: "", checked: false }, { text: "", checked: false }],
+          [{ text: "", checked: false }, { text: "", checked: false }, { text: "", checked: false }, { text: "", checked: false }, { text: "", checked: false }, { text: "", checked: false }, { text: "", checked: false }]
+        ],
+        timeless: [
+          { text: "Read 20 Pages of Wisdom", checked: false },
+          { text: "Backup Laptop to Cloud", checked: false },
+          { text: "Sort Cable & Charger Box", checked: false },
+          { text: "Pumice Stone Foot Care", checked: false },
+          { text: "Prune Dead Plant Leaves", checked: false },
+          { text: "Schedule Annual Checkup", checked: false },
+          { text: "", checked: false }
+        ],
+        everyday: [
+          { text: "Do a Load of Laundry", checks: [false,false,false,false,false,false,false] },
+          { text: "Do a Load of Dishes", checks: [false,false,false,false,false,false,false] },
+          { text: "Tidy Up", checks: [false,false,false,false,false,false,false] },
+          { text: "Water Plants", checks: [false,false,false,false,false,false,false] },
+          { text: "", checks: [false,false,false,false,false,false,false] },
+          { text: "", checks: [false,false,false,false,false,false,false] },
+          { text: "", checks: [false,false,false,false,false,false,false] },
+          { text: "", checks: [false,false,false,false,false,false,false] },
+          { text: "", checks: [false,false,false,false,false,false,false] },
+          { text: "", checks: [false,false,false,false,false,false,false] }
+        ],
+        monthly: [
+          { text: "Wash Windows", checks: new Array(12).fill(false) },
+          { text: "Wash Walls and Baseboards", checks: new Array(12).fill(false) },
+          { text: "Disinfect Light Switches/Doorknobs", checks: new Array(12).fill(false) },
+          { text: "Bath Dogs", checks: new Array(12).fill(false) },
+          { text: "Clean Oven", checks: new Array(12).fill(false) },
+          { text: "Descale Coffee Maker", checks: new Array(12).fill(false) },
+          { text: "Degrease Backsplash", checks: new Array(12).fill(false) },
+          { text: "Clean Dishwasher/Fridge", checks: new Array(12).fill(false) },
+          { text: "Wash/Declutter Dog Toys", checks: new Array(12).fill(false) },
+          { text: "Clean Shower Curtain", checks: new Array(12).fill(false) }
+        ],
+        quarterly: [
+          { text: "Wash Curtains", checks: [false,false,false,false] },
+          { text: "Clean Trash Cans (Inside and Out)", checks: [false,false,false,false] },
+          { text: "Change Toothbrush Heads", checks: [false,false,false,false] },
+          { text: "Change Air Filter", checks: [false,false,false,false] },
+          { text: "Replace Kitchen Sponge", checks: [false,false,false,false] },
+          { text: "Replace Loofahs", checks: [false,false,false,false] },
+          { text: "Replace Razors", checks: [false,false,false,false] },
+          { text: "Clean/Organize Pantry", checks: [false,false,false,false] },
+          { text: "", checks: [false,false,false,false] }
+        ],
+        semiannual: [
+          { text: "Declutter/Sort Paper Files", checks: [false,false] },
+          { text: "Declutter Closet", checks: [false,false] },
+          { text: "Deep Clean Washer/Dryer", checks: [false,false] },
+          { text: "Clean Vents/Ceiling Fans", checks: [false,false] },
+          { text: "Clean Vacuum/Change Filter", checks: [false,false] },
+          { text: "Deep Clean Couch", checks: [false,false] },
+          { text: "Clean Range Hood", checks: [false,false] },
+          { text: "", checks: [false,false] },
+          { text: "", checks: [false,false] }
+        ],
+        annual: [
+          { lMonth: "J", lText: "", rMonth: "J", rText: "Reasses Chore Chart" },
+          { lMonth: "F", lText: "Reasses Belongings", rMonth: "A", rText: "" },
+          { lMonth: "M", lText: "Donate Items", rMonth: "S", rText: "Clean Behind Stove/Fridge" },
+          { lMonth: "A", lText: "Check Weather Stripping", rMonth: "O", rText: "" },
+          { lMonth: "M", lText: "Clean Gutters", rMonth: "N", rText: "" },
+          { lMonth: "J", lText: "Hurrice Prep", rMonth: "D", rText: "" },
+          { lMonth: "", lText: "", rMonth: "", rText: "" },
+          { lMonth: "", lText: "", rMonth: "", rText: "" },
+          { lMonth: "", lText: "", rMonth: "", rText: "" }
+        ]
+      },
+
+      parenting: {
+        id: "parenting",
+        name: "Parenting & Romance Balance",
+        week: [
+          [{ text: "Pack Kids School Lunches", checked: false }, { text: "Schedule Bi-Weekly Date Night", checked: false }, { text: "Help with Homework / Reading", checked: false }, { text: "Give 15m Shoulder Rub", checked: false }, { text: "One-on-One Solo Outing with Child", checked: false }, { text: "Cook Fancy Dinner for Two", checked: false }, { text: "Rotate Kids Toy Bins", checked: false }],
+          [{ text: "Conduct Sunday Couple Sync", checked: false }, { text: "Read Bedtime Story (20m)", checked: false }, { text: "Lay Out Kids Outfits", checked: false }, { text: "Send Flirty Midday Text", checked: false }, { text: "Wash Stuffed Animals / Toys", checked: false }, { text: "2hr Solo Recharge for Partner", checked: false }, { text: "2hr Solo Recharge for Self", checked: false }],
+          [{ text: "Wash Bedsheets & Blankets", checked: false }, { text: "Sanitize Bottles & Sippy Cups", checked: false }, { text: "Restock Diaper & Wipe Caddies", checked: false }, { text: "Dance Party with Kids", checked: false }, { text: "Unplugged Walk Hand in Hand", checked: false }, { text: "", checked: false }, { text: "Tackle Chore Partner Dislikes", checked: false }],
+          [{ text: "Review Kids School Calendar", checked: false }, { text: "Clean High Chair & Tray", checked: false }, { text: "Clean Stovetop & Counters", checked: false }, { text: "", checked: false }, { text: "Order Dessert Takeout for Two", checked: false }, { text: "", checked: false }, { text: "", checked: false }],
+          [{ text: "Family Grocery Shop Run", checked: false }, { text: "Organize Carseat Crumbs", checked: false }, { text: "Check Kids Medication Kit", checked: false }, { text: "", checked: false }, { text: "Tell Partner 3 Appreciations", checked: false }, { text: "", checked: false }, { text: "", checked: false }],
+          [{ text: "", checked: false }, { text: "", checked: false }, { text: "", checked: false }, { text: "", checked: false }, { text: "", checked: false }, { text: "", checked: false }, { text: "", checked: false }],
+          [{ text: "", checked: false }, { text: "", checked: false }, { text: "", checked: false }, { text: "", checked: false }, { text: "", checked: false }, { text: "", checked: false }, { text: "", checked: false }]
+        ],
+        timeless: [
+          { text: "Long 30-Second Embrace Greeting", checked: false },
+          { text: "Confirm Babysitter Date Night", checked: false },
+          { text: "Bring Partner Morning Coffee", checked: false },
+          { text: "Leave Love Note on Pillow", checked: false },
+          { text: "Practice Emotion Naming with Child", checked: false },
+          { text: "Schedule Pediatrician Checkup", checked: false },
+          { text: "", checked: false }
+        ],
+        everyday: [
+          { text: "Read Bedtime Story (20m Unplugged)", checks: [false,false,false,false,false,false,false] },
+          { text: "Conduct 'Highs & Lows' Dinner Chat", checks: [false,false,false,false,false,false,false] },
+          { text: "Say 'Thank You for Working Hard'", checks: [false,false,false,false,false,false,false] },
+          { text: "Do a Load of Kids Laundry", checks: [false,false,false,false,false,false,false] },
+          { text: "Cuddle No Screens 20 Minutes", checks: [false,false,false,false,false,false,false] },
+          { text: "Do a Load of Dishes", checks: [false,false,false,false,false,false,false] },
+          { text: "15m Living Room Toy Reset", checks: [false,false,false,false,false,false,false] },
+          { text: "", checks: [false,false,false,false,false,false,false] },
+          { text: "", checks: [false,false,false,false,false,false,false] },
+          { text: "", checks: [false,false,false,false,false,false,false] }
+        ],
+        monthly: [
+          { text: "Audit Kids Clothes for Outgrown Sizes", checks: new Array(12).fill(false) },
+          { text: "Check In on Mental Load & Chore Equity", checks: new Array(12).fill(false) },
+          { text: "Wash Stroller Fabrics & Wheels", checks: new Array(12).fill(false) },
+          { text: "Couple Budget & Savings Sync", checks: new Array(12).fill(false) },
+          { text: "Deep Clean Kid Bath Toys", checks: new Array(12).fill(false) },
+          { text: "Clean Out Family Van / Car Interior", checks: new Array(12).fill(false) },
+          { text: "Plan Special Solo Outing per Child", checks: new Array(12).fill(false) },
+          { text: "Book Overnight Babysitter / Staycation", checks: new Array(12).fill(false) },
+          { text: "Archive Kids School Artworks", checks: new Array(12).fill(false) },
+          { text: "Sanitize Diaper Pail & Caddies", checks: new Array(12).fill(false) }
+        ],
+        quarterly: [
+          { text: "Audit Seasonal Kids Shoes & Coats", checks: [false,false,false,false] },
+          { text: "Plan Weekend Couples Getaway Trip", checks: [false,false,false,false] },
+          { text: "Kids Dentist Routine Checkups", checks: [false,false,false,false] },
+          { text: "Review Screen Time Limits & Rules", checks: [false,false,false,false] },
+          { text: "Revisit 5-Year Family Vision", checks: [false,false,false,false] },
+          { text: "Deep Clean Kids Mattresses & Protectors", checks: [false,false,false,false] },
+          { text: "Donate Outgrown Baby / Kid Equipment", checks: [false,false,false,false] },
+          { text: "Update Emergency Contacts / Wills", checks: [false,false,false,false] },
+          { text: "", checks: [false,false,false,false] }
+        ],
+        semiannual: [
+          { text: "Review Division of Morning/Evening Shifts", checks: [false,false] },
+          { text: "Audit Kids Growth Percentiles & Vaccines", checks: [false,false] },
+          { text: "Deep Clean Kid Car Seats / Straps", checks: [false,false] },
+          { text: "Re-negotiate Chore & Solo Time Boundaries", checks: [false,false] },
+          { text: "Family Photo Album Archival Print", checks: [false,false] },
+          { text: "Deep Steam Living Room Rug & Sofa", checks: [false,false] },
+          { text: "", checks: [false,false] },
+          { text: "", checks: [false,false] },
+          { text: "", checks: [false,false] }
+        ],
+        annual: [
+          { lMonth: "J", lText: "Family Goal & Values Alignment", rMonth: "J", rText: "Plan Summer Camp Logistics" },
+          { lMonth: "F", lText: "Valentine's Romantic Celebration", rMonth: "A", rText: "Back to School Clothing Inventory" },
+          { lMonth: "M", lText: "Purge Broken Toys & Games", rMonth: "S", rText: "Pediatric Wellness Exams" },
+          { lMonth: "A", lText: "Plan Family Summer Vacation", rMonth: "O", rText: "Carve Pumpkins & Family Costumes" },
+          { lMonth: "M", lText: "Mother's Day Rest & Celebration", rMonth: "N", rText: "Holiday Gift Budget & Secret Planning" },
+          { lMonth: "J", lText: "Father's Day Celebration & Rest", rMonth: "D", rText: "End of Year Marriage Review Dinner" },
+          { lMonth: "", lText: "", rMonth: "", rText: "" },
+          { lMonth: "", lText: "", rMonth: "", rText: "" },
+          { lMonth: "", lText: "", rMonth: "", rText: "" }
+        ]
+      }
+    };
+
+    // User's active custom sheets storage
+    let userSheets = {
+      apartment: JSON.parse(JSON.stringify(TEMPLATE_PRESETS.apartment)),
+      house: JSON.parse(JSON.stringify(TEMPLATE_PRESETS.house)),
+      parenting: JSON.parse(JSON.stringify(TEMPLATE_PRESETS.parenting))
+    };
+
+    let activeSheetKey = "apartment";
+    let currentSheetState = userSheets[activeSheetKey];
+    let modalEditTarget = null;
+    let draggedChoreData = null; // Enterprise consumer drag-drop session tracker
+    let lastGeneratedCsv = "";
+
+    function getTaskDifficulty(name) {
+      if (!name) return 0;
+      const found = chorePool.find(c => c.name.toLowerCase() === name.toLowerCase());
+      if (found) return found.diff;
+      const n = name.toLowerCase();
+      if (n.includes('deep') || n.includes('behind') || n.includes('prep') || n.includes('roof') || n.includes('annual') || n.includes('getaway')) return 6;
+      if (n.includes('scrub') || n.includes('powerwash') || n.includes('baseboards') || n.includes('squat') || n.includes('stroller')) return 5;
+      if (n.includes('clean') || n.includes('wash') || n.includes('workout') || n.includes('run') || n.includes('dinner') || n.includes('outing')) return 4;
+      if (n.includes('tidy') || n.includes('dust') || n.includes('cook') || n.includes('read') || n.includes('date') || n.includes('sync')) return 3;
+      if (n.includes('replace') || n.includes('trash') || n.includes('wipe') || n.includes('water') || n.includes('massage') || n.includes('rub')) return 2;
+      return 1;
+    }
+
+    // --- 2B. TEMPLATE SWITCHING & MANAGEMENT LOGIC ---
+    function toggleTemplateMenu() {
+      const dropdown = document.getElementById("template-dropdown");
+      const isHidden = dropdown.classList.contains("hidden");
+      if (isHidden) {
+        renderTemplateMenuList();
+        dropdown.classList.remove("hidden");
+      } else {
+        dropdown.classList.add("hidden");
+      }
+    }
+
+    function renderTemplateMenuList() {
+      const container = document.getElementById("template-list-container");
+      container.innerHTML = "";
+
+      Object.keys(userSheets).forEach(key => {
+        const sheet = userSheets[key];
+        const isActive = key === activeSheetKey;
+
+        const row = document.createElement("div");
+        row.className = `px-3 py-2 flex items-center justify-between cursor-pointer hover:bg-slate-100 transition ${isActive ? 'bg-indigo-50 font-bold text-indigo-900 border-l-4 border-indigo-600' : 'text-slate-700'}`;
+        
+        const labelWrap = document.createElement("div");
+        labelWrap.className = "flex items-center gap-2 overflow-hidden flex-1";
+        labelWrap.onclick = () => switchSheetTemplate(key);
+        labelWrap.innerHTML = `
+          <i class="fa-regular ${isActive ? 'fa-circle-dot text-indigo-600' : 'fa-circle text-slate-400'} text-xs shrink-0"></i>
+          <span class="truncate text-xs">${sheet.name}</span>
+        `;
+
+        const actionWrap = document.createElement("div");
+        actionWrap.className = "flex items-center gap-1.5 shrink-0";
+
+        // Rename button
+        const renBtn = document.createElement("button");
+        renBtn.className = "text-slate-400 hover:text-slate-700 p-1 text-[11px]";
+        renBtn.title = "Rename Sheet";
+        renBtn.onclick = (e) => {
+          e.stopPropagation();
+          renameSheetTemplate(key);
+        };
+        renBtn.innerHTML = `<i class="fa-solid fa-pen"></i>`;
+        actionWrap.appendChild(renBtn);
+
+        // Delete button (allowed if more than 1 sheet exists)
+        if (Object.keys(userSheets).length > 1) {
+          const delBtn = document.createElement("button");
+          delBtn.className = "text-slate-400 hover:text-rose-600 p-1 text-[11px]";
+          delBtn.title = "Delete Sheet";
+          delBtn.onclick = (e) => {
+            e.stopPropagation();
+            deleteSheetTemplate(key);
+          };
+          delBtn.innerHTML = `<i class="fa-solid fa-trash-can"></i>`;
+          actionWrap.appendChild(delBtn);
+        }
+
+        row.appendChild(labelWrap);
+        row.appendChild(actionWrap);
+        container.appendChild(row);
+      });
+    }
+
+    function switchSheetTemplate(key) {
+      if (!userSheets[key]) return;
+      activeSheetKey = key;
+      currentSheetState = userSheets[key];
+      document.getElementById("active-template-label").innerText = currentSheetState.name;
+      document.getElementById("template-dropdown").classList.add("hidden");
+      renderSpreadsheet();
+      showToast(`Switched to "${currentSheetState.name}"`, "info");
+    }
+
+    function createNewSheetTemplate() {
+      const baseName = "Custom Sheet " + (Object.keys(userSheets).length + 1);
+      const name = prompt("Enter a name for the new life sheet:", baseName);
+      if (!name) return;
+
+      const newId = "custom_" + Date.now();
+      // Start with blank template skeleton
+      userSheets[newId] = {
+        id: newId,
+        name: name.trim(),
+        week: Array.from({ length: 7 }, () => Array.from({ length: 7 }, () => ({ text: "", checked: false }))),
+        timeless: Array.from({ length: 7 }, () => ({ text: "", checked: false })),
+        everyday: Array.from({ length: 10 }, () => ({ text: "", checks: [false,false,false,false,false,false,false] })),
+        monthly: Array.from({ length: 10 }, () => ({ text: "", checks: new Array(12).fill(false) })),
+        quarterly: Array.from({ length: 9 }, () => ({ text: "", checks: [false,false,false,false] })),
+        semiannual: Array.from({ length: 9 }, () => ({ text: "", checks: [false,false] })),
+        annual: Array.from({ length: 9 }, (_, idx) => {
+          const leftM = ["J","F","M","A","M","J","","",""][idx];
+          const rightM = ["J","A","S","O","N","D","","",""][idx];
+          return { lMonth: leftM, lText: "", rMonth: rightM, rText: "" };
+        })
+      };
+
+      switchSheetTemplate(newId);
+    }
+
+    function duplicateActiveTemplate() {
+      const active = userSheets[activeSheetKey];
+      const cloneName = prompt("Name for duplicated sheet:", active.name + " (Copy)");
+      if (!cloneName) return;
+
+      const newId = "clone_" + Date.now();
+      userSheets[newId] = JSON.parse(JSON.stringify(active));
+      userSheets[newId].id = newId;
+      userSheets[newId].name = cloneName.trim();
+
+      switchSheetTemplate(newId);
+    }
+
+    function renameSheetTemplate(key) {
+      const current = userSheets[key];
+      const newName = prompt("Enter new name for this sheet:", current.name);
+      if (!newName || !newName.trim()) return;
+
+      current.name = newName.trim();
+      if (key === activeSheetKey) {
+        document.getElementById("active-template-label").innerText = current.name;
+      }
+      renderTemplateMenuList();
+      showToast(`Sheet renamed to "${current.name}"`, "info");
+    }
+
+    function deleteSheetTemplate(key) {
+      if (Object.keys(userSheets).length <= 1) {
+        showToast("Cannot delete the only remaining sheet", "error");
+        return;
+      }
+      const confirmed = confirm(`Are you sure you want to delete "${userSheets[key].name}"?`);
+      if (!confirmed) return;
+
+      delete userSheets[key];
+      if (activeSheetKey === key) {
+        const remainingKeys = Object.keys(userSheets);
+        switchSheetTemplate(remainingKeys[0]);
+      } else {
+        renderTemplateMenuList();
+      }
+      showToast("Sheet deleted", "info");
+    }
+
+    // Close template dropdown when clicking outside
+    document.addEventListener("click", (e) => {
+      const btn = document.getElementById("template-switch-btn");
+      const menu = document.getElementById("template-dropdown");
+      if (btn && menu && !btn.contains(e.target) && !menu.contains(e.target)) {
+        menu.classList.add("hidden");
+      }
+    });
+
+    // --- 3. UNIFIED SPREADSHEET TABLE GENERATION (WITH TIMELESS LIST AT TOP RIGHT) ---
+    function renderSpreadsheet() {
+      const tbody = document.getElementById("sheet-main-body");
+      tbody.innerHTML = "";
+
+      // ROW 1: WEEKDAY HEADERS + TIMELESS HEADER
+      const tr1 = document.createElement("tr");
+      tr1.innerHTML = `
+        <td class="header-cell-index">1</td>
+        <th colspan="2" class="th-sun">SUN</th>
+        <th colspan="2" class="th-mon">MON</th>
+        <th colspan="2" class="th-tue">TUE</th>
+        <th colspan="2" class="th-wed">WED</th>
+        <th colspan="2" class="th-thu">THU</th>
+        <th colspan="2" class="th-fri">FRI</th>
+        <th colspan="2" class="th-sat">SAT</th>
+        <th colspan="2" class="th-timeless">TIMELESS</th>
+      `;
+      tbody.appendChild(tr1);
+
+      // ROWS 2 TO 8: WEEKDAYS SLOTS & CHECKBOXES + TIMELESS COLUMN
+      for (let r = 0; r < 7; r++) {
+        const rowNum = r + 2;
+        const tr = document.createElement("tr");
+        const tdIdx = document.createElement("td");
+        tdIdx.className = "header-cell-index";
+        tdIdx.innerText = rowNum;
+        tr.appendChild(tdIdx);
+
+        // 7 Weekday Columns
+        for (let day = 0; day < 7; day++) {
+          const item = currentSheetState.week[r][day];
+          const diff = getTaskDifficulty(item.text);
+
+          // Task Slot
+          const tdSlot = document.createElement("td");
+          tdSlot.className = "p-0 relative";
+          const slot = document.createElement("div");
+          slot.className = `sheet-slot ${diff > 0 ? 'diff-' + diff : ''}`;
+          slot.dataset.loc = `week:${r}:${day}`;
+          slot.ondragover = handleDragOver;
+          slot.ondragleave = handleDragLeave;
+          slot.ondrop = handleDrop;
+          slot.onclick = () => handleSlotClick(`week:${r}:${day}`);
+
+          if (item.text) {
+            slot.draggable = true;
+            slot.ondragstart = (e) => handleSlotDragStart(e, `week:${r}:${day}`, item.text);
+            slot.ondragend = handleSlotDragEnd;
+
+            slot.innerHTML = `
+              <div class="flex items-center gap-1 overflow-hidden flex-1">
+                <i class="fa-solid fa-grip-vertical text-[9px] text-slate-400 cursor-grab shrink-0"></i>
+                <span class="truncate pr-1">${item.text}</span>
+              </div>
+              <button onclick="event.stopPropagation(); clearSlot('week:${r}:${day}')" class="text-slate-400 hover:text-rose-600 text-[10px] px-0.5">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            `;
+          } else {
+            slot.innerHTML = "";
+          }
+          tdSlot.appendChild(slot);
+          tr.appendChild(tdSlot);
+
+          // Checkbox Cell
+          const tdCheck = document.createElement("td");
+          tdCheck.className = "sheet-check-cell";
+          const box = document.createElement("div");
+          box.className = `sheet-checkbox ${item.checked ? 'checked' : ''}`;
+          box.onclick = () => {
+            item.checked = !item.checked;
+            renderSpreadsheet();
+          };
+          tdCheck.appendChild(box);
+          tr.appendChild(tdCheck);
+        }
+
+        // Timeless Slot (Row 2-8, perfectly lining up with Annual right side border)
+        const timeItem = currentSheetState.timeless[r] || { text: "", checked: false };
+        const timeDiff = getTaskDifficulty(timeItem.text);
+
+        const tdTimeSlot = document.createElement("td");
+        tdTimeSlot.className = "p-0 relative";
+        const timeSlot = document.createElement("div");
+        timeSlot.className = `sheet-slot ${timeDiff > 0 ? 'diff-' + timeDiff : ''}`;
+        timeSlot.dataset.loc = `timeless:${r}`;
+        timeSlot.ondragover = handleDragOver;
+        timeSlot.ondragleave = handleDragLeave;
+        timeSlot.ondrop = handleDrop;
+        timeSlot.onclick = () => handleSlotClick(`timeless:${r}`);
+
+        if (timeItem.text) {
+          timeSlot.draggable = true;
+          timeSlot.ondragstart = (e) => handleSlotDragStart(e, `timeless:${r}`, timeItem.text);
+          timeSlot.ondragend = handleSlotDragEnd;
+
+          timeSlot.innerHTML = `
+            <div class="flex items-center gap-1 overflow-hidden flex-1">
+              <i class="fa-solid fa-grip-vertical text-[9px] text-slate-400 cursor-grab shrink-0"></i>
+              <span class="truncate pr-1">${timeItem.text}</span>
+            </div>
+            <button onclick="event.stopPropagation(); clearSlot('timeless:${r}')" class="text-slate-400 hover:text-rose-600 text-[10px] px-0.5">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          `;
+        } else {
+          timeSlot.innerHTML = "";
+        }
+        tdTimeSlot.appendChild(timeSlot);
+        tr.appendChild(tdTimeSlot);
+
+        // Timeless Checkbox Cell
+        const tdTimeCheck = document.createElement("td");
+        tdTimeCheck.className = "sheet-check-cell";
+        const timeBox = document.createElement("div");
+        timeBox.className = `sheet-checkbox ${timeItem.checked ? 'checked' : ''}`;
+        timeBox.onclick = () => {
+          timeItem.checked = !timeItem.checked;
+          renderSpreadsheet();
+        };
+        tdTimeCheck.appendChild(timeBox);
+        tr.appendChild(tdTimeCheck);
+
+        tbody.appendChild(tr);
+      }
+
+      // ROW 9: HORIZONTAL SPACER
+      const tr9 = document.createElement("tr");
+      tr9.className = "spacer-row";
+      tr9.innerHTML = `<td class="header-cell-index">9</td><td colspan="16" class="bg-white"></td>`;
+      tbody.appendChild(tr9);
+
+      // ROW 10: EVERY DAY & MONTHLY HEADERS
+      const tr10 = document.createElement("tr");
+      tr10.innerHTML = `
+        <td class="header-cell-index">10</td>
+        <!-- EVERY DAY (Col span 1 for chore slot, 7 matrix cols) -->
+        <th colspan="1" class="sec-everyday text-center">EVERY DAY</th>
+        <th class="matrix-th-day">S</th>
+        <th class="matrix-th-day">M</th>
+        <th class="matrix-th-day">T</th>
+        <th class="matrix-th-day">W</th>
+        <th class="matrix-th-day">T</th>
+        <th class="matrix-th-day">F</th>
+        <th class="matrix-th-day">S</th>
+        <!-- MONTHLY (Col span 1 for chore slot, 7 sub-cols spanned for 12 month matrices flush with right border) -->
+        <th colspan="2" class="sec-monthly text-center">MONTHLY</th>
+        <th colspan="5" class="p-0">
+          <div class="flex w-full h-full">
+            <span class="matrix-th-month flex-1">J</span>
+            <span class="matrix-th-month flex-1">F</span>
+            <span class="matrix-th-month flex-1">M</span>
+            <span class="matrix-th-month flex-1">A</span>
+            <span class="matrix-th-month flex-1">M</span>
+            <span class="matrix-th-month flex-1">J</span>
+            <span class="matrix-th-month flex-1">J</span>
+            <span class="matrix-th-month flex-1">A</span>
+            <span class="matrix-th-month flex-1">S</span>
+            <span class="matrix-th-month flex-1">O</span>
+            <span class="matrix-th-month flex-1">N</span>
+            <span class="matrix-th-month flex-1">D</span>
+          </div>
+        </th>
+      `;
+      tbody.appendChild(tr10);
+
+      // ROWS 11 TO 20: EVERY DAY & MONTHLY DATA
+      for (let r = 0; r < 10; r++) {
+        const rowNum = r + 11;
+        const tr = document.createElement("tr");
+        
+        // Row index
+        const tdIdx = document.createElement("td");
+        tdIdx.className = "header-cell-index";
+        tdIdx.innerText = rowNum;
+        tr.appendChild(tdIdx);
+
+        // Every day task slot
+        const edItem = currentSheetState.everyday[r];
+        const edDiff = getTaskDifficulty(edItem.text);
+        const tdEd = document.createElement("td");
+        tdEd.className = "p-0 relative";
+        const edSlot = document.createElement("div");
+        edSlot.className = `sheet-slot ${edDiff > 0 ? 'diff-' + edDiff : ''}`;
+        edSlot.dataset.loc = `everyday:${r}`;
+        edSlot.ondragover = handleDragOver;
+        edSlot.ondragleave = handleDragLeave;
+        edSlot.ondrop = handleDrop;
+        edSlot.onclick = () => handleSlotClick(`everyday:${r}`);
+
+        if (edItem.text) {
+          edSlot.draggable = true;
+          edSlot.ondragstart = (e) => handleSlotDragStart(e, `everyday:${r}`, edItem.text);
+          edSlot.ondragend = handleSlotDragEnd;
+
+          edSlot.innerHTML = `
+            <div class="flex items-center gap-1 overflow-hidden flex-1">
+              <i class="fa-solid fa-grip-vertical text-[9px] text-slate-400 cursor-grab shrink-0"></i>
+              <span class="truncate pr-1">${edItem.text}</span>
+            </div>
+            <button onclick="event.stopPropagation(); clearSlot('everyday:${r}')" class="text-slate-400 hover:text-rose-600 text-[10px] px-0.5">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          `;
+        }
+        tdEd.appendChild(edSlot);
+        tr.appendChild(tdEd);
+
+        // 7 Day Checkboxes for Everyday
+        for (let d = 0; d < 7; d++) {
+          const td = document.createElement("td");
+          td.className = `matrix-check ${edItem.checks[d] ? 'marked' : ''}`;
+          td.innerText = edItem.checks[d] ? "✓" : "";
+          td.onclick = () => {
+            edItem.checks[d] = !edItem.checks[d];
+            renderSpreadsheet();
+          };
+          tr.appendChild(td);
+        }
+
+        // Monthly task slot (spans 2 columns)
+        const moItem = currentSheetState.monthly[r];
+        const moDiff = getTaskDifficulty(moItem.text);
+        const tdMo = document.createElement("td");
+        tdMo.colSpan = 2;
+        tdMo.className = "p-0 relative";
+        const moSlot = document.createElement("div");
+        moSlot.className = `sheet-slot ${moDiff > 0 ? 'diff-' + moDiff : ''}`;
+        moSlot.dataset.loc = `monthly:${r}`;
+        moSlot.ondragover = handleDragOver;
+        moSlot.ondragleave = handleDragLeave;
+        moSlot.ondrop = handleDrop;
+        moSlot.onclick = () => handleSlotClick(`monthly:${r}`);
+
+        if (moItem.text) {
+          moSlot.draggable = true;
+          moSlot.ondragstart = (e) => handleSlotDragStart(e, `monthly:${r}`, moItem.text);
+          moSlot.ondragend = handleSlotDragEnd;
+
+          moSlot.innerHTML = `
+            <div class="flex items-center gap-1 overflow-hidden flex-1">
+              <i class="fa-solid fa-grip-vertical text-[9px] text-slate-400 cursor-grab shrink-0"></i>
+              <span class="truncate pr-1">${moItem.text}</span>
+            </div>
+            <button onclick="event.stopPropagation(); clearSlot('monthly:${r}')" class="text-slate-400 hover:text-rose-600 text-[10px] px-0.5">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          `;
+        }
+        tdMo.appendChild(moSlot);
+        tr.appendChild(tdMo);
+
+        // 12 Month Checkboxes for Monthly (spanned over 5 table columns flush with outer border)
+        const tdMonths = document.createElement("td");
+        tdMonths.colSpan = 5;
+        tdMonths.className = "p-0";
+        const mContainer = document.createElement("div");
+        mContainer.className = "flex w-full h-full";
+        for (let m = 0; m < 12; m++) {
+          const mCell = document.createElement("div");
+          mCell.className = `flex-1 text-center matrix-check border-r last:border-r-0 border-slate-300 h-full flex items-center justify-center ${moItem.checks[m] ? 'marked-blue' : ''}`;
+          mCell.innerText = moItem.checks[m] ? "✓" : "";
+          mCell.onclick = () => {
+            moItem.checks[m] = !moItem.checks[m];
+            renderSpreadsheet();
+          };
+          mContainer.appendChild(mCell);
+        }
+        tdMonths.appendChild(mContainer);
+        tr.appendChild(tdMonths);
+
+        tbody.appendChild(tr);
+      }
+
+      // ROW 21: HORIZONTAL SPACER
+      const tr21 = document.createElement("tr");
+      tr21.className = "spacer-row";
+      tr21.innerHTML = `<td class="header-cell-index">21</td><td colspan="16" class="bg-white"></td>`;
+      tbody.appendChild(tr21);
+
+      // ROW 22: QUARTERLY, SEMI-ANNUAL, ANNUAL HEADERS
+      const tr22 = document.createElement("tr");
+      tr22.innerHTML = `
+        <td class="header-cell-index">22</td>
+        <!-- QUARTERLY (slot + 4 seasons S S F W) -->
+        <th colspan="1" class="sec-quarterly text-center">QUARTERLY</th>
+        <th class="matrix-th-season">S</th>
+        <th class="matrix-th-season">S</th>
+        <th class="matrix-th-season">F</th>
+        <th class="matrix-th-season">W</th>
+        <!-- SEMI-ANNUAL (slot + 2 halves 1 2) -->
+        <th colspan="2" class="sec-semiannual text-center">SEMI-ANNUAL</th>
+        <th class="matrix-th-semi">1</th>
+        <th class="matrix-th-semi">2</th>
+        <!-- ANNUAL (Double column matching top-right border alignment) -->
+        <th colspan="7" class="sec-annual text-center">ANNUAL</th>
+      `;
+      tbody.appendChild(tr22);
+
+      // ROWS 23 TO 31: LOWER SECTION DATA
+      for (let r = 0; r < 9; r++) {
+        const rowNum = r + 23;
+        const tr = document.createElement("tr");
+
+        // Row index
+        const tdIdx = document.createElement("td");
+        tdIdx.className = "header-cell-index";
+        tdIdx.innerText = rowNum;
+        tr.appendChild(tdIdx);
+
+        // Quarterly Slot
+        const qItem = currentSheetState.quarterly[r];
+        const qDiff = qItem ? getTaskDifficulty(qItem.text) : 0;
+        const tdQ = document.createElement("td");
+        tdQ.className = "p-0 relative";
+        const qSlot = document.createElement("div");
+        qSlot.className = `sheet-slot ${qDiff > 0 ? 'diff-' + qDiff : ''}`;
+        qSlot.dataset.loc = `quarterly:${r}`;
+        qSlot.ondragover = handleDragOver;
+        qSlot.ondragleave = handleDragLeave;
+        qSlot.ondrop = handleDrop;
+        qSlot.onclick = () => handleSlotClick(`quarterly:${r}`);
+
+        if (qItem && qItem.text) {
+          qSlot.draggable = true;
+          qSlot.ondragstart = (e) => handleSlotDragStart(e, `quarterly:${r}`, qItem.text);
+          qSlot.ondragend = handleSlotDragEnd;
+
+          qSlot.innerHTML = `
+            <div class="flex items-center gap-1 overflow-hidden flex-1">
+              <i class="fa-solid fa-grip-vertical text-[9px] text-slate-400 cursor-grab shrink-0"></i>
+              <span class="truncate pr-1">${qItem.text}</span>
+            </div>
+            <button onclick="event.stopPropagation(); clearSlot('quarterly:${r}')" class="text-slate-400 hover:text-rose-600 text-[10px] px-0.5">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          `;
+        }
+        tdQ.appendChild(qSlot);
+        tr.appendChild(tdQ);
+
+        // Quarterly 4 checks (S, S, F, W)
+        for (let q = 0; q < 4; q++) {
+          const td = document.createElement("td");
+          td.className = `matrix-check ${qItem && qItem.checks[q] ? 'marked-amber' : ''}`;
+          td.innerText = (qItem && qItem.checks[q]) ? "✓" : "";
+          td.onclick = () => {
+            if (qItem) {
+              qItem.checks[q] = !qItem.checks[q];
+              renderSpreadsheet();
+            }
+          };
+          tr.appendChild(td);
+        }
+
+        // Semi-Annual Slot (Colspan 2)
+        const saItem = currentSheetState.semiannual[r];
+        const saDiff = saItem ? getTaskDifficulty(saItem.text) : 0;
+        const tdSa = document.createElement("td");
+        tdSa.colSpan = 2;
+        tdSa.className = "p-0 relative";
+        const saSlot = document.createElement("div");
+        saSlot.className = `sheet-slot ${saDiff > 0 ? 'diff-' + saDiff : ''}`;
+        saSlot.dataset.loc = `semiannual:${r}`;
+        saSlot.ondragover = handleDragOver;
+        saSlot.ondragleave = handleDragLeave;
+        saSlot.ondrop = handleDrop;
+        saSlot.onclick = () => handleSlotClick(`semiannual:${r}`);
+
+        if (saItem && saItem.text) {
+          saSlot.draggable = true;
+          saSlot.ondragstart = (e) => handleSlotDragStart(e, `semiannual:${r}`, saItem.text);
+          saSlot.ondragend = handleSlotDragEnd;
+
+          saSlot.innerHTML = `
+            <div class="flex items-center gap-1 overflow-hidden flex-1">
+              <i class="fa-solid fa-grip-vertical text-[9px] text-slate-400 cursor-grab shrink-0"></i>
+              <span class="truncate pr-1">${saItem.text}</span>
+            </div>
+            <button onclick="event.stopPropagation(); clearSlot('semiannual:${r}')" class="text-slate-400 hover:text-rose-600 text-[10px] px-0.5">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          `;
+        }
+        tdSa.appendChild(saSlot);
+        tr.appendChild(tdSa);
+
+        // Semi-Annual 2 checks (1, 2)
+        for (let s = 0; s < 2; s++) {
+          const td = document.createElement("td");
+          td.className = `matrix-check ${saItem && saItem.checks[s] ? 'marked-blue' : ''}`;
+          td.innerText = (saItem && saItem.checks[s]) ? "✓" : "";
+          td.onclick = () => {
+            if (saItem) {
+              saItem.checks[s] = !saItem.checks[s];
+              renderSpreadsheet();
+            }
+          };
+          tr.appendChild(td);
+        }
+
+        // Annual Columns (Left Month, Left Slot, Right Month, Right Slot - spanning 7 cols to align flush with Timeless top border)
+        const annItem = currentSheetState.annual[r];
+
+        // Left Month
+        const tdLM = document.createElement("td");
+        tdLM.className = "ann-month-tag";
+        tdLM.innerText = annItem ? annItem.lMonth : "";
+        tr.appendChild(tdLM);
+
+        // Left Slot (Colspan 2)
+        const tdLSlot = document.createElement("td");
+        tdLSlot.colSpan = 2;
+        tdLSlot.className = "p-0 relative";
+        const lDiff = annItem && annItem.lText ? getTaskDifficulty(annItem.lText) : 0;
+        const slotL = document.createElement("div");
+        slotL.className = `sheet-slot ${lDiff > 0 ? 'diff-' + lDiff : ''}`;
+        slotL.dataset.loc = `annual:left:${r}`;
+        slotL.ondragover = handleDragOver;
+        slotL.ondragleave = handleDragLeave;
+        slotL.ondrop = handleDrop;
+        slotL.onclick = () => handleSlotClick(`annual:left:${r}`);
+
+        if (annItem && annItem.lText) {
+          slotL.draggable = true;
+          slotL.ondragstart = (e) => handleSlotDragStart(e, `annual:left:${r}`, annItem.lText);
+          slotL.ondragend = handleSlotDragEnd;
+
+          slotL.innerHTML = `
+            <div class="flex items-center gap-1 overflow-hidden flex-1">
+              <i class="fa-solid fa-grip-vertical text-[9px] text-slate-400 cursor-grab shrink-0"></i>
+              <span class="truncate pr-1">${annItem.lText}</span>
+            </div>
+            <button onclick="event.stopPropagation(); clearSlot('annual:left:${r}')" class="text-slate-400 hover:text-rose-600 text-[10px] px-0.5">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          `;
+        }
+        tdLSlot.appendChild(slotL);
+        tr.appendChild(tdLSlot);
+
+        // Right Month
+        const tdRM = document.createElement("td");
+        tdRM.className = "ann-month-tag";
+        tdRM.innerText = annItem ? annItem.rMonth : "";
+        tr.appendChild(tdRM);
+
+        // Right Slot (Colspan 3 - seamlessly stretches to right edge border flush with Timeless above)
+        const tdRSlot = document.createElement("td");
+        tdRSlot.colSpan = 3;
+        tdRSlot.className = "p-0 relative";
+        const rDiff = annItem && annItem.rText ? getTaskDifficulty(annItem.rText) : 0;
+        const slotR = document.createElement("div");
+        slotR.className = `sheet-slot ${rDiff > 0 ? 'diff-' + rDiff : ''}`;
+        slotR.dataset.loc = `annual:right:${r}`;
+        slotR.ondragover = handleDragOver;
+        slotR.ondragleave = handleDragLeave;
+        slotR.ondrop = handleDrop;
+        slotR.onclick = () => handleSlotClick(`annual:right:${r}`);
+
+        if (annItem && annItem.rText) {
+          slotR.draggable = true;
+          slotR.ondragstart = (e) => handleSlotDragStart(e, `annual:right:${r}`, annItem.rText);
+          slotR.ondragend = handleSlotDragEnd;
+
+          slotR.innerHTML = `
+            <div class="flex items-center gap-1 overflow-hidden flex-1">
+              <i class="fa-solid fa-grip-vertical text-[9px] text-slate-400 cursor-grab shrink-0"></i>
+              <span class="truncate pr-1">${annItem.rText}</span>
+            </div>
+            <button onclick="event.stopPropagation(); clearSlot('annual:right:${r}')" class="text-slate-400 hover:text-rose-600 text-[10px] px-0.5">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          `;
+        }
+        tdRSlot.appendChild(slotR);
+        tr.appendChild(tdRSlot);
+
+        tbody.appendChild(tr);
+      }
+    }
+
+    // --- 4. BOTTOM CHORE DRAWER WITH DRAG ITEM BUTTON ON THE LEFT ---
+    function renderDrawer() {
+      const container = document.getElementById("drawer-items");
+      const searchVal = document.getElementById("chore-search").value.toLowerCase();
+      const catVal = document.getElementById("category-filter").value;
+      const diffVal = document.getElementById("diff-filter").value;
+
+      const filtered = chorePool.filter(c => {
+        const matchesSearch = c.name.toLowerCase().includes(searchVal);
+        const matchesCat = catVal === "ALL" || c.cat === catVal;
+        const matchesDiff = diffVal === "ALL" || c.diff === parseInt(diffVal);
+        return matchesSearch && matchesCat && matchesDiff;
+      });
+
+      document.getElementById("pool-count").innerText = `${filtered.length} tasks/habits`;
+      container.innerHTML = "";
+
+      filtered.forEach((chore, poolIdx) => {
+        const itemCard = document.createElement("div");
+        itemCard.className = `diff-${chore.diff} border rounded flex items-center justify-between p-1 shadow-sm transition hover:shadow group text-xs`;
+
+        // Left side: Dedicated Drag Button & Chore Title
+        const leftGroup = document.createElement("div");
+        leftGroup.className = "flex items-center gap-1.5 overflow-hidden flex-1";
+
+        // Drag handle button on the left
+        const dragHandle = document.createElement("button");
+        dragHandle.className = "cursor-grab active:cursor-grabbing p-1 text-slate-600 hover:text-slate-900 bg-white/70 hover:bg-white rounded border border-slate-300 flex items-center justify-center shrink-0";
+        dragHandle.title = "Hold & drag into spreadsheet cell or reorder";
+        dragHandle.setAttribute("draggable", "true");
+        dragHandle.innerHTML = `<i class="fa-solid fa-grip-vertical text-[10px]"></i>`;
+        
+        dragHandle.ondragstart = (e) => {
+          draggedChoreData = { source: 'drawer', name: chore.name };
+          e.dataTransfer.setData("text/plain", chore.name);
+          e.dataTransfer.effectAllowed = "copyMove";
+          itemCard.classList.add("opacity-50");
+        };
+
+        dragHandle.ondragend = () => {
+          itemCard.classList.remove("opacity-50");
+          draggedChoreData = null;
+        };
+
+        const titleSpan = document.createElement("span");
+        titleSpan.className = "truncate font-medium text-slate-800 text-[11px]";
+        titleSpan.title = `${chore.name} (${chore.cat} - Level ${chore.diff})`;
+        titleSpan.innerText = chore.name;
+
+        leftGroup.appendChild(dragHandle);
+        leftGroup.appendChild(titleSpan);
+
+        // Right side: Quick Action Buttons (Edit, Delete)
+        const actionGroup = document.createElement("div");
+        actionGroup.className = "flex items-center gap-1 shrink-0 ml-1 opacity-70 group-hover:opacity-100 transition";
+
+        const editBtn = document.createElement("button");
+        editBtn.className = "text-slate-600 hover:text-blue-700 p-0.5 text-[10px]";
+        editBtn.title = "Edit Task";
+        editBtn.onclick = () => editPoolChore(poolIdx);
+        editBtn.innerHTML = `<i class="fa-solid fa-pen"></i>`;
+
+        const delBtn = document.createElement("button");
+        delBtn.className = "text-slate-600 hover:text-rose-700 p-0.5 text-[10px]";
+        delBtn.title = "Remove from Pool";
+        delBtn.onclick = () => deletePoolChore(poolIdx);
+        delBtn.innerHTML = `<i class="fa-solid fa-trash"></i>`;
+
+        actionGroup.appendChild(editBtn);
+        actionGroup.appendChild(delBtn);
+
+        itemCard.appendChild(leftGroup);
+        itemCard.appendChild(actionGroup);
+
+        container.appendChild(itemCard);
+      });
+    }
+
+    // --- 5. ENTERPRISE CONSUMER-FACING DRAG, DROP & LIVE REORDERING ---
+    function handleSlotDragStart(e, loc, text) {
+      draggedChoreData = { source: 'slot', loc: loc, name: text };
+      e.dataTransfer.setData("text/plain", text);
+      e.dataTransfer.effectAllowed = "move";
+      e.currentTarget.classList.add("dragging-active");
+    }
+
+    function handleSlotDragEnd(e) {
+      e.currentTarget.classList.remove("dragging-active");
+      document.querySelectorAll(".sheet-slot").forEach(el => el.classList.remove("drag-over"));
+      draggedChoreData = null;
+    }
+
+    function handleDragOver(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = (draggedChoreData && draggedChoreData.source === 'slot') ? "move" : "copy";
+      e.currentTarget.classList.add("drag-over");
+    }
+
+    function handleDragLeave(e) {
+      e.currentTarget.classList.remove("drag-over");
+    }
+
+    function handleDrop(e) {
+      e.preventDefault();
+      e.currentTarget.classList.remove("drag-over");
+      const incomingText = e.dataTransfer.getData("text/plain") || (draggedChoreData ? draggedChoreData.name : "");
+      if (!incomingText) return;
+
+      const targetLoc = e.currentTarget.dataset.loc;
+
+      // If moving from one chart slot to another, perform smooth swap / reorder
+      if (draggedChoreData && draggedChoreData.source === 'slot') {
+        const sourceLoc = draggedChoreData.loc;
+        if (sourceLoc !== targetLoc) {
+          const targetCurrentText = getSlotValue(targetLoc);
+          setSlotValue(targetLoc, incomingText);
+          setSlotValue(sourceLoc, targetCurrentText); // swap contents
+        }
+      } else {
+        // Source is drawer: populate target slot directly
+        setSlotValue(targetLoc, incomingText);
+      }
+
+      draggedChoreData = null;
+      renderSpreadsheet();
+    }
+
+    function getSlotValue(loc) {
+      const parts = loc.split(":");
+      const type = parts[0];
+      if (type === "week") return currentSheetState.week[parseInt(parts[1])][parseInt(parts[2])].text;
+      if (type === "timeless") return (currentSheetState.timeless[parseInt(parts[1])] || {}).text || "";
+      if (type === "everyday") return currentSheetState.everyday[parseInt(parts[1])].text;
+      if (type === "monthly") return currentSheetState.monthly[parseInt(parts[1])].text;
+      if (type === "quarterly") return currentSheetState.quarterly[parseInt(parts[1])] ? currentSheetState.quarterly[parseInt(parts[1])].text : "";
+      if (type === "semiannual") return currentSheetState.semiannual[parseInt(parts[1])] ? currentSheetState.semiannual[parseInt(parts[1])].text : "";
+      if (type === "annual") {
+        const r = parseInt(parts[2]);
+        return parts[1] === "left" ? currentSheetState.annual[r].lText : currentSheetState.annual[r].rText;
+      }
+      return "";
+    }
+
+    function setSlotValue(loc, text) {
+      const parts = loc.split(":");
+      const type = parts[0];
+
+      if (type === "week") {
+        const r = parseInt(parts[1]);
+        const day = parseInt(parts[2]);
+        currentSheetState.week[r][day].text = text;
+      } else if (type === "timeless") {
+        const r = parseInt(parts[1]);
+        if (!currentSheetState.timeless[r]) currentSheetState.timeless[r] = { text: "", checked: false };
+        currentSheetState.timeless[r].text = text;
+      } else if (type === "everyday") {
+        const r = parseInt(parts[1]);
+        currentSheetState.everyday[r].text = text;
+      } else if (type === "monthly") {
+        const r = parseInt(parts[1]);
+        currentSheetState.monthly[r].text = text;
+      } else if (type === "quarterly") {
+        const r = parseInt(parts[1]);
+        if (currentSheetState.quarterly[r]) currentSheetState.quarterly[r].text = text;
+      } else if (type === "semiannual") {
+        const r = parseInt(parts[1]);
+        if (currentSheetState.semiannual[r]) currentSheetState.semiannual[r].text = text;
+      } else if (type === "annual") {
+        const side = parts[1];
+        const r = parseInt(parts[2]);
+        if (currentSheetState.annual[r]) {
+          if (side === "left") currentSheetState.annual[r].lText = text;
+          else currentSheetState.annual[r].rText = text;
+        }
+      }
+    }
+
+    function clearSlot(loc) {
+      setSlotValue(loc, "");
+      renderSpreadsheet();
+    }
+
+    function handleSlotClick(loc) {
+      const currentVal = getSlotValue(loc);
+
+      modalEditTarget = { type: 'slot', loc: loc };
+      document.getElementById("modal-title").innerText = "Edit Chart Slot Task";
+      document.getElementById("modal-name").value = currentVal;
+      document.getElementById("modal-cat").parentElement.style.display = "none";
+      
+      const diff = getTaskDifficulty(currentVal) || 2;
+      const radio = document.querySelector(`input[name="modal-diff"][value="${diff}"]`);
+      if (radio) radio.checked = true;
+
+      document.getElementById("modal-overlay").classList.remove("hidden");
+      document.getElementById("modal-overlay").classList.add("flex");
+    }
+
+    // --- 6. GUIDE MODAL CONTROLS ---
+    function openGuideModal() {
+      const modal = document.getElementById("guide-modal");
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+
+    function closeGuideModal() {
+      const modal = document.getElementById("guide-modal");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
+
+    // --- 7. MODAL & CHORE EDIT/ADD/DELETE CONTROLS ---
+    function openAddChoreModal() {
+      modalEditTarget = { type: 'new_pool' };
+      document.getElementById("modal-title").innerText = "Create New Task / Habit";
+      document.getElementById("modal-name").value = "";
+      document.getElementById("modal-cat").parentElement.style.display = "block";
+      document.querySelector('input[name="modal-diff"][value="2"]').checked = true;
+
+      document.getElementById("modal-overlay").classList.remove("hidden");
+      document.getElementById("modal-overlay").classList.add("flex");
+    }
+
+    function editPoolChore(poolIdx) {
+      const chore = chorePool[poolIdx];
+      modalEditTarget = { type: 'pool', index: poolIdx };
+      document.getElementById("modal-title").innerText = "Edit Task in Pool";
+      document.getElementById("modal-name").value = chore.name;
+      document.getElementById("modal-cat").value = chore.cat;
+      document.getElementById("modal-cat").parentElement.style.display = "block";
+
+      const radio = document.querySelector(`input[name="modal-diff"][value="${chore.diff}"]`);
+      if (radio) radio.checked = true;
+
+      document.getElementById("modal-overlay").classList.remove("hidden");
+      document.getElementById("modal-overlay").classList.add("flex");
+    }
+
+    function deletePoolChore(poolIdx) {
+      chorePool.splice(poolIdx, 1);
+      renderDrawer();
+    }
+
+    function closeModal() {
+      document.getElementById("modal-overlay").classList.add("hidden");
+      document.getElementById("modal-overlay").classList.remove("flex");
+      modalEditTarget = null;
+    }
+
+    function saveModalChore() {
+      const name = document.getElementById("modal-name").value.trim();
+      const cat = document.getElementById("modal-cat").value;
+      const diffInput = document.querySelector('input[name="modal-diff"]:checked');
+      const diff = diffInput ? parseInt(diffInput.value) : 2;
+
+      if (!name) {
+        closeModal();
+        return;
+      }
+
+      if (modalEditTarget.type === 'new_pool') {
+        chorePool.unshift({ name, cat, diff });
+      } else if (modalEditTarget.type === 'pool') {
+        chorePool[modalEditTarget.index] = { name, cat, diff };
+      } else if (modalEditTarget.type === 'slot') {
+        setSlotValue(modalEditTarget.loc, name);
+        const exists = chorePool.find(c => c.name.toLowerCase() === name.toLowerCase());
+        if (!exists) {
+          chorePool.unshift({ name, cat: "Living & Bedroom", diff });
+        } else {
+          exists.diff = diff;
+        }
+      }
+
+      closeModal();
+      renderSpreadsheet();
+      renderDrawer();
+    }
+
+    function resetToDefaultTemplate() {
+      if (TEMPLATE_PRESETS[activeSheetKey]) {
+        userSheets[activeSheetKey] = JSON.parse(JSON.stringify(TEMPLATE_PRESETS[activeSheetKey]));
+      } else {
+        // Reset to house default if custom
+        userSheets[activeSheetKey] = JSON.parse(JSON.stringify(TEMPLATE_PRESETS.house));
+        userSheets[activeSheetKey].name = "Reset Chart";
+      }
+      currentSheetState = userSheets[activeSheetKey];
+      document.getElementById("active-template-label").innerText = currentSheetState.name;
+      renderSpreadsheet();
+      renderDrawer();
+      showToast("Chart restored to default template state", "info");
+    }
+
+    // --- 8. TOAST NOTIFICATION SYSTEM ---
+    function showToast(message, type = "success") {
+      const container = document.getElementById("toast-container");
+      const toast = document.createElement("div");
+      const colors = {
+        success: "bg-emerald-800 text-emerald-100 border-emerald-600",
+        error: "bg-rose-800 text-rose-100 border-rose-600",
+        info: "bg-slate-800 text-slate-100 border-slate-600"
+      };
+
+      toast.className = `${colors[type] || colors.info} border px-4 py-2.5 rounded-lg shadow-xl text-xs flex items-center gap-2 pointer-events-auto transition duration-300 transform translate-y-2 opacity-0`;
+      toast.innerHTML = `
+        <i class="fa-solid ${type === 'success' ? 'fa-circle-check text-emerald-400' : type === 'error' ? 'fa-triangle-exclamation text-rose-400' : 'fa-info-circle text-sky-400'}"></i>
+        <span>${message}</span>
+      `;
+      container.appendChild(toast);
+
+      requestAnimationFrame(() => {
+        toast.classList.remove("translate-y-2", "opacity-0");
+      });
+
+      setTimeout(() => {
+        toast.classList.add("opacity-0", "translate-y-2");
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    // --- 9. BULLETPROOF DOWNLOAD PIPELINE FOR SANDBOXED IFRAMES ---
+    function generateAoaSpreadsheetData() {
+      const wsData = [];
+
+      // Row 1: Week Header + Timeless Header
+      wsData.push(["SUN", "", "MON", "", "TUE", "", "WED", "", "THU", "", "FRI", "", "SAT", "", "TIMELESS", ""]);
+
+      // Rows 2-8: Week Items + Timeless Items
+      for (let r = 0; r < 7; r++) {
+        const row = [];
+        for (let d = 0; d < 7; d++) {
+          const item = currentSheetState.week[r][d];
+          row.push(item.text);
+          row.push(item.checked ? "[X]" : "[ ]");
+        }
+        const timeItem = currentSheetState.timeless[r] || { text: "", checked: false };
+        row.push(timeItem.text);
+        row.push(timeItem.checked ? "[X]" : "[ ]");
+        wsData.push(row);
+      }
+
+      // Row 9: Spacer
+      wsData.push([]);
+
+      // Row 10: Everyday & Monthly Headers
+      wsData.push(["EVERY DAY", "S", "M", "T", "W", "T", "F", "S", "MONTHLY", "", "J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"]);
+
+      // Rows 11-20: Everyday & Monthly Data
+      for (let r = 0; r < 10; r++) {
+        const row = [];
+        const ed = currentSheetState.everyday[r];
+        row.push(ed.text);
+        ed.checks.forEach(c => row.push(c ? "✓" : ""));
+
+        const mo = currentSheetState.monthly[r];
+        row.push(mo.text);
+        row.push(""); // spacer column alignment
+        mo.checks.forEach(c => row.push(c ? "✓" : ""));
+        wsData.push(row);
+      }
+
+      // Row 21: Spacer
+      wsData.push([]);
+
+      // Row 22: Lower Section Headers
+      wsData.push(["QUARTERLY", "S", "S", "F", "W", "SEMI-ANNUAL", "", "1", "2", "ANNUAL", "", "", "", "", "", ""]);
+
+      // Rows 23-31: Lower Section Data
+      for (let r = 0; r < 9; r++) {
+        const row = [];
+        const q = currentSheetState.quarterly[r];
+        row.push(q ? q.text : "");
+        if (q) q.checks.forEach(c => row.push(c ? "✓" : ""));
+        else row.push("", "", "", "");
+
+        const sa = currentSheetState.semiannual[r];
+        row.push(sa ? sa.text : "");
+        row.push(""); // spanned column spacer
+        if (sa) sa.checks.forEach(c => row.push(c ? "✓" : ""));
+        else row.push("", "");
+
+        const ann = currentSheetState.annual[r];
+        if (ann) {
+          row.push(ann.lMonth, ann.lText, "", ann.rMonth, ann.rText, "");
+        }
+
+        wsData.push(row);
+      }
+
+      return wsData;
+    }
+
+    function buildCsvString(wsData) {
+      let csv = "\uFEFF"; // UTF-8 BOM
+      wsData.forEach(row => {
+        const rowStr = row.map(val => `"${(val || "").toString().replace(/"/g, '""')}"`).join(",");
+        csv += rowStr + "\r\n";
+      });
+      return csv;
+    }
+
+    function openExportModal(title, desc, primaryBtnHtml) {
+      document.getElementById("export-fallback-title").innerHTML = title;
+      document.getElementById("export-fallback-desc").innerText = desc;
+      document.getElementById("direct-download-action-slot").innerHTML = primaryBtnHtml;
+      const modal = document.getElementById("export-fallback-modal");
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+
+    function closeExportModal() {
+      const modal = document.getElementById("export-fallback-modal");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
+
+    function copyCsvToClipboard() {
+      if (!lastGeneratedCsv) {
+        lastGeneratedCsv = buildCsvString(generateAoaSpreadsheetData());
+      }
+      const tempArea = document.createElement("textarea");
+      tempArea.value = lastGeneratedCsv;
+      tempArea.style.position = "fixed";
+      tempArea.style.opacity = "0";
+      document.body.appendChild(tempArea);
+      tempArea.select();
+      try {
+        document.execCommand("copy");
+        showToast("Spreadsheet data copied to clipboard!", "success");
+      } catch (e) {
+        showToast("Unable to copy automatically. Please select text manually.", "error");
+      }
+      document.body.removeChild(tempArea);
+    }
+
+    function exportToSheetsFlawless() {
+      try {
+        const wsData = generateAoaSpreadsheetData();
+        const csvString = buildCsvString(wsData);
+        lastGeneratedCsv = csvString;
+        const safeName = (currentSheetState.name || "Life_Chart").replace(/\s+/g, "_");
+
+        let xlsxDataUri = "";
+        let xlsxBlob = null;
+
+        if (window.XLSX && XLSX.utils && XLSX.write) {
+          const wb = XLSX.utils.book_new();
+          const ws = XLSX.utils.aoa_to_sheet(wsData);
+          XLSX.utils.book_append_sheet(wb, ws, "Chore Chart");
+          const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+          xlsxBlob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+          
+          // Also try direct XLSX.writeFile if supported in this environment
+          try {
+            XLSX.writeFile(wb, `${safeName}.xlsx`);
+            showToast("Spreadsheet (.xlsx) downloaded to disk!", "success");
+            return;
+          } catch (e) {
+            console.warn("XLSX.writeFile was blocked by sandbox, using direct fallback link", e);
+          }
+        }
+
+        // Create standard CSV Data URI which bypasses iframe download restrictions
+        const csvBlob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
+        const csvUrl = URL.createObjectURL(csvBlob);
+
+        // Try FileSaver.js saveAs directly
+        if (typeof saveAs === 'function' && xlsxBlob) {
+          try {
+            saveAs(xlsxBlob, `${safeName}.xlsx`);
+            showToast("Spreadsheet saved via FileSaver!", "success");
+            return;
+          } catch (e) {
+            console.warn("FileSaver failed:", e);
+          }
+        }
+
+        // Guaranteed Fallback UI with a direct link and clipboard copy
+        const primaryBtn = `
+          <a href="${csvUrl}" download="${safeName}.csv" class="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs flex items-center justify-center gap-2 shadow transition">
+            <i class="fa-solid fa-download"></i> Direct Download (${safeName}.csv)
+          </a>
+        `;
+
+        openExportModal(
+          `<i class="fa-solid fa-file-excel text-emerald-600"></i> Download Spreadsheet File`,
+          `Your formatted spreadsheet for "${currentSheetState.name}" is generated. Click below to download directly to your machine or copy the data to paste directly into Google Sheets:`,
+          primaryBtn
+        );
+      } catch (err) {
+        console.error("Export to sheets error:", err);
+        showToast("Export error: " + err.message, "error");
+      }
+    }
+
+    function exportToPdfFlawless() {
+      try {
+        const safeName = (currentSheetState.name || "Life_Chart").replace(/\s+/g, "_");
+        const jsPdfLib = window.jspdf ? window.jspdf.jsPDF : window.jsPDF;
+
+        if (jsPdfLib) {
+          const doc = new jsPdfLib({
+            orientation: 'landscape',
+            unit: 'pt',
+            format: 'letter'
+          });
+
+          doc.setFontSize(14);
+          doc.setTextColor(30, 41, 59);
+          doc.text(`Life Management Chore Chart — ${currentSheetState.name}`, 36, 32);
+
+          doc.setFontSize(8.5);
+          doc.setTextColor(100, 116, 139);
+          doc.text("Holistic Cadence & Habit Architecture | 6-Tier Difficulty Spectrum", 36, 44);
+
+          const rawData = generateAoaSpreadsheetData();
+          const tableBody = rawData.map(row => row.map(cell => cell !== undefined ? cell : ""));
+
+          if (typeof doc.autoTable === 'function') {
+            doc.autoTable({
+              startY: 52,
+              body: tableBody,
+              theme: 'grid',
+              styles: {
+                fontSize: 6,
+                cellPadding: 2,
+                overflow: 'ellipsize',
+                textColor: [15, 23, 42],
+                lineColor: [203, 213, 225],
+                lineWidth: 0.5
+              },
+              headStyles: {
+                fillColor: [241, 245, 249],
+                textColor: [15, 23, 42],
+                fontStyle: 'bold'
+              },
+              alternateRowStyles: {
+                fillColor: [255, 255, 255]
+              },
+              margin: { left: 24, right: 24 }
+            });
+
+            // Try doc.save() directly
+            try {
+              doc.save(`${safeName}.pdf`);
+              showToast("PDF file saved directly to your disk!", "success");
+              return;
+            } catch (err) {
+              console.warn("doc.save() blocked by browser sandbox policy, triggering fallback", err);
+            }
+
+            // Fallback: Generate Blob URL for manual click
+            const pdfBlob = doc.output('blob');
+            const pdfUrl = URL.createObjectURL(pdfBlob);
+
+            const primaryBtn = `
+              <a href="${pdfUrl}" download="${safeName}.pdf" target="_blank" class="w-full py-2.5 px-4 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-lg text-xs flex items-center justify-center gap-2 shadow transition">
+                <i class="fa-solid fa-download"></i> Direct Download (${safeName}.pdf)
+              </a>
+              <button onclick="window.print()" class="w-full py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold rounded text-xs flex items-center justify-center gap-2 transition">
+                <i class="fa-solid fa-print"></i> Open Native Print Dialog (Select 'Save as PDF')
+              </button>
+            `;
+
+            openExportModal(
+              `<i class="fa-solid fa-file-pdf text-rose-600"></i> Download PDF Document`,
+              `Your PDF document for "${currentSheetState.name}" is compiled and ready. Click below to download directly to your computer or open your system print dialog:`,
+              primaryBtn
+            );
+            return;
+          }
+        }
+
+        // Direct print-to-PDF trigger if jsPDF fails
+        showToast("Opening Print Dialog: Select 'Save as PDF'", "info");
+        setTimeout(() => { window.print(); }, 200);
+      } catch (err) {
+        console.error("PDF generation failed:", err);
+        showToast("Opening print dialog fallback...", "info");
+        setTimeout(() => { window.print(); }, 200);
+      }
+    }
+
+    // Initialize on window load
+    window.onload = function() {
+      // Set active label
+      document.getElementById("active-template-label").innerText = currentSheetState.name;
+      renderSpreadsheet();
+      renderDrawer();
+    };
+  </script>
+</body>
+</html>
