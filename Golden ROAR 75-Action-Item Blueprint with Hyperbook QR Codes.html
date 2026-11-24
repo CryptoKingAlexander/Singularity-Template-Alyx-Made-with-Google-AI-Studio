@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GOLDEN ROAR // 75-Action-Item Operational Blueprint &amp; Hyperbook QR Matrix</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- QRCode.js CDN for crisp, real scannable QR codes -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <script>
+    // Configure Tailwind theme with bespoke Golden obsidian tokens
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            obsidian: {
+              950: '#06080c',
+              900: '#0b0e14',
+              800: '#121722',
+              700: '#1c2333',
+            },
+            gold: {
+              300: '#fde08d',
+              400: '#f5c84c',
+              500: '#d4af37',
+              600: '#aa8520',
+              700: '#7d6014',
+            },
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    /* Subtle golden ambient glow & custom scrollbars */
+    body {
+      background-color: #06080c;
+      background-image:
+        radial-gradient(ellipse 80% 50% at 50% -15%, rgba(212, 175, 55, 0.14), transparent),
+        radial-gradient(ellipse 60% 40% at 100% 100%, rgba(170, 133, 32, 0.08), transparent);
+      color: #e5e7eb;
+    }
+
+    .gold-border {
+      border: 1px solid rgba(212, 175, 55, 0.25);
+    }
+
+    .gold-border-strong {
+      border: 1px solid rgba(245, 200, 76, 0.55);
+    }
+
+    .gold-text-gradient {
+      background: linear-gradient(135deg, #fde08d 0%, #d4af37 50%, #aa8520 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .qr-box img,
+    .qr-box canvas {
+      margin: 0 auto;
+      border-radius: 6px;
+      display: block;
+    }
+
+    /* Print styling for clean PDF export */
+    @media print {
+      body {
+        background: #ffffff !important;
+        color: #111827 !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .print-break-avoid {
+        break-inside: avoid;
+      }
+      .bg-obsidian-900,
+      .bg-obsidian-800,
+      .bg-obsidian-950 {
+        background: #ffffff !important;
+        border-color: #d1d5db !important;
+        color: #111827 !important;
+      }
+      .text-gray-300,
+      .text-gray-400 {
+        color: #374151 !important;
+      }
+      .gold-text-gradient {
+        -webkit-text-fill-color: #854d0e !important;
+      }
+    }
+  </style>
+</head>
+
+<body class="font-sans antialiased min-h-screen selection:bg-gold-500/30 selection:text-gold-300">
+  <!-- Toast Notification Container (No native alert/confirm) -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none no-print"></div>
+
+  <!-- Main Container -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-8">
+
+    <!-- ===================================================================== -->
+    <!-- TOP HEADER: GOLDEN ROAR COMMAND BANNER                                -->
+    <!-- ===================================================================== -->
+    <header class="bg-obsidian-900/90 backdrop-blur-md gold-border rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+        <div class="space-y-3">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold-500/10 border border-gold-500/30 text-gold-300 text-xs font-mono tracking-wider uppercase">
+            <span class="w-2 h-2 rounded-full bg-gold-400 animate-pulse"></span>
+            ROAR PROTOCOL v2.6 // GOLDEN DOME × HYPERBOOK MATRIX
+          </div>
+          <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight gold-text-gradient">
+            75-Action-Item Golden ROAR Blueprint
+          </h1>
+          <p class="text-sm sm:text-base text-gray-400 max-w-3xl leading-relaxed">
+            Synthesized directly from your Google Drive corpus: <span class="text-gray-200 font-medium">ROAR Protocol Specification</span>,
+            <span class="text-gray-200 font-medium">National Air Defense Shield ("Golden Dome") Supply Chain Proposal</span>,
+            <span class="text-gray-200 font-medium">UAS Service Demand (DOT-VNTSC-DoD)</span>, and
+            <span class="text-gray-200 font-medium">Hyperbook Complete Compendium</span>. Every action item is weighted via the ROAR Priority Formula and linked via a live scannable Hyperbook QR code.
+          </p>
+        </div>
+
+        <!-- Quick Action Controls -->
+        <div class="flex flex-wrap items-center gap-2.5 no-print">
+          <button onclick="exportCSV()" class="px-4 py-2.5 rounded-xl bg-obsidian-800 hover:bg-obsidian-700 gold-border text-gold-300 text-xs sm:text-sm font-medium transition flex items-center gap-2">
+            <span>↓</span> Export CSV
+          </button>
+          <button onclick="exportJSON()" class="px-4 py-2.5 rounded-xl bg-obsidian-800 hover:bg-obsidian-700 gold-border text-gold-300 text-xs sm:text-sm font-medium transition flex items-center gap-2">
+            <span>{}</span> Export JSON
+          </button>
+          <button onclick="window.print()" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-400 hover:to-gold-500 text-obsidian-950 font-bold text-xs sm:text-sm transition shadow-lg shadow-gold-500/20">
+            Print / PDF
+          </button>
+        </div>
+      </div>
+
+      <!-- Telemetry KPI Bar -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-gold-500/20">
+        <div class="bg-obsidian-950/70 rounded-xl p-4 border border-white/5">
+          <div class="text-xs font-mono text-gray-400 uppercase">Total Action Items</div>
+          <div class="mt-1 flex items-baseline gap-2">
+            <span id="stat-total" class="text-2xl sm:text-3xl font-bold text-gold-400 font-mono">75</span>
+            <span class="text-xs text-gray-500">5 Phases × 15</span>
+          </div>
+        </div>
+        <div class="bg-obsidian-950/70 rounded-xl p-4 border border-white/5">
+          <div class="text-xs font-mono text-gray-400 uppercase">Completed</div>
+          <div class="mt-1 flex items-baseline gap-2">
+            <span id="stat-done" class="text-2xl sm:text-3xl font-bold text-emerald-400 font-mono">0</span>
+            <span id="stat-pct" class="text-xs text-emerald-500 font-mono">(0%)</span>
+          </div>
+        </div>
+        <div class="bg-obsidian-950/70 rounded-xl p-4 border border-white/5">
+          <div class="text-xs font-mono text-gray-400 uppercase">Mean ROAR Priority</div>
+          <div class="mt-1 flex items-baseline gap-2">
+            <span id="stat-avg-priority" class="text-2xl sm:text-3xl font-bold text-gold-300 font-mono">0.0</span>
+            <span class="text-xs text-gray-500 font-mono">U+(I×M)/(R/A)</span>
+          </div>
+        </div>
+        <div class="bg-obsidian-950/70 rounded-xl p-4 border border-white/5">
+          <div class="text-xs font-mono text-gray-400 uppercase">Hyperbook QR Nodes</div>
+          <div class="mt-1 flex items-baseline gap-2">
+            <span class="text-2xl sm:text-3xl font-bold text-amber-300 font-mono">75</span>
+            <span class="text-xs text-gray-500">Live Scannable</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="mt-5">
+        <div class="flex justify-between text-xs font-mono text-gray-400 mb-1.5">
+          <span>OPERATIONAL EXECUTION PROGRESS</span>
+          <span id="progress-label">0 / 75 VERIFIED</span>
+        </div>
+        <div class="w-full h-2.5 bg-obsidian-950 rounded-full overflow-hidden border border-gold-500/20">
+          <div id="progress-bar" class="h-full bg-gradient-to-r from-gold-600 via-gold-400 to-emerald-400 transition-all duration-500" style="width: 0%"></div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ===================================================================== -->
+    <!-- HYPERBOOK QR BASE URL CONFIGURATION BAR                               -->
+    <!-- ===================================================================== -->
+    <section class="bg-obsidian-900/80 gold-border rounded-2xl p-5 no-print">
+      <div class="flex flex-col md:flex-row md:items-center gap-4 justify-between">
+        <div class="space-y-1">
+          <h2 class="text-sm font-bold text-gold-300 font-mono uppercase tracking-wider">
+            Hyperbook QR Target Base URL
+          </h2>
+          <p class="text-xs text-gray-400">
+            All 75 QR codes dynamically encode <code class="text-gold-300">{BaseURL}#node-{hyperbook_node_id}</code>. Update to your hosted Hyperbook URL or Drive link and click Regenerate.
+          </p>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto md:min-w-[460px]">
+          <input
+            id="hyperbook-base-url"
+            type="url"
+            value="https://hyperbook.roar-ops.io/compendium"
+            class="flex-1 bg-obsidian-950 border border-gold-500/30 rounded-xl px-3.5 py-2 text-xs sm:text-sm font-mono text-gray-100 focus:outline-none focus:border-gold-400"
+            placeholder="https://your-hyperbook-url.com/compendium"
+          />
+          <button
+            onclick="updateBaseUrl()"
+            class="px-4 py-2 rounded-xl bg-gold-500/20 hover:bg-gold-500/30 border border-gold-500/40 text-gold-300 text-xs sm:text-sm font-semibold transition whitespace-nowrap"
+          >
+            Regenerate 75 QRs
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- ROAR PILLARS: R (REQUISITES) & O (OBJECTIVES)                         -->
+    <!-- ===================================================================== -->
+    <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- PILLAR 1: REQUISITES -->
+      <article class="bg-obsidian-900/85 gold-border rounded-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-gold-500/20 pb-3">
+          <div class="flex items-center gap-3">
+            <span class="w-9 h-9 rounded-xl bg-gold-500/15 border border-gold-500/40 flex items-center justify-center font-mono font-bold text-gold-400">R</span>
+            <div>
+              <h2 class="text-lg font-bold text-gray-100">1. Requisites</h2>
+              <p class="text-xs font-mono text-gray-400">Baseline Inputs, Assets &amp; Upstream Dependencies</p>
+            </div>
+          </div>
+          <span class="text-xs font-mono px-2.5 py-1 rounded-lg bg-obsidian-800 text-gold-300 border border-gold-500/20">PILLAR I</span>
+        </div>
+        <ul class="space-y-2.5 text-sm text-gray-300">
+          <li class="flex gap-2.5">
+            <span class="text-gold-400 font-mono">▸</span>
+            <span><strong class="text-gray-100">Input State &amp; Context:</strong> End-to-end domestic industrial base blueprint ("Golden Dome") unifying ISR, BMS, C4ISR, and multi-tier Kinetic/DEW interception, cross-indexed with the 40-category Hyperbook Compendium.</span>
+          </li>
+          <li class="flex gap-2.5">
+            <span class="text-gold-400 font-mono">▸</span>
+            <span><strong class="text-gray-100">Critical Upstream Assets:</strong> Mountain Pass REE separation, domestic GaN-on-SiC &amp; rad-hard SOI foundries, Ti-6Al-4V/AerMet 100 metallurgy, HTPB/AP energetics, and secure sub-7nm / 28nm trusted fabs.</span>
+          </li>
+          <li class="flex gap-2.5">
+            <span class="text-gold-400 font-mono">▸</span>
+            <span><strong class="text-gray-100">Software &amp; AI Toolchains:</strong> MIPROv2/DSPy prompt compilers, Deterministic Agentic StateGraphs, vLLM PagedAttention inference clusters, eBPF kernel telemetry, and FIPS 203 ML-KEM post-quantum HSMs.</span>
+          </li>
+          <li class="flex gap-2.5">
+            <span class="text-gold-400 font-mono">▸</span>
+            <span><strong class="text-gray-100">Baseline Assumptions:</strong> 1–7 ROAR initialization weighting (4 = baseline average); zero single-point geopolitical supply vulnerabilities; continuous compliance with NAS/FAA &amp; DoD JADC2 standards.</span>
+          </li>
+        </ul>
+      </article>
+
+      <!-- PILLAR 2: OBJECTIVES -->
+      <article class="bg-obsidian-900/85 gold-border rounded-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-gold-500/20 pb-3">
+          <div class="flex items-center gap-3">
+            <span class="w-9 h-9 rounded-xl bg-gold-500/15 border border-gold-500/40 flex items-center justify-center font-mono font-bold text-gold-400">O</span>
+            <div>
+              <h2 class="text-lg font-bold text-gray-100">2. Objectives</h2>
+              <p class="text-xs font-mono text-gray-400">Target End-State, OKRs &amp; Definition of Done</p>
+            </div>
+          </div>
+          <span class="text-xs font-mono px-2.5 py-1 rounded-lg bg-obsidian-800 text-gold-300 border border-gold-500/20">PILLAR II</span>
+        </div>
+        <ul class="space-y-2.5 text-sm text-gray-300">
+          <li class="flex gap-2.5">
+            <span class="text-gold-400 font-mono">▸</span>
+            <span><strong class="text-gray-100">Primary End-State:</strong> Deliver a fully fabricated, integrated, verified, and domestically bolted-down multi-tier air/missile defense and sovereign AI/cyber architecture with zero scope drift.</span>
+          </li>
+          <li class="flex gap-2.5">
+            <span class="text-gold-400 font-mono">▸</span>
+            <span><strong class="text-gray-100">Quantifiable OKRs:</strong> 100% domestic Tier-0 raw material provenance; &lt;50ms end-to-end JADC2 sensor-to-shooter latency; ≥99.99% post-quantum cryptographic attestation; 75/75 verified Hyperbook-linked gates.</span>
+          </li>
+          <li class="flex gap-2.5">
+            <span class="text-gold-400 font-mono">▸</span>
+            <span><strong class="text-gray-100">Hyperbook Traceability:</strong> Every tactical task binds directly to a scannable Hyperbook QR node (with Complexity C &amp; Yield Y metrics) enabling instant field engineering reference.</span>
+          </li>
+          <li class="flex gap-2.5">
+            <span class="text-gold-400 font-mono">▸</span>
+            <span><strong class="text-gray-100">Definition of Done:</strong> All 75 action items pass automated red-teaming, HIL (Hardware-in-the-Loop) simulation, live-fire/acceptance testing, and executive ROAR sign-off.</span>
+          </li>
+        </ul>
+      </article>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- PILLAR 3: A — 75 SEQUENCED ACTION ITEMS (FILTER & CONTROL BAR)        -->
+    <!-- ===================================================================== -->
+    <section class="space-y-5">
+      <div class="bg-obsidian-900/90 gold-border rounded-2xl p-5 space-y-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gold-500/20 pb-4">
+          <div class="flex items-center gap-3">
+            <span class="w-9 h-9 rounded-xl bg-gold-500/20 border border-gold-400/60 flex items-center justify-center font-mono font-bold text-gold-300">A</span>
+            <div>
+              <h2 class="text-xl font-bold text-gray-100">3. Action Items (01–75)</h2>
+              <p class="text-xs font-mono text-gray-400">
+                Priority Formula: <span class="text-gold-300">P = Urgency + ((Impact × Magnitude) / (Retardation / Acceleration))</span>
+              </p>
+            </div>
+          </div>
+          <div class="text-xs font-mono text-gray-400">
+            Showing <span id="visible-count" class="text-gold-300 font-bold">75</span> of 75 Action Items
+          </div>
+        </div>
+
+        <!-- Filter & Search Controls -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 no-print">
+          <input
+            id="search-input"
+            type="text"
+            oninput="renderActions()"
+            placeholder="Search task, owner, or Hyperbook node..."
+            class="sm:col-span-2 bg-obsidian-950 border border-gold-500/30 rounded-xl px-3.5 py-2.5 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-gold-400"
+          />
+
+          <select id="phase-filter" onchange="renderActions()" class="bg-obsidian-950 border border-gold-500/30 rounded-xl px-3 py-2.5 text-sm text-gray-200 focus:outline-none focus:border-gold-400">
+            <option value="ALL">All 5 Phases (75)</option>
+            <option value="Phase I">Phase I: Tier 0 Supply &amp; Fab (01–15)</option>
+            <option value="Phase II">Phase II: ISR, Quantum &amp; Stealth (16–30)</option>
+            <option value="Phase III">Phase III: JADC2 BMS &amp; Prod AI (31–45)</option>
+            <option value="Phase IV">Phase IV: Cyber, PQC &amp; Gov (46–60)</option>
+            <option value="Phase V">Phase V: Kinetic, DEW &amp; Deploy (61–75)</option>
+          </select>
+
+          <select id="tier-filter" onchange="renderActions()" class="bg-obsidian-950 border border-gold-500/30 rounded-xl px-3 py-2.5 text-sm text-gray-200 focus:outline-none focus:border-gold-400">
+            <option value="ALL">All Hyperbook Tiers</option>
+            <option value="Frontier">Frontier</option>
+            <option value="Expert">Expert</option>
+            <option value="Advanced">Advanced</option>
+            <option value="Intermediate">Intermediate</option>
+          </select>
+
+          <select id="sort-select" onchange="renderActions()" class="bg-obsidian-950 border border-gold-500/30 rounded-xl px-3 py-2.5 text-sm text-gray-200 focus:outline-none focus:border-gold-400">
+            <option value="id-asc">Sort: Sequence (01 → 75)</option>
+            <option value="priority-desc">Sort: ROAR Priority (High → Low)</option>
+            <option value="priority-asc">Sort: ROAR Priority (Low → High)</option>
+            <option value="status">Sort: Incomplete First</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 75 Action Items Grid -->
+      <div id="action-items-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <!-- Dynamically populated with all 75 Action Items + Live QR Codes -->
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- PILLAR 4: R (REQUIREMENTS & GOVERNANCE)                               -->
+    <!-- ===================================================================== -->
+    <section class="bg-obsidian-900/85 gold-border rounded-2xl p-6 space-y-5">
+      <div class="flex items-center justify-between border-b border-gold-500/20 pb-3">
+        <div class="flex items-center gap-3">
+          <span class="w-9 h-9 rounded-xl bg-gold-500/15 border border-gold-500/40 flex items-center justify-center font-mono font-bold text-gold-400">R</span>
+          <div>
+            <h2 class="text-lg font-bold text-gray-100">4. Requirements &amp; ROAR Governance</h2>
+            <p class="text-xs font-mono text-gray-400">Non-Negotiable Boundaries, Technical Constraints &amp; Zero Scope Creep</p>
+          </div>
+        </div>
+        <span class="text-xs font-mono px-2.5 py-1 rounded-lg bg-obsidian-800 text-gold-300 border border-gold-500/20">PILLAR IV</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5 text-sm">
+        <div class="bg-obsidian-950/70 rounded-xl p-4 border border-white/5 space-y-2">
+          <h3 class="font-mono text-xs uppercase text-gold-400 font-bold">Functional &amp; Non-Functional Criteria</h3>
+          <p class="text-gray-300 leading-relaxed">
+            Sub-50ms C4ISR sensor fusion; radiation-hardened avionics (MIL-STD-883); FIPS 203 ML-KEM post-quantum encryption across all tactical links; deterministic grammar-constrained AI tool dispatch with dual-LLM firewalling.
+          </p>
+        </div>
+        <div class="bg-obsidian-950/70 rounded-xl p-4 border border-white/5 space-y-2">
+          <h3 class="font-mono text-xs uppercase text-gold-400 font-bold">Boundaries &amp; Out-of-Scope</h3>
+          <p class="text-gray-300 leading-relaxed">
+            Zero foreign-sourced critical rare earths or untrusted silicon in Tier-0/Tier-1 assemblies. Unverified autonomous lethal engagement without human-on-the-loop cryptographic authorization is strictly out of scope.
+          </p>
+        </div>
+        <div class="bg-obsidian-950/70 rounded-xl p-4 border border-white/5 space-y-2">
+          <h3 class="font-mono text-xs uppercase text-gold-400 font-bold">Zero Scope Creep &amp; Correction Protocol</h3>
+          <p class="text-gray-300 leading-relaxed">
+            Per ROAR Specification §4: Any proposal or task failing to map cleanly into Requisites, Objectives, Action Items, or Requirements is immediately rejected or re-anchored to an explicit Hyperbook node ID.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <footer class="text-center text-xs font-mono text-gray-500 py-4 border-t border-gold-500/15">
+      GOLDEN ROAR BLUEPRINT // 75 SEQUENCED ACTION ITEMS // HYPERBOOK QR COMPENDIUM INTEGRATED
+    </footer>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- INTERACTIVE QR & ROAR WEIGHTING MODAL                                   -->
+  <!-- ======================================================================= -->
+  <div id="qr-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4 no-print">
+    <div class="bg-obsidian-900 gold-border-strong rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-5 max-h-[92vh] overflow-y-auto">
+      <div class="flex items-start justify-between gap-4 border-b border-gold-500/20 pb-3">
+        <div>
+          <span id="modal-badge" class="text-xs font-mono px-2 py-0.5 rounded bg-gold-500/15 text-gold-300 border border-gold-500/30">ACTION #01</span>
+          <h3 id="modal-title" class="text-lg font-bold text-gray-100 mt-1.5">Action Item Title</h3>
+          <p id="modal-node-title" class="text-xs font-mono text-gold-400 mt-0.5">Hyperbook Node</p>
+        </div>
+        <button onclick="closeModal()" class="p-2 rounded-lg bg-obsidian-800 hover:bg-obsidian-700 text-gray-400 hover:text-white transition">✕</button>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 items-center">
+        <!-- Large High-Res QR Code -->
+        <div class="flex flex-col items-center justify-center bg-white p-4 rounded-xl shadow-inner">
+          <div id="modal-qr-container" class="qr-box"></div>
+          <p class="text-[11px] font-mono text-gray-800 mt-2 font-semibold text-center break-all" id="modal-qr-caption"></p>
+        </div>
+
+        <!-- Hyperbook Metadata + Live ROAR Sliders -->
+        <div class="space-y-4">
+          <div class="bg-obsidian-950 rounded-xl p-3.5 border border-white/10 space-y-1.5 text-xs font-mono">
+            <div class="flex justify-between"><span class="text-gray-400">Node ID:</span> <span id="modal-node-id" class="text-gold-300 truncate max-w-[170px]"></span></div>
+            <div class="flex justify-between"><span class="text-gray-400">Tier:</span> <span id="modal-tier" class="text-gray-200"></span></div>
+            <div class="flex justify-between"><span class="text-gray-400">Complexity (C) / Yield (Y):</span> <span id="modal-cy" class="text-emerald-400"></span></div>
+            <div class="flex justify-between"><span class="text-gray-400">ROAR Priority:</span> <span id="modal-priority" class="text-gold-400 font-bold text-sm"></span></div>
+          </div>
+
+          <!-- Interactive 1-7 ROAR Weight Sliders -->
+          <div class="space-y-2.5 text-xs">
+            <div class="font-mono text-gold-300 uppercase text-[11px] tracking-wider">Live ROAR Weight Tuning (1–7 Scale)</div>
+            <div class="grid grid-cols-1 gap-2">
+              <label class="flex items-center justify-between gap-2">
+                <span class="text-gray-300 w-24">Urgency (<span id="val-u">4</span>)</span>
+                <input type="range" min="1" max="7" id="slider-u" oninput="updateModalWeights()" class="flex-1 accent-amber-400" />
+              </label>
+              <label class="flex items-center justify-between gap-2">
+                <span class="text-gray-300 w-24">Impact (<span id="val-i">4</span>)</span>
+                <input type="range" min="1" max="7" id="slider-i" oninput="updateModalWeights()" class="flex-1 accent-amber-400" />
+              </label>
+              <label class="flex items-center justify-between gap-2">
+                <span class="text-gray-300 w-24">Magnitude (<span id="val-m">4</span>)</span>
+                <input type="range" min="1" max="7" id="slider-m" oninput="updateModalWeights()" class="flex-1 accent-amber-400" />
+              </label>
+              <label class="flex items-center justify-between gap-2">
+                <span class="text-gray-300 w-24">Retardation (<span id="val-r">4</span>)</span>
+                <input type="range" min="1" max="7" id="slider-r" oninput="updateModalWeights()" class="flex-1 accent-amber-400" />
+              </label>
+              <label class="flex items-center justify-between gap-2">
+                <span class="text-gray-300 w-24">Accel (<span id="val-a">4</span>)</span>
+                <input type="range" min="1" max="7" id="slider-a" oninput="updateModalWeights()" class="flex-1 accent-amber-400" />
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- URL Copy Bar -->
+      <div class="flex flex-col sm:flex-row gap-2 pt-2 border-t border-gold-500/20">
+        <input id="modal-url-input" type="text" readonly class="flex-1 bg-obsidian-950 border border-white/10 rounded-xl px-3 py-2 text-xs font-mono text-gray-300" />
+        <button onclick="copyModalUrl()" class="px-4 py-2 rounded-xl bg-gold-500 hover:bg-gold-400 text-obsidian-950 font-bold text-xs transition">
+          Copy Hyperbook Link
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- APPLICATION LOGIC & 75-ITEM ROAR + HYPERBOOK DATASET                    -->
+  <!-- ======================================================================= -->
+  <script>
+    /**
+     * All 75 ROAR Action Items synthesized from the user's Google Drive:
+     * - ROAR Protocol Specification & Priority Formula
+     * - National Air Defense Shield ("Golden Dome") Supply Chain Proposal
+     * - UAS Service Demand 2015-2035 (Volpe / DoD)
+     * - Hyperbook Complete Compendium (real node IDs, tiers, C & Y scores)
+     */
+    const DEFAULT_ACTIONS = [
+      // ==================== PHASE I (01-15): TIER 0 SUPPLY CHAIN & FABRICATION ====================
+      { id: 1, phase: "Phase I", owner: "Tier-0 Mining Ops", title: "Secure Mountain Pass REE Extraction & Separation Quota", desc: "Lock domestic supply of Neodymium, Dysprosium, and Samarium for permanent-magnet servo actuators and radar circulators.", nodeId: "macrotech-supply-chain-mineral-sovereignty", nodeTitle: "MacroTech: Planetary Supply Chain & Mineral Sovereignty", tier: "Advanced", c: 84, y: 70, u: 7, i: 7, m: 7, r: 3, a: 5 },
+      { id: 2, phase: "Phase I", owner: "Foundry Eng", title: "Qualify Domestic GaN-on-SiC Epitaxial Wafer Lines", desc: "Fabricate high-purity Gallium Nitride on Silicon Carbide substrates for AESA radar Transmit/Receive (T/R) modules.", nodeId: "miltech-aesa-gan-radar-transceivers", nodeTitle: "Gallium Nitride (GaN) Active Electronically Scanned Array Radars", tier: "Advanced", c: 84, y: 70, u: 7, i: 7, m: 6, r: 4, a: 5 },
+      { id: 3, phase: "Phase I", owner: "Orbital Silicon", title: "Spin Rad-Hard Silicon-on-Insulator (SOI) Focal Plane Wafers", desc: "Manufacture radiation-hardened SOI wafers tailored for orbital SBIRS and DSP infrared early-warning focal plane arrays.", nodeId: "semiconductor-wafer-defect-detection", nodeTitle: "Computer Vision Wafer Defect Inspection & Fab Yield Optimization", tier: "Advanced", c: 84, y: 70, u: 6, i: 7, m: 6, r: 4, a: 4 },
+      { id: 4, phase: "Phase I", owner: "Metallurgy Lead", title: "Certify Aerospace Ti-6Al-4V Interceptor Airframe Billets", desc: "Refine and ultrasonically inspect Titanium alloy ingots for exoatmospheric interceptor structures and nozzle throats.", nodeId: "deep-learning-engineering", nodeTitle: "Industrial & Engineering: Physics-Informed NNs & CFD", tier: "Advanced", c: 84, y: 70, u: 6, i: 6, m: 6, r: 3, a: 4 },
+      { id: 5, phase: "Phase I", owner: "Propulsion Mat", title: "Forge AerMet 100 & 300M High-Pressure Rocket Motor Cases", desc: "Produce ultra-high-strength steel casings rated for multi-stage booster chamber pressures with zero micro-fracture tolerance.", nodeId: "predictive-maintenance-turbomachinery", nodeTitle: "Industrial Predictive Maintenance & Remaining Useful Life (RUL)", tier: "Advanced", c: 84, y: 70, u: 6, i: 6, m: 5, r: 4, a: 4 },
+      { id: 6, phase: "Phase I", owner: "Airframe Fab", title: "Extrude Al-Li 2195 Canister & Tactical UAV Structural Frames", desc: "Fabricate lightweight Aluminum-Lithium launcher canisters and attritable UAS airframes for high-payload efficiency.", nodeId: "micro-uav-kinetic-swarms", nodeTitle: "Swarm Robotics & Autonomous Micro-UAV Kinetic Fleets", tier: "Intermediate", c: 61, y: 60, u: 5, i: 5, m: 5, r: 3, a: 5 },
+      { id: 7, phase: "Phase I", owner: "Energetics Lab", title: "Synthesize Domestic HTPB Binder & Ammonium Perchlorate", desc: "Establish redundant domestic synthesis plants for solid propellant HTPB binder, AP oxidizer, and nano-aluminum fuel powder.", nodeId: "biotech-cell-free-protein-synthesis", nodeTitle: "Continuous-Exchange Chemical & Cell-Free Synthesis Reactors", tier: "Advanced", c: 84, y: 70, u: 7, i: 7, m: 6, r: 4, a: 4 },
+      { id: 8, phase: "Phase I", owner: "Thermal TPS", title: "Autoclave Carbon-Carbon (C-C) Hypersonic Thermal Shields", desc: "Weave and densify C-C composite nosecones for exoatmospheric kill vehicle thermal protection and hypersonic glide stability.", nodeId: "miltech-hypersonic-glide-flight-controls", nodeTitle: "Hypersonic Glide Vehicle (HGV) Aerothermal Flight Controls", tier: "Frontier", c: 100, y: 76, u: 6, i: 7, m: 7, r: 5, a: 4 },
+      { id: 9, phase: "Phase I", owner: "Trusted Fab", title: "Tape-Out Sub-7nm BMS Neural Inference ASICs", desc: "Allocate secure domestic sub-7nm foundry capacity for low-latency Battle Management System neural threat-evaluation processors.", nodeId: "neuromorphic-spiking-computing", nodeTitle: "Neuromorphic Computing & Event-Driven Spiking Networks", tier: "Frontier", c: 100, y: 76, u: 6, i: 7, m: 6, r: 4, a: 5 },
+      { id: 10, phase: "Phase I", owner: "Crypto Silicon", title: "Fabricate 28nm/65nm Rad-Hard Link-16 & Seeker DSP Chips", desc: "Run trusted legacy radiation-hardened silicon lines for IBCS cryptographic modules and terminal seeker Digital Signal Processors.", nodeId: "cybertech-zero-trust-hardware-enclaves", nodeTitle: "Zero-Trust Continuous Authorization & Hardware Security Enclaves", tier: "Expert", c: 100, y: 76, u: 7, i: 6, m: 6, r: 3, a: 5 },
+      { id: 11, phase: "Phase I", owner: "QA Vision", title: "Deploy Automated Computer Vision Wafer & Weld Inspection", desc: "Install high-speed optical and X-ray defect detection across all Tier-1 microelectronics and airframe weld stations.", nodeId: "deep-learning-apps-master", nodeTitle: "Master Node: Vertical Computer Vision Inspection SaaS", tier: "Frontier", c: 100, y: 76, u: 5, i: 6, m: 5, r: 2, a: 6 },
+      { id: 12, phase: "Phase I", owner: "Cryo Supply", title: "Commission Dilution Cryostat & Superconducting Sensor Lines", desc: "Establish domestic fabrication of millikelvin cryocoolers for superconducting infrared focal planes and quantum sensors.", nodeId: "qtech-superconducting-transmon-dilution-cryostat", nodeTitle: "Superconducting Transmon Qubits & Millikelvin Dilution Cryostats", tier: "Frontier", c: 100, y: 76, u: 5, i: 6, m: 6, r: 5, a: 4 },
+      { id: 13, phase: "Phase I", owner: "Power Eng", title: "Manufacture Solid-State High-Energy Capacitor Banks", desc: "Produce pulsed-power storage arrays capable of sustaining continuous megawatt discharge for AESA radars and fiber lasers.", nodeId: "unconventional-directed-energy-fiber-laser", nodeTitle: "Solid-State Fiber Laser Directed Energy & Beam Steering", tier: "Frontier", c: 100, y: 76, u: 6, i: 6, m: 6, r: 4, a: 5 },
+      { id: 14, phase: "Phase I", owner: "Logistics", title: "Stand Up Strategic Buffer Stockpiles for Tier-0 Minerals", desc: "Maintain a 36-month domestic strategic reserve of refined REEs, SiC boules, and aerospace titanium across hardened vaults.", nodeId: "cloud-finops-gpu-arbitrage", nodeTitle: "Resource Yield Management, Arbitrage & Strategic Buffering", tier: "Advanced", c: 84, y: 70, u: 6, i: 6, m: 5, r: 3, a: 5 },
+      { id: 15, phase: "Phase I", owner: "Audit Gate", title: "Execute Tier-0/Tier-1 Provenance & Supply Chain Sign-Off", desc: "Verify cryptographic bill-of-materials (SBOM/HBOM) lineage from raw ore extraction to packaged defense silicon.", nodeId: "cybertech-zero-knowledge-continuous-trust-attestation", nodeTitle: "Zero-Knowledge Continuous Trust Attestation & Device Proofs", tier: "Frontier", c: 100, y: 76, u: 7, i: 6, m: 6, r: 3, a: 6 },
+
+      // ==================== PHASE II (16-30): ISR, QUANTUM SENSING & STEALTH ====================
+      { id: 16, phase: "Phase II", owner: "Space ISR", title: "Integrate Orbital SBIRS & Proliferated LEO Tracking Layer", desc: "Fuse persistent overhead infrared launch detection with low-earth-orbit hypersonic glide vehicle tracking constellations.", nodeId: "miltech-ballistic-trajectory-kalman-extrapolation", nodeTitle: "Unscented Kalman Filter Multi-Sensor Ballistic Extrapolation", tier: "Advanced", c: 84, y: 70, u: 7, i: 7, m: 7, r: 4, a: 5 },
+      { id: 17, phase: "Phase II", owner: "Radar Eng", title: "Calibrate Long-Range GaN AESA Homeland Early-Warning Arrays", desc: "Deploy digital beamforming AESA radar arrays with simultaneous multi-target ballistic and cruise missile discrimination.", nodeId: "miltech-master", nodeTitle: "Master Node: Portable AESA Signal Intelligence Toolkit", tier: "Frontier", c: 100, y: 76, u: 7, i: 7, m: 6, r: 3, a: 5 },
+      { id: 18, phase: "Phase II", owner: "SAR Recon", title: "Activate Bistatic SAR & Ground Moving Target Indication", desc: "Deploy passive bistatic Synthetic Aperture Radar receivers to detect low-flying cruise missiles and mobile launchers.", nodeId: "miltech-bistatic-sar-coherent-mti", nodeTitle: "Bistatic Synthetic Aperture Radar (SAR) Coherent MTI", tier: "Frontier", c: 100, y: 76, u: 6, i: 6, m: 6, r: 4, a: 5 },
+      { id: 19, phase: "Phase II", owner: "Quantum ISR", title: "Prototype Entangled-Photon Quantum Anti-Stealth Radar", desc: "Field-test quantum illumination transceivers to defeat conventional radar-absorbent stealth coatings in cluttered airspace.", nodeId: "quantum-radar-stealth-entanglement", nodeTitle: "Quantum Entangled Radar & Anti-Stealth Detection", tier: "Frontier", c: 88, y: 93, u: 5, i: 7, m: 7, r: 5, a: 4 },
+      { id: 20, phase: "Phase II", owner: "Subsea ISR", title: "Deploy Superconducting Quantum MAD Submarine Sensors", desc: "Anchor coastal Magnetic Anomaly Detection arrays to monitor littoral approaches and submarine-launched missile threats.", nodeId: "magnetic-anomaly-detection-mad", nodeTitle: "High-Sensitivity Superconducting Quantum MAD Tracking", tier: "Advanced", c: 85, y: 90, u: 5, i: 6, m: 6, r: 4, a: 4 },
+      { id: 21, phase: "Phase II", owner: "Maritime Ops", title: "Harden Deep-Sea Submarine Fiber Cable Monitoring Nodes", desc: "Instrument transoceanic backhaul cables with distributed acoustic sensing to detect tampering or interdiction.", nodeId: "deepsea-submarine-cable-interdiction", nodeTitle: "Deep Sea Submarine Cable Warfare & Maritime Chokepoints", tier: "Advanced", c: 84, y: 70, u: 6, i: 6, m: 6, r: 3, a: 5 },
+      { id: 22, phase: "Phase II", owner: "QKD Comms", title: "Establish Satellite Optical Quantum Key Distribution Links", desc: "Provision entangled-photon satellite QKD channels between NORAD/NORTHCOM command bunkers and regional radar hubs.", nodeId: "qtech-qkd-satellite-optical-links", nodeTitle: "Quantum Key Distribution (QKD) Satellite Optical Links", tier: "Frontier", c: 100, y: 76, u: 6, i: 7, m: 6, r: 4, a: 5 },
+      { id: 23, phase: "Phase II", owner: "QKD Ground", title: "Deploy Fiber Entangled-Photon QKD Metro Bridges", desc: "Connect regional BMS data centers via tamper-evident polarization-entangled QKD fiber bridges.", nodeId: "qtech-master", nodeTitle: "Master Node: Entangled Photon QKD Bridge", tier: "Frontier", c: 100, y: 76, u: 6, i: 6, m: 5, r: 3, a: 5 },
+      { id: 24, phase: "Phase II", owner: "Stealth Eng", title: "Apply Broadband Metamaterial RAS to Forward Sensor Pods", desc: "Coat exposed tactical sensor housings and UAS relays with impedance-matched radar-absorbent metamaterials.", nodeId: "stealthtech-broadband-metamaterial-ras", nodeTitle: "Broadband Metamaterial Radar Absorbent Structures (RAS)", tier: "Frontier", c: 100, y: 76, u: 5, i: 6, m: 5, r: 4, a: 4 },
+      { id: 25, phase: "Phase II", owner: "Thermal Camo", title: "Install Active IR Suppression & Thermoelectric Diffusers", desc: "Mask thermal exhaust plumes of mobile THAAD/Patriot power generators using adaptive thermoelectric cooling tiles.", nodeId: "stealthtech-master", nodeTitle: "Master Node: Active Thermal Signature Suppressor", tier: "Frontier", c: 100, y: 76, u: 5, i: 5, m: 5, r: 3, a: 5 },
+      { id: 26, phase: "Phase II", owner: "Aero Stealth", title: "Optimize Physical Optics RCS Faceting on Relay Drones", desc: "Apply planar faceting and plasma-actuator flow control to minimize radar cross-section of high-altitude comms relays.", nodeId: "stealthtech-plasma-actuator-rcs-reduction", nodeTitle: "Plasma Actuator Active Flow Radar Cross Section Reduction", tier: "Frontier", c: 100, y: 76, u: 4, i: 6, m: 5, r: 4, a: 4 },
+      { id: 27, phase: "Phase II", owner: "Acoustic Net", title: "Seed Perimeter Smart-Dust Acoustic Recon Arrays", desc: "Deploy low-power acoustic and seismic micro-sensor grids around remote interceptor silos for perimeter intrusion detection.", nodeId: "smartdust-acoustic-recon", nodeTitle: "Nanofabricated Smart Dust for Acoustic Reconnaissance", tier: "Advanced", c: 84, y: 70, u: 5, i: 5, m: 4, r: 2, a: 6 },
+      { id: 28, phase: "Phase II", owner: "Vision AI", title: "Train Multi-Modal VLM Spatial Target Grounding Models", desc: "Enable real-time EO/IR video slicing and bounding-box classification of small Group 1–3 UAS swarms.", nodeId: "production-ai-multimodal-spatial-vlm-grounding", nodeTitle: "Multimodal Vision-Language Grounding & Video Slicing", tier: "Advanced", c: 84, y: 70, u: 6, i: 6, m: 6, r: 3, a: 6 },
+      { id: 29, phase: "Phase II", owner: "EMP Shield", title: "Harden Sensor Enclosures with Counter-EMP Faraday Grids", desc: "Retrofit all ground radar shelters and fiber junctions against high-altitude nuclear EMP and HPM transient surges.", nodeId: "counter-nano-emp-grids", nodeTitle: "Counter-Nano Electromagnetic Pulse (EMP) Shielding Grids", tier: "Intermediate", c: 61, y: 60, u: 7, i: 7, m: 6, r: 3, a: 5 },
+      { id: 30, phase: "Phase II", owner: "ISR Gate", title: "Validate Multi-Domain Sensor Fusion & Track Continuity", desc: "Run 72-hour continuous track handoff benchmark across orbital IR, ground AESA, and airborne UAS sensors.", nodeId: "contrastive-language-image-pretraining", nodeTitle: "Contrastive Vision-Language Alignment & Multi-Modal Search", tier: "Advanced", c: 84, y: 70, u: 6, i: 6, m: 6, r: 3, a: 5 },
+
+      // ==================== PHASE III (31-45): JADC2 BMS & PRODUCTION AI EVALS ====================
+      { id: 31, phase: "Phase III", owner: "JADC2 Lead", title: "Architect Unified JADC2 Sensor-to-Shooter Killchain", desc: "Connect all four Golden Dome operational realms (ISR, BMS, C4ISR, Kinetic) onto a unified low-latency command bus.", nodeId: "miltech-sensor-to-shooter-jadc2-killchain", nodeTitle: "JADC2 Sensor-to-Shooter Orchestration", tier: "Advanced", c: 84, y: 70, u: 7, i: 7, m: 7, r: 4, a: 5 },
+      { id: 32, phase: "Phase III", owner: "Agentic AI", title: "Implement Deterministic Agentic StateGraphs for BMS Ops", desc: "Replace brittle scripts with formally verifiable Hierarchical Task Network (HTN) StateGraphs for threat triage.", nodeId: "production-ai-deterministic-agent-stategraphs", nodeTitle: "Deterministic Agentic StateGraphs & HTN Workflows", tier: "Frontier", c: 100, y: 76, u: 7, i: 7, m: 6, r: 3, a: 6 },
+      { id: 33, phase: "Phase III", owner: "Prompt Ops", title: "Compile Decision-Support Prompts via MIPROv2 & DSPy", desc: "Automatically optimize tactical briefing and intelligence synthesis instructions against golden evaluation datasets.", nodeId: "production-ai-mipro-prompt-compilation", nodeTitle: "Automated Multi-Prompt Optimization (MIPROv2 & DSPy)", tier: "Advanced", c: 84, y: 70, u: 5, i: 6, m: 5, r: 2, a: 6 },
+      { id: 34, phase: "Phase III", owner: "Safety AI", title: "Embed Semantic Entropy Zero-Shot Hallucination Probes", desc: "Monitor hidden-state uncertainty in real time to block ungrounded AI recommendations before reaching BMS operators.", nodeId: "production-ai-semantic-entropy-hallucination-probes", nodeTitle: "Semantic Entropy & Hidden-State Hallucination Detection", tier: "Frontier", c: 100, y: 76, u: 7, i: 7, m: 6, r: 3, a: 5 },
+      { id: 35, phase: "Phase III", owner: "Graph RAG", title: "Deploy Corrective RAG (CRAG) & Knowledge Graph Traversal", desc: "Ground tactical intelligence queries in verified Doctrine & Hyperbook triplet graphs with automatic self-correction.", nodeId: "production-ai-corrective-crag-graph-rag", nodeTitle: "Corrective RAG (CRAG) & Knowledge Graph Hybrid Traversal", tier: "Advanced", c: 84, y: 70, u: 6, i: 6, m: 6, r: 3, a: 6 },
+      { id: 36, phase: "Phase III", owner: "Inference", title: "Stand Up vLLM PagedAttention & Speculative Decoding", desc: "Deliver sub-50ms time-to-first-token across sovereign GPU clusters using chunked prefill and speculative draft models.", nodeId: "production-ai-vllm-paged-speculative-inference", nodeTitle: "High-Throughput vLLM PagedAttention & Speculative Decoding", tier: "Advanced", c: 84, y: 70, u: 6, i: 6, m: 6, r: 3, a: 6 },
+      { id: 37, phase: "Phase III", owner: "Structured AI", title: "Enforce Grammar-Constrained FSM Decoding on All Tool Calls", desc: "Apply XGrammar/Outlines regex logit masking so every C4ISR JSON payload conforms 100% to strict schema contracts.", nodeId: "production-ai-grammar-constrained-structured-decoding", nodeTitle: "Grammar-Constrained Decoding & XGrammar FSM Logit Masking", tier: "Advanced", c: 84, y: 70, u: 7, i: 6, m: 6, r: 2, a: 6 },
+      { id: 38, phase: "Phase III", owner: "AI Firewall", title: "Deploy Dual-LLM Sandboxing & Prompt Injection Firewalls", desc: "Isolate untrusted OSINT/SIGINT ingestion inside a quarantined reader LLM separated from privileged tool dispatch.", nodeId: "production-ai-prompt-injection-dual-llm-firewall", nodeTitle: "Indirect Prompt Injection Defense & Dual-LLM Firewalls", tier: "Frontier", c: 100, y: 76, u: 7, i: 7, m: 6, r: 3, a: 5 },
+      { id: 39, phase: "Phase III", owner: "Edge AI", title: "Quantize Edge Seeker Models via BitNet 1.58-Bit Ternary", desc: "Compile MatMul-free ternary reasoning models onto power-constrained UAS and interceptor flight computers.", nodeId: "production-ai-1bit-quantization-edge-reasoning", nodeTitle: "BitNet 1.58-bit Ternary Quantization & Edge Reasoning", tier: "Frontier", c: 100, y: 76, u: 5, i: 6, m: 6, r: 4, a: 5 },
+      { id: 40, phase: "Phase III", owner: "Voice Ops", title: "Enable Ultra-Low-Latency WebRTC Speech-to-Speech Command", desc: "Provide hands-free tactical voice interfaces with turn-taking VAD for watch officers in high-tempo raid scenarios.", nodeId: "production-ai-speech-to-speech-webrtc-voice-agents", nodeTitle: "Ultra-Low Latency Speech-to-Speech WebRTC Voice Agents", tier: "Frontier", c: 100, y: 76, u: 5, i: 5, m: 5, r: 3, a: 5 },
+      { id: 41, phase: "Phase III", owner: "Context Eng", title: "Calibrate Long-Context NIAH & KV Prefix Caching", desc: "Eliminate lost-in-the-middle degradation across 1M-token operational logs using attention-sink slicing and KV dedup.", nodeId: "production-ai-prefix-caching-semantic-vector-dedup", nodeTitle: "KV Prefix Caching & Semantic Vector Deduplication", tier: "Advanced", c: 84, y: 70, u: 5, i: 6, m: 5, r: 2, a: 6 },
+      { id: 42, phase: "Phase III", owner: "Kernel Mesh", title: "Accelerate C4ISR Data Bus via Zero-Copy eBPF Offload", desc: "Bypass kernel networking bottlenecks between radar ingest nodes and BMS compute blades using eBPF/XDP.", nodeId: "system-performance-ebpf-kernel-offload", nodeTitle: "Zero-Copy eBPF Kernel Offloading for Distributed Mesh", tier: "Advanced", c: 84, y: 70, u: 6, i: 6, m: 6, r: 3, a: 6 },
+      { id: 43, phase: "Phase III", owner: "Dist Sys", title: "Verify PACELC & Raft/Paxos Consensus Under Partition", desc: "Guarantee deterministic engagement-order consensus even when regional fiber links suffer kinetic or cyber severance.", nodeId: "distributed-consensus-fault-tolerance", nodeTitle: "Distributed Consensus, Replication & Fault Tolerance", tier: "Advanced", c: 84, y: 70, u: 7, i: 7, m: 6, r: 4, a: 5 },
+      { id: 44, phase: "Phase III", owner: "Control Math", title: "Apply Control-Barrier-Function (CBF) Safety Filters", desc: "Enforce mathematically provable forward-invariance safety envelopes around friendly commercial air corridors.", nodeId: "production-ai-evals-os-math-11", nodeTitle: "Control-Barrier-Function (CBF) Forward-Invariance Safety Filter", tier: "Expert", c: 93, y: 91, u: 7, i: 7, m: 7, r: 4, a: 5 },
+      { id: 45, phase: "Phase III", owner: "Eval Gate", title: "Run Automated Agentic Stress-Test & Elo Calibration Suite", desc: "Execute continuous Arena-Hard & Bradley-Terry Elo evals plus automated red-teaming prior to BMS release.", nodeId: "production-ai-evals-master", nodeTitle: "Master Node: Automated Agentic Evaluator & Stress-Tester", tier: "Frontier", c: 100, y: 76, u: 6, i: 7, m: 6, r: 3, a: 6 },
+
+      // ==================== PHASE IV (46-60): SOVEREIGN CYBER, PQC & GOVERNANCE ====================
+      { id: 46, phase: "Phase IV", owner: "PQC Security", title: "Roll Out FIPS 203 ML-KEM (Kyber) Hardware Security Modules", desc: "Upgrade all C4ISR tactical data links and command bunkers to post-quantum lattice-based key encapsulation.", nodeId: "cybertech-post-quantum-kyber-hsm", nodeTitle: "FIPS 203 ML-KEM (Kyber) Post-Quantum HSMs", tier: "Frontier", c: 100, y: 76, u: 7, i: 7, m: 7, r: 3, a: 5 },
+      { id: 47, phase: "Phase IV", owner: "Cyber Ops", title: "Deploy eBPF Kernel-Level XDR Threat Hunting Across Fleet", desc: "Instrument every BMS server and ground station with high-velocity eBPF syscall telemetry and anomaly blocking.", nodeId: "cybertech-master", nodeTitle: "Master Node: eBPF-Based High-Velocity Threat Hunter", tier: "Frontier", c: 100, y: 76, u: 7, i: 7, m: 6, r: 3, a: 6 },
+      { id: 48, phase: "Phase IV", owner: "AppSec", title: "Fuzz Flight & Radar Firmware via Coverage-Guided SMT", desc: "Run continuous greybox fuzzing coupled with symbolic SMT constraint solving across all C/C++/Ada embedded codebases.", nodeId: "cybertech-coverage-guided-symbolic-fuzzing", nodeTitle: "Coverage-Guided Greybox Fuzzing with Symbolic SMT", tier: "Advanced", c: 84, y: 70, u: 6, i: 7, m: 6, r: 3, a: 5 },
+      { id: 49, phase: "Phase IV", owner: "IAM Graph", title: "Eliminate Lateral Movement Paths via Attack Graph Centrality", desc: "Continuously map Active Directory and Kubernetes identity graphs to sever high-centrality privilege escalation paths.", nodeId: "cybertech-threat-graph-lateral-movement-pathfinding", nodeTitle: "Attack Path Graph Centrality & Lateral Movement Discovery", tier: "Intermediate", c: 61, y: 60, u: 6, i: 6, m: 5, r: 2, a: 6 },
+      { id: 50, phase: "Phase IV", owner: "Crypto Audit", title: "Execute Post-Quantum Crypto-Audit Across Legacy Links", desc: "Inventory and remediate all RSA/ECC dependencies vulnerable to harvest-now-decrypt-later quantum adversaries.", nodeId: "quantum-computing-master", nodeTitle: "Master Node: Post-Quantum Crypto-Audit Framework", tier: "Frontier", c: 100, y: 76, u: 6, i: 7, m: 6, r: 3, a: 5 },
+      { id: 51, phase: "Phase IV", owner: "Anomaly AI", title: "Install Wald SPRT Sequential Anomaly Firewalls on Comms", desc: "Detect subtle state-sponsored spoofed telemetry injections using Sequential Probability Ratio Tests.", nodeId: "production-ai-evals-os-math-05", nodeTitle: "Wald Sequential Probability Ratio (SPRT) Anomaly Firewall", tier: "Expert", c: 89, y: 99, u: 6, i: 6, m: 6, r: 3, a: 5 },
+      { id: 52, phase: "Phase IV", owner: "ZK Proofs", title: "Verify Telemetry Integrity with PlonK Polynomial Commitments", desc: "Attach lightweight zero-knowledge proofs to sensor fusion batches so downstream nodes verify compute integrity.", nodeId: "production-ai-evals-os-math-09", nodeTitle: "Zero-Knowledge PlonK Polynomial Commitment Verifier", tier: "Expert", c: 86, y: 98, u: 5, i: 6, m: 6, r: 4, a: 4 },
+      { id: 53, phase: "Phase IV", owner: "Resilience", title: "Conduct Chaos Engineering & Fault-Injection Game Days", desc: "Simulate simultaneous regional power loss, BGP hijacks, and radar node attrition to validate automatic failover.", nodeId: "chaos-engineering-reliability", nodeTitle: "Chaos Engineering, Fault Injection & High-Availability", tier: "Advanced", c: 84, y: 70, u: 6, i: 7, m: 6, r: 3, a: 6 },
+      { id: 54, phase: "Phase IV", owner: "Legal Tech", title: "Automate Multi-Jurisdiction Regulatory & FAA Diffing", desc: "Continuously track FAA NAS airspace regulations, ITAR export controls, and DoD directives in a compliance graph.", nodeId: "legtech-multi-jurisdiction-regulatory-diffing", nodeTitle: "Multi-Jurisdiction Regulatory Diffing & Compliance Graphs", tier: "Intermediate", c: 61, y: 60, u: 5, i: 5, m: 5, r: 2, a: 6 },
+      { id: 55, phase: "Phase IV", owner: "Contract Eng", title: "Formally Verify Smart Procurement & Escrow Contracts", desc: "Audit automated Tier-0/Tier-1 milestone disbursement logic using symbolic formal verification engines.", nodeId: "legtech-formal-verification-smart-contracts", nodeTitle: "Smart Contract Formal Verification & Symbolic SMT Auditing", tier: "Advanced", c: 84, y: 70, u: 4, i: 5, m: 5, r: 3, a: 5 },
+      { id: 56, phase: "Phase IV", owner: "DevOps AI", title: "Deploy Autonomous SWE-Bench Self-Healing Patch Agents", desc: "Use test-driven autonomous coding agents in air-gapped CI/CD sandboxes to rapidly remediate discovered CVEs.", nodeId: "production-ai-swe-bench-autonomous-coding-agents", nodeTitle: "Autonomous Coding Agents & Test-Driven Self-Reflection", tier: "Frontier", c: 100, y: 76, u: 5, i: 6, m: 6, r: 3, a: 6 },
+      { id: 57, phase: "Phase IV", owner: "FinOps", title: "Meter AI Token-Margin & Sovereign Compute Unit Economics", desc: "Track cost-per-engagement-cycle and GPU utilization across all homeland defense cloud enclaves.", nodeId: "production-ai-token-margin-metering-monetization", nodeTitle: "AI Token-Margin Metering & Dynamic Unit Economics", tier: "Advanced", c: 84, y: 70, u: 4, i: 5, m: 4, r: 2, a: 6 },
+      { id: 58, phase: "Phase IV", owner: "Human Ops", title: "Monitor Watch-Officer Cognitive Load via HRV/GSR Biosensors", desc: "Integrate non-invasive fatigue telemetry in command centers to trigger shift rotation before decision degradation.", nodeId: "psytech-wearable-gsr-hrv-affective-biosensors", nodeTitle: "Wearable Galvanic Skin Response & HRV Affective Biosensors", tier: "Intermediate", c: 61, y: 60, u: 4, i: 5, m: 5, r: 3, a: 5 },
+      { id: 59, phase: "Phase IV", owner: "Training", title: "Stand Up Adaptive Socratic Simulators for Mission Specialists", desc: "Per DoD UAS demand study, scale proficiency training for remote pilots, payload analysts, and maintenance crews.", nodeId: "edtech-master", nodeTitle: "Master Node: Hyper-Adaptive Socratic AI Tutor", tier: "Frontier", c: 100, y: 76, u: 5, i: 6, m: 5, r: 2, a: 6 },
+      { id: 60, phase: "Phase IV", owner: "Cyber Gate", title: "Pass Sovereign Red-Team & Authority-to-Operate (ATO) Gate", desc: "Obtain full DoD/CISA Authority-to-Operate certification after surviving unannounced adversarial cyber exercises.", nodeId: "production-ai-evals-mipro-prompt-compilers", nodeTitle: "MIPROv2 Auto-Prompt Compilers & Automated Red Teaming", tier: "Expert", c: 100, y: 76, u: 7, i: 7, m: 6, r: 4, a: 5 },
+
+      // ==================== PHASE V (61-75): KINETIC, DEW, UAS & FINAL INSTALLATION ====================
+      { id: 61, phase: "Phase V", owner: "Exo Defense", title: "Bolt Down Exoatmospheric GBI & Aegis BMD Interceptor Sites", desc: "Complete final silo installation and fire-control integration for midcourse ICBM and HGV exoatmospheric interception.", nodeId: "us-dod-jadc2-all-domain", nodeTitle: "US DoD Joint All-Domain Command & Control (JADC2)", tier: "Advanced", c: 84, y: 70, u: 7, i: 7, m: 7, r: 4, a: 5 },
+      { id: 62, phase: "Phase V", owner: "Upper Endo", title: "Deploy Upper Endospheric THAAD Batteries at Strategic Hubs", desc: "Position mobile THAAD launchers and AN/TPY-2 radars covering high-altitude IRBM/MRBM terminal corridors.", nodeId: "crossstrait-a2ad-hypersonic", nodeTitle: "Anti-Access / Area-Denial (A2/AD) Hypersonic Missile Chains", tier: "Advanced", c: 84, y: 70, u: 7, i: 7, m: 7, r: 4, a: 5 },
+      { id: 63, phase: "Phase V", owner: "Lower Endo", title: "Integrate Lower Endospheric Patriot PAC-3 MSE Squadrons", desc: "Link PAC-3 MSE hit-to-kill batteries directly into IBCS/JADC2 for medium-altitude tactical ballistic & cruise defense.", nodeId: "miltech-jadc2-multi-domain-command", nodeTitle: "Multi-Domain Joint All-Domain Command & Control (JADC2)", tier: "Expert", c: 100, y: 76, u: 7, i: 7, m: 6, r: 3, a: 5 },
+      { id: 64, phase: "Phase V", owner: "Point Def", title: "Install Tamir / Iron Dome Point-Defense Batteries", desc: "Deploy short-range kinetic point defense protecting critical substations, ports, and population centers from RAM/UAVs.", nodeId: "system-performance-cloud-master", nodeTitle: "Master Node: Edge-First Global Low-Latency Accelerator", tier: "Frontier", c: 100, y: 76, u: 7, i: 7, m: 6, r: 3, a: 6 },
+      { id: 65, phase: "Phase V", owner: "DEW Laser", title: "Field Solid-State Fiber Laser (LaWS) Counter-UAS Turrets", desc: "Commission 100kW+ solid-state directed-energy laser turrets for near-zero marginal-cost drone swarm attrition.", nodeId: "laser-weapon-systems-laws", nodeTitle: "Laser Weapon Systems (LaWS) Counter-UAS & Missile Interception", tier: "Advanced", c: 84, y: 70, u: 6, i: 7, m: 6, r: 4, a: 5 },
+      { id: 66, phase: "Phase V", owner: "DEW HPM", title: "Deploy High-Power Microwave (HPM) Area Swarm Disruptors", desc: "Position wide-beam HPM emitters at airbases to neutralize dense autonomous micro-UAV swarms instantaneously.", nodeId: "high-power-microwave-electronics-fry", nodeTitle: "High-Power Microwave (HPM) Electronics Directed Energy", tier: "Frontier", c: 100, y: 76, u: 6, i: 7, m: 6, r: 4, a: 5 },
+      { id: 67, phase: "Phase V", owner: "UAS Relay", title: "Launch Persistent High-Altitude UAS Communications Relays", desc: "Implement DOT/DoD relay UAS missions to bridge terrain-blocked or degraded SATCOM links during emergencies.", nodeId: "nanotech-cellular-swarms-master", nodeTitle: "Master Node: Distributed Micro-UAV Industrial Survey Fleet", tier: "Frontier", c: 100, y: 76, u: 5, i: 6, m: 5, r: 3, a: 6 },
+      { id: 68, phase: "Phase V", owner: "Pilot Aug", title: "Certify Autonomous Pilot-Augmentation Safety Envelopes", desc: "Deploy autonomous flight-safety recovery modules for manned air-defense patrol aircraft during crew incapacitation.", nodeId: "production-ai-evals-os-math-01", nodeTitle: "Hamilton-Jacobi-Bellman Stochastic Control Manifold [OS-01]", tier: "Frontier", c: 83, y: 87, u: 5, i: 6, m: 5, r: 4, a: 5 },
+      { id: 69, phase: "Phase V", owner: "Subsea Ops", title: "Deploy Autonomous Subsea AUV Mine Countermeasure Fleets", desc: "Patrol critical naval approaches and undersea cable landings with autonomous mine-countermeasure UUVs.", nodeId: "subsea-auv-mine-countermeasures", nodeTitle: "Subsea Autonomous Unmanned Vehicles (AUVs) & MCM", tier: "Intermediate", c: 61, y: 60, u: 5, i: 6, m: 5, r: 3, a: 5 },
+      { id: 70, phase: "Phase V", owner: "CBRN Def", title: "Integrate Autonomous Bio-Pathogen Perimeter Sensors", desc: "Co-locate clandestine biological/chemical containment detectors at hardened command bunkers and air intakes.", nodeId: "clandestine-pathogen-bio-detection", nodeTitle: "Clandestine Biological Pathogen Containment & Sensors", tier: "Advanced", c: 84, y: 70, u: 5, i: 6, m: 5, r: 3, a: 5 },
+      { id: 71, phase: "Phase V", owner: "Order Book", title: "Run Stackelberg Resource-Allocation & Interceptor Metering", desc: "Optimize interceptor salvo doctrine using bilevel game-theoretic cost-exchange solvers against saturation raids.", nodeId: "production-ai-evals-os-math-06", nodeTitle: "Stackelberg Bilevel Leader-Follower Game Equilibrium [OS-06]", tier: "Advanced", c: 93, y: 89, u: 6, i: 7, m: 6, r: 3, a: 5 },
+      { id: 72, phase: "Phase V", owner: "Cascade AI", title: "Deploy Hawkes Point-Process Multi-Wave Raid Predictors", desc: "Model self-exciting launch cascades to pre-position mobile Patriot/THAAD reloads ahead of secondary waves.", nodeId: "production-ai-evals-os-math-07", nodeTitle: "Hawkes Self-Exciting Point-Process Cascade Filter [OS-07]", tier: "Frontier", c: 96, y: 92, u: 6, i: 6, m: 6, r: 3, a: 5 },
+      { id: 73, phase: "Phase V", owner: "Live Fire", title: "Execute Full-Scale Multi-Tier Integrated Live-Fire Exercise", desc: "Simultaneously intercept simulated ICBM, HGV, cruise missile, and drone swarm targets across all four realms.", nodeId: "production-ai-dpo-kto-alignment-pipelines", nodeTitle: "Direct Preference Optimization (DPO) & Post-Exercise Tuning", tier: "Advanced", c: 84, y: 70, u: 7, i: 7, m: 7, r: 4, a: 5 },
+      { id: 74, phase: "Phase V", owner: "Maint Ops", title: "Activate Predictive Telemetry & Spares Logistics Automation", desc: "Transition all bolted-down installations into automated RUL predictive maintenance with domestic spares replenishment.", nodeId: "fintech-fpga-low-latency-order-routing", nodeTitle: "Ultra-Low Latency Automated Dispatch & Microstructure Routing", tier: "Expert", c: 100, y: 76, u: 5, i: 6, m: 5, r: 2, a: 6 },
+      { id: 75, phase: "Phase V", owner: "Exec Sign-Off", title: "Conduct Final Golden Dome ROAR Commissioning & Handover", desc: "Verify 75/75 closed action items, archive immutable Hyperbook QR field manuals, and declare Full Operational Capability (FOC).", nodeId: "production-ai-evals-os-math-10", nodeTitle: "Vickrey-Clarke-Groves Truthful Mechanism Design Core [OS-10]", tier: "Frontier", c: 90, y: 88, u: 7, i: 7, m: 7, r: 2, a: 7 },
+    ];
+
+    // Persistent State Keys
+    const STORAGE_KEY = 'golden_roar_75_state_v1';
+    const URL_KEY = 'golden_roar_75_baseurl_v1';
+
+    let actions = [];
+    let activeModalId = null;
+
+    /**
+     * Calculate ROAR Priority from Drive document "omnioverlord escaping foundationalite":
+     * Priority = Urgency + ( ( Impact * Magnitude ) / ( Retardation / Acceleration ) )
+     */
+    function calcPriority(item) {
+      const denom = item.r / item.a;
+      const score = item.u + ((item.i * item.m) / (denom || 1));
+      return Number(score.toFixed(1));
+    }
+
+    /**
+     * Load state from localStorage with safe fallback
+     */
+    function loadState() {
+      try {
+        const savedUrl = localStorage.getItem(URL_KEY);
+        if (savedUrl) {
+          document.getElementById('hyperbook-base-url').value = savedUrl;
+        }
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          actions = DEFAULT_ACTIONS.map(def => {
+            const match = parsed.find(p => p.id === def.id);
+            return match ? { ...def, ...match } : { ...def, done: false };
+          });
+        } else {
+          actions = DEFAULT_ACTIONS.map(def => ({ ...def, done: false }));
+        }
+      } catch (err) {
+        console.error('State load error:', err);
+        actions = DEFAULT_ACTIONS.map(def => ({ ...def, done: false }));
+      }
+    }
+
+    function saveState() {
+      try {
+        const compact = actions.map(({ id, done, u, i, m, r, a }) => ({ id, done, u, i, m, r, a }));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(compact));
+      } catch (err) {
+        console.error('State save error:', err);
+      }
+    }
+
+    function getBaseUrl() {
+      const val = document.getElementById('hyperbook-base-url').value.trim();
+      return val || 'https://hyperbook.roar-ops.io/compendium';
+    }
+
+    function getHyperbookUrl(nodeId) {
+      const base = getBaseUrl().replace(/#.*$/, '');
+      return `${base}#node-${nodeId}`;
+    }
+
+    function updateBaseUrl() {
+      try {
+        localStorage.setItem(URL_KEY, getBaseUrl());
+      } catch (e) {}
+      renderActions();
+      showToast('All 75 Hyperbook QR codes regenerated with updated Base URL.');
+    }
+
+    /**
+     * Toast helper (replaces native alert/confirm)
+     */
+    function showToast(message) {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = 'pointer-events-auto bg-obsidian-800 gold-border-strong text-gold-300 text-xs font-mono px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2 transition-all duration-300';
+      toast.innerHTML = `<span class="text-gold-400">✦</span><span>${message}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(8px)';
+        setTimeout(() => toast.remove(), 300);
+      }, 2800);
+    }
+
+    /**
+     * Toggle completion status of an action item
+     */
+    function toggleDone(id) {
+      const item = actions.find(a => a.id === id);
+      if (!item) return;
+      item.done = !item.done;
+      saveState();
+      updateTelemetry();
+      renderActions();
+    }
+
+    /**
+     * Update top KPI telemetry counters & progress bar
+     */
+    function updateTelemetry() {
+      const total = actions.length;
+      const doneCount = actions.filter(a => a.done).length;
+      const pct = Math.round((doneCount / total) * 100);
+      const avgP = (actions.reduce((acc, item) => acc + calcPriority(item), 0) / total).toFixed(1);
+
+      document.getElementById('stat-total').textContent = total;
+      document.getElementById('stat-done').textContent = doneCount;
+      document.getElementById('stat-pct').textContent = `(${pct}%)`;
+      document.getElementById('stat-avg-priority').textContent = avgP;
+      document.getElementById('progress-label').textContent = `${doneCount} / ${total} VERIFIED`;
+      document.getElementById('progress-bar').style.width = `${pct}%`;
+    }
+
+    /**
+     * Badge styling by Hyperbook Tier
+     */
+    function tierBadgeClass(tier) {
+      switch (tier) {
+        case 'Frontier': return 'bg-amber-500/15 text-amber-300 border-amber-400/40';
+        case 'Expert': return 'bg-purple-500/15 text-purple-300 border-purple-400/40';
+        case 'Advanced': return 'bg-sky-500/15 text-sky-300 border-sky-400/40';
+        default: return 'bg-emerald-500/15 text-emerald-300 border-emerald-400/40';
+      }
+    }
+
+    /**
+     * Render filtered & sorted action items + generate crisp QR codes
+     */
+    function renderActions() {
+      const query = document.getElementById('search-input').value.trim().toLowerCase();
+      const phaseFilter = document.getElementById('phase-filter').value;
+      const tierFilter = document.getElementById('tier-filter').value;
+      const sortBy = document.getElementById('sort-select').value;
+
+      let filtered = actions.filter(item => {
+        if (phaseFilter !== 'ALL' && item.phase !== phaseFilter) return false;
+        if (tierFilter !== 'ALL' && item.tier !== tierFilter) return false;
+        if (query) {
+          const hay = `${item.id} ${item.title} ${item.desc} ${item.owner} ${item.nodeId} ${item.nodeTitle} ${item.phase}`.toLowerCase();
+          if (!hay.includes(query)) return false;
+        }
+        return true;
+      });
+
+      filtered.sort((a, b) => {
+        if (sortBy === 'priority-desc') return calcPriority(b) - calcPriority(a);
+        if (sortBy === 'priority-asc') return calcPriority(a) - calcPriority(b);
+        if (sortBy === 'status') return Number(a.done) - Number(b.done) || a.id - b.id;
+        return a.id - b.id;
+      });
+
+      document.getElementById('visible-count').textContent = filtered.length;
+      const grid = document.getElementById('action-items-grid');
+      grid.innerHTML = '';
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full bg-obsidian-900/70 gold-border rounded-2xl p-10 text-center text-gray-400 font-mono text-sm">
+            No action items match your current filter criteria.
+          </div>
+        `;
+        return;
+      }
+
+      const fragment = document.createDocumentFragment();
+
+      filtered.forEach(item => {
+        const priority = calcPriority(item);
+        const padId = String(item.id).padStart(2, '0');
+        const card = document.createElement('div');
+        card.className = `print-break-avoid bg-obsidian-900/90 rounded-2xl p-4 sm:p-5 flex flex-col justify-between gap-4 transition-all duration-200 ${
+          item.done
+            ? 'border border-emerald-500/40 bg-emerald-950/15 opacity-85'
+            : 'gold-border hover:border-gold-400/60 hover:shadow-lg hover:shadow-gold-500/10'
+        }`;
+
+        card.innerHTML = `
+          <div class="space-y-3">
+            <!-- Top Row: ID, Phase, Priority, Checkbox -->
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="font-mono text-xs font-bold px-2 py-0.5 rounded-md bg-gold-500/15 text-gold-300 border border-gold-500/30">
+                  #${padId}
+                </span>
+                <span class="font-mono text-[11px] px-2 py-0.5 rounded-md bg-obsidian-800 text-gray-300 border border-white/10">
+                  ${item.phase}
+                </span>
+                <span class="font-mono text-[11px] px-2 py-0.5 rounded-md border ${tierBadgeClass(item.tier)}">
+                  ${item.tier}
+                </span>
+              </div>
+
+              <button
+                onclick="toggleDone(${item.id})"
+                title="Mark Action Item Complete"
+                class="w-6 h-6 rounded-lg flex items-center justify-center border transition shrink-0 ${
+                  item.done
+                    ? 'bg-emerald-500 border-emerald-400 text-obsidian-950 font-bold'
+                    : 'bg-obsidian-950 border-gold-500/40 text-transparent hover:border-gold-400'
+                }"
+              >✓</button>
+            </div>
+
+            <!-- Title & Description -->
+            <div>
+              <h3 class="text-sm sm:text-base font-bold leading-snug ${item.done ? 'line-through text-gray-400' : 'text-gray-100'}">
+                ${item.title}
+              </h3>
+              <p class="text-xs text-gray-400 mt-1.5 leading-relaxed">
+                ${item.desc}
+              </p>
+            </div>
+          </div>
+
+          <!-- Bottom Row: Metadata + Live Scannable Hyperbook QR Code -->
+          <div class="pt-3 border-t border-white/10 flex items-center justify-between gap-3">
+            <div class="space-y-1.5 min-w-0 flex-1">
+              <div class="flex items-center gap-2 text-[11px] font-mono">
+                <span class="text-gray-500">OWNER:</span>
+                <span class="text-gray-200 truncate">${item.owner}</span>
+              </div>
+              <div class="flex items-center gap-2 text-[11px] font-mono">
+                <span class="text-gray-500">ROAR P:</span>
+                <span class="text-gold-400 font-bold">${priority}</span>
+                <span class="text-gray-500">| C:${item.c} Y:${item.y}</span>
+              </div>
+              <button
+                onclick="openModal(${item.id})"
+                class="text-[11px] font-mono text-gold-300 hover:text-gold-200 underline underline-offset-2 truncate block max-w-full text-left"
+                title="${item.nodeTitle}"
+              >
+                QR ↗ ${item.nodeId}
+              </button>
+            </div>
+
+            <!-- Clickable Live QR Code Box -->
+            <button
+              onclick="openModal(${item.id})"
+              title="Click to enlarge Hyperbook QR &amp; tune ROAR weights"
+              class="bg-white p-1.5 rounded-xl shrink-0 shadow-md hover:scale-105 transition-transform cursor-pointer"
+            >
+              <div id="qr-card-${item.id}" class="qr-box w-[68px] h-[68px] flex items-center justify-center"></div>
+            </button>
+          </div>
+        `;
+
+        fragment.appendChild(card);
+      });
+
+      grid.appendChild(fragment);
+
+      // Render actual QR codes after DOM insertion
+      filtered.forEach(item => {
+        const el = document.getElementById(`qr-card-${item.id}`);
+        if (el && typeof QRCode !== 'undefined') {
+          try {
+            new QRCode(el, {
+              text: getHyperbookUrl(item.nodeId),
+              width: 68,
+              height: 68,
+              colorDark: '#0b0e14',
+              colorLight: '#ffffff',
+              correctLevel: QRCode.CorrectLevel.L,
+            });
+          } catch (e) {
+            el.innerHTML = `<span class="text-[9px] text-black font-mono">QR #${item.id}</span>`;
+          }
+        }
+      });
+    }
+
+    /**
+     * Open High-Resolution QR & ROAR Weighting Modal
+     */
+    function openModal(id) {
+      const item = actions.find(a => a.id === id);
+      if (!item) return;
+      activeModalId = id;
+
+      const url = getHyperbookUrl(item.nodeId);
+      document.getElementById('modal-badge').textContent = `ACTION #${String(item.id).padStart(2, '0')} // ${item.phase.toUpperCase()}`;
+      document.getElementById('modal-title').textContent = item.title;
+      document.getElementById('modal-node-title').textContent = item.nodeTitle;
+      document.getElementById('modal-node-id').textContent = item.nodeId;
+      document.getElementById('modal-tier').textContent = item.tier;
+      document.getElementById('modal-cy').textContent = `C:${item.c} / Y:${item.y}`;
+      document.getElementById('modal-url-input').value = url;
+      document.getElementById('modal-qr-caption').textContent = `#node-${item.nodeId}`;
+
+      // Set sliders
+      document.getElementById('slider-u').value = item.u;
+      document.getElementById('slider-i').value = item.i;
+      document.getElementById('slider-m').value = item.m;
+      document.getElementById('slider-r').value = item.r;
+      document.getElementById('slider-a').value = item.a;
+      syncModalWeightLabels(item);
+
+      // Render large crisp QR code
+      const qrContainer = document.getElementById('modal-qr-container');
+      qrContainer.innerHTML = '';
+      if (typeof QRCode !== 'undefined') {
+        new QRCode(qrContainer, {
+          text: url,
+          width: 210,
+          height: 210,
+          colorDark: '#06080c',
+          colorLight: '#ffffff',
+          correctLevel: QRCode.CorrectLevel.M,
+        });
+      }
+
+      const modal = document.getElementById('qr-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function syncModalWeightLabels(item) {
+      document.getElementById('val-u').textContent = item.u;
+      document.getElementById('val-i').textContent = item.i;
+      document.getElementById('val-m').textContent = item.m;
+      document.getElementById('val-r').textContent = item.r;
+      document.getElementById('val-a').textContent = item.a;
+      document.getElementById('modal-priority').textContent = calcPriority(item);
+    }
+
+    function updateModalWeights() {
+      const item = actions.find(a => a.id === activeModalId);
+      if (!item) return;
+      item.u = Number(document.getElementById('slider-u').value);
+      item.i = Number(document.getElementById('slider-i').value);
+      item.m = Number(document.getElementById('slider-m').value);
+      item.r = Number(document.getElementById('slider-r').value);
+      item.a = Number(document.getElementById('slider-a').value);
+      syncModalWeightLabels(item);
+      saveState();
+      updateTelemetry();
+      renderActions();
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('qr-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      activeModalId = null;
+    }
+
+    /**
+     * Copy URL using document.execCommand('copy') for iFrame compatibility
+     */
+    function copyModalUrl() {
+      const input = document.getElementById('modal-url-input');
+      input.select();
+      input.setSelectionRange(0, 99999);
+      try {
+        document.execCommand('copy');
+        showToast('Hyperbook QR URL copied to clipboard.');
+      } catch (err) {
+        showToast('Unable to copy automatically — select the URL field to copy.');
+      }
+    }
+
+    /**
+     * Export 75 Action Items to JSON
+     */
+    function exportJSON() {
+      const payload = {
+        protocol: 'ROAR v2.6',
+        generatedAt: new Date().toISOString(),
+        hyperbookBaseUrl: getBaseUrl(),
+        items: actions.map(item => ({
+          ...item,
+          priority: calcPriority(item),
+          hyperbookQrUrl: getHyperbookUrl(item.nodeId),
+        })),
+      };
+      downloadFile(JSON.stringify(payload, null, 2), 'golden_roar_75_hyperbook.json', 'application/json');
+      showToast('Exported 75-item ROAR blueprint as JSON.');
+    }
+
+    /**
+     * Export 75 Action Items to CSV
+     */
+    function exportCSV() {
+      const headers = ['ID', 'Phase', 'Owner', 'Title', 'Status', 'ROAR_Priority', 'U', 'I', 'M', 'R', 'A', 'Hyperbook_Node_ID', 'Tier', 'C', 'Y', 'QR_URL'];
+      const rows = actions.map(item => [
+        item.id,
+        `"${item.phase}"`,
+        `"${item.owner}"`,
+        `"${item.title.replace(/"/g, '""')}"`,
+        item.done ? 'DONE' : 'PENDING',
+        calcPriority(item),
+        item.u, item.i, item.m, item.r, item.a,
+        item.nodeId,
+        item.tier,
+        item.c,
+        item.y,
+        `"${getHyperbookUrl(item.nodeId)}"`,
+      ].join(','));
+      downloadFile([headers.join(','), ...rows].join('\n'), 'golden_roar_75_hyperbook.csv', 'text/csv');
+      showToast('Exported 75-item ROAR matrix as CSV.');
+    }
+
+    function downloadFile(content, filename, mime) {
+      const blob = new Blob([content], { type: mime });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    // Close modal on Escape key or backdrop click
+    window.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeModal();
+    });
+    document.getElementById('qr-modal').addEventListener('click', e => {
+      if (e.target.id === 'qr-modal') closeModal();
+    });
+
+    // Initialize on load
+    window.onload = function () {
+      loadState();
+      updateTelemetry();
+      renderActions();
+    };
+  </script>
+</body>
+</html>
