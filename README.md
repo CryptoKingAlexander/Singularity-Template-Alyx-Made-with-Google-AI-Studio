@@ -4,7 +4,7 @@ Base - https://youtu.be/rOA6xSq4GV4
 
 Alyx - https://youtu.be/TtHhybSQHsI
 
-got another video when I was tripping on cannablis. 
+been updated a bit since the video of Alyx. Added some conversation .bin files with prompt as update history suggestion. hooks 2 G3.5Flash but every model knows Alyx is a 21+ app using universal paralanguage and english super higher order guess pivots.
 
 ------------------------
 ----- INSTRUCTIONS -----
